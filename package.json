@@ -1,0 +1,8 @@
+{
+  "name": "copenhague-shared-pwa",
+  "private": true,
+  "version": "310.0.0",
+  "dependencies": {
+    "@supabase/supabase-js": "2.111.0"
+  }
+}
