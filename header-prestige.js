@@ -3,13 +3,13 @@
 
   const STYLE_ID="cph-prestige-header-style";
   const FLAG_ROW_CLASS="cph-prestige-flags";
+  const SETTINGS_TILE_ID="cphPrestigeSettingsTile";
 
   function addStyles(){
     if(document.getElementById(STYLE_ID))return;
     const style=document.createElement("style");
     style.id=STYLE_ID;
     style.textContent=`
-      /* Prestige header: title area only. No dimensions outside this block are changed. */
       .cph-prestige-title-row{
         display:grid!important;
         grid-template-columns:40px minmax(0,1fr) 40px!important;
@@ -18,10 +18,12 @@
         gap:4px!important;
         margin:0 0 8px!important;
       }
-      .cph-prestige-title-row::before{
+      .cph-prestige-title-row::before,
+      .cph-prestige-title-row::after{
         content:"";
-        grid-column:1;
       }
+      .cph-prestige-title-row::before{grid-column:1;}
+      .cph-prestige-title-row::after{grid-column:3;}
       .cph-prestige-title{
         grid-column:2!important;
         margin:0!important;
@@ -36,30 +38,6 @@
         letter-spacing:.035em!important;
         color:#fff!important;
         text-shadow:0 1px 1px rgba(0,0,0,.14)!important;
-      }
-      .cph-prestige-settings{
-        grid-column:3!important;
-        justify-self:end!important;
-        align-self:center!important;
-        width:34px!important;
-        height:34px!important;
-        min-width:34px!important;
-        min-height:34px!important;
-        margin:0!important;
-        padding:0!important;
-        border:1.5px solid #ddb36a!important;
-        border-radius:999px!important;
-        background:rgba(0,0,0,.06)!important;
-        color:#fff!important;
-        box-shadow:none!important;
-        display:inline-flex!important;
-        align-items:center!important;
-        justify-content:center!important;
-      }
-      .cph-prestige-settings svg,
-      .cph-prestige-settings img{
-        width:20px!important;
-        height:20px!important;
       }
       .cph-prestige-flags{
         display:flex!important;
@@ -97,8 +75,61 @@
         font-weight:800!important;
         letter-spacing:.16em!important;
       }
-      .cph-prestige-hide-save{
+      .cph-prestige-hide-save,
+      .cph-prestige-hide-original-settings{
         display:none!important;
+      }
+      .cph-prestige-settings-tile{
+        width:100%!important;
+        margin:12px 0 0!important;
+        padding:14px 16px!important;
+        border:1px solid #d9e4df!important;
+        border-radius:14px!important;
+        background:#fffdf8!important;
+        color:#31534a!important;
+        box-shadow:0 3px 12px rgba(53,88,75,.08)!important;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:space-between!important;
+        gap:12px!important;
+        cursor:pointer!important;
+        font:inherit!important;
+        text-align:left!important;
+      }
+      .cph-prestige-settings-tile-main{
+        display:flex!important;
+        align-items:center!important;
+        gap:11px!important;
+        min-width:0!important;
+      }
+      .cph-prestige-settings-tile-icon{
+        width:36px!important;
+        height:36px!important;
+        min-width:36px!important;
+        border-radius:10px!important;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        background:#e8f0ec!important;
+        color:#31534a!important;
+        font-size:21px!important;
+      }
+      .cph-prestige-settings-tile-title{
+        display:block!important;
+        font-weight:800!important;
+        line-height:1.15!important;
+      }
+      .cph-prestige-settings-tile-subtitle{
+        display:block!important;
+        margin-top:3px!important;
+        color:#71877f!important;
+        font-size:12px!important;
+        line-height:1.2!important;
+      }
+      .cph-prestige-settings-tile-arrow{
+        color:#7d918a!important;
+        font-size:21px!important;
+        line-height:1!important;
       }
       @media (max-width:390px){
         .cph-prestige-title-row{
@@ -108,12 +139,6 @@
         .cph-prestige-title{
           font-size:clamp(19px,5.45vw,23px)!important;
           letter-spacing:.018em!important;
-        }
-        .cph-prestige-settings{
-          width:32px!important;
-          height:32px!important;
-          min-width:32px!important;
-          min-height:32px!important;
         }
         .cph-prestige-flags span{font-size:24px!important;}
       }
@@ -144,58 +169,85 @@
       });
   }
 
+  function findResetAnchor(){
+    const candidates=Array.from(document.querySelectorAll("button,a,[role='button'],.button,.btn"));
+    const reset=candidates.find(element=>{
+      const text=normalizedText(element).toLowerCase();
+      return text.includes("réinitial") || text.includes("reinitial");
+    });
+    if(!reset)return null;
+    return reset.closest(".card,.panel,.section,.settings-section,.toolbar")||reset.parentElement||reset;
+  }
+
+  function createSettingsTile(settings){
+    if(document.getElementById(SETTINGS_TILE_ID))return true;
+    const anchor=findResetAnchor();
+    if(!anchor||!anchor.parentNode)return false;
+
+    const tile=document.createElement("button");
+    tile.type="button";
+    tile.id=SETTINGS_TILE_ID;
+    tile.className="cph-prestige-settings-tile";
+    tile.setAttribute("aria-label","Ouvrir les réglages et sauvegardes");
+    tile.innerHTML=`
+      <span class="cph-prestige-settings-tile-main">
+        <span class="cph-prestige-settings-tile-icon" aria-hidden="true">⚙</span>
+        <span>
+          <span class="cph-prestige-settings-tile-title">Réglages et sauvegardes</span>
+          <span class="cph-prestige-settings-tile-subtitle">Sauvegardes, restauration et options</span>
+        </span>
+      </span>
+      <span class="cph-prestige-settings-tile-arrow" aria-hidden="true">›</span>`;
+    tile.addEventListener("click",()=>settings.click());
+    anchor.parentNode.insertBefore(tile,anchor.nextSibling);
+    return true;
+  }
+
   function apply(){
     const header=document.querySelector("header");
-    if(!header||header.dataset.prestigeHeaderApplied==="1")return;
-
-    const title=Array.from(header.querySelectorAll("h1,h2,[role='heading']"))
-      .find(element=>/COPENHAGUE/i.test(normalizedText(element))&&/MALM[ÖO]/i.test(normalizedText(element)));
-    const guide=findGuideLabel();
     const settings=document.getElementById("backupSettingsButton");
-    if(!title||!guide||!settings)return;
+    if(!header||!settings)return false;
 
     addStyles();
-    header.dataset.prestigeHeaderApplied="1";
 
-    title.textContent="COPENHAGUE & MALMÖ";
-    title.classList.add("cph-prestige-title");
-    settings.classList.add("cph-prestige-settings");
+    if(header.dataset.prestigeHeaderApplied!=="1"){
+      const title=Array.from(header.querySelectorAll("h1,h2,[role='heading']"))
+        .find(element=>/COPENHAGUE/i.test(normalizedText(element))&&/MALM[ÖO]/i.test(normalizedText(element)));
+      const guide=findGuideLabel();
+      if(!title||!guide)return false;
 
-    const oldSettingsParent=settings.parentElement;
-    const row=document.createElement("div");
-    row.className="cph-prestige-title-row";
-    title.parentNode.insertBefore(row,title);
-    row.appendChild(title);
-    row.appendChild(settings);
+      header.dataset.prestigeHeaderApplied="1";
+      title.textContent="COPENHAGUE & MALMÖ";
+      title.classList.add("cph-prestige-title");
 
-    const saveIndicator=document.getElementById("saveIndicator");
-    if(saveIndicator&&saveIndicator!==settings&&saveIndicator!==row){
-      saveIndicator.classList.add("cph-prestige-hide-save");
+      const row=document.createElement("div");
+      row.className="cph-prestige-title-row";
+      title.parentNode.insertBefore(row,title);
+      row.appendChild(title);
+
+      const saveIndicator=document.getElementById("saveIndicator");
+      if(saveIndicator)saveIndicator.classList.add("cph-prestige-hide-save");
+      settings.classList.add("cph-prestige-hide-original-settings");
+
+      hideExistingFlags(header,title,guide);
+      const flags=document.createElement("div");
+      flags.className=FLAG_ROW_CLASS;
+      flags.setAttribute("aria-label","Danemark et Suède");
+      flags.innerHTML="<span aria-hidden='true'>🇩🇰</span><span aria-hidden='true'>🇸🇪</span>";
+      guide.parentNode.insertBefore(flags,guide);
+      guide.classList.add("cph-prestige-guide");
     }
-    if(oldSettingsParent&&oldSettingsParent!==row&&oldSettingsParent.children.length===0){
-      oldSettingsParent.style.display="none";
-    }
 
-    hideExistingFlags(header,title,guide);
-    const flags=document.createElement("div");
-    flags.className=FLAG_ROW_CLASS;
-    flags.setAttribute("aria-label","Danemark et Suède");
-    flags.innerHTML="<span aria-hidden='true'>🇩🇰</span><span aria-hidden='true'>🇸🇪</span>";
-    guide.parentNode.insertBefore(flags,guide);
-
-    guide.classList.add("cph-prestige-guide");
+    settings.classList.add("cph-prestige-hide-original-settings");
+    createSettingsTile(settings);
+    return true;
   }
 
   function start(){
     apply();
-    if(!document.querySelector("header")||!document.getElementById("backupSettingsButton")){
-      const observer=new MutationObserver(()=>{
-        apply();
-        if(document.querySelector("header[data-prestige-header-applied='1']"))observer.disconnect();
-      });
-      observer.observe(document.documentElement,{childList:true,subtree:true});
-      setTimeout(()=>observer.disconnect(),10000);
-    }
+    const observer=new MutationObserver(()=>apply());
+    observer.observe(document.documentElement,{childList:true,subtree:true});
+    setTimeout(()=>observer.disconnect(),15000);
   }
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});
