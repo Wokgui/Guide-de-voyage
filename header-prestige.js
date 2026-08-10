@@ -3,6 +3,7 @@
 
   const STYLE_ID="cph-prestige-header-style";
   const FLAG_ROW_CLASS="cph-prestige-flags";
+  const SETTINGS_TILE_ID="cphPrestigeSettingsTile";
 
   function addStyles(){
     if(document.getElementById(STYLE_ID))return;
@@ -18,10 +19,12 @@
         gap:4px!important;
         margin:0 0 8px!important;
       }
-      .cph-prestige-title-row::before{
+      .cph-prestige-title-row::before,
+      .cph-prestige-title-row::after{
         content:"";
-        grid-column:1;
       }
+      .cph-prestige-title-row::before{grid-column:1;}
+      .cph-prestige-title-row::after{grid-column:3;}
       .cph-prestige-title{
         grid-column:2!important;
         margin:0!important;
@@ -109,6 +112,58 @@
       .cph-prestige-hide-save{
         display:none!important;
       }
+      .cph-prestige-settings-tile{
+        width:100%!important;
+        margin:0 0 40px!important;
+        padding:14px 16px!important;
+        border:1px solid #d9e4df!important;
+        border-radius:14px!important;
+        background:#fffdf8!important;
+        color:#31534a!important;
+        box-shadow:0 3px 12px rgba(53,88,75,.08)!important;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:space-between!important;
+        gap:12px!important;
+        cursor:pointer!important;
+        font:inherit!important;
+        text-align:left!important;
+      }
+      .cph-prestige-settings-tile-main{
+        display:flex!important;
+        align-items:center!important;
+        gap:11px!important;
+        min-width:0!important;
+      }
+      .cph-prestige-settings-tile-icon{
+        width:38px!important;
+        height:38px!important;
+        min-width:38px!important;
+        border-radius:10px!important;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        background:#e8f0ec!important;
+        color:#31534a!important;
+        font-size:22px!important;
+      }
+      .cph-prestige-settings-tile-title{
+        display:block!important;
+        font-weight:800!important;
+        line-height:1.15!important;
+      }
+      .cph-prestige-settings-tile-subtitle{
+        display:block!important;
+        margin-top:3px!important;
+        color:#71877f!important;
+        font-size:12px!important;
+        line-height:1.2!important;
+      }
+      .cph-prestige-settings-tile-arrow{
+        color:#7d918a!important;
+        font-size:22px!important;
+        line-height:1!important;
+      }
       @media (max-width:390px){
         .cph-prestige-title-row{
           grid-template-columns:34px minmax(0,1fr) 34px!important;
@@ -153,6 +208,29 @@
       });
   }
 
+  function createSettingsTile(settings){
+    if(document.getElementById(SETTINGS_TILE_ID))return;
+    const actions=document.querySelector("main > .footer-actions")||document.querySelector(".footer-actions");
+    if(!actions||!actions.parentNode)return;
+
+    const tile=document.createElement("button");
+    tile.type="button";
+    tile.id=SETTINGS_TILE_ID;
+    tile.className="cph-prestige-settings-tile";
+    tile.setAttribute("aria-label","Ouvrir les réglages et sauvegardes");
+    tile.innerHTML=`
+      <span class="cph-prestige-settings-tile-main">
+        <span class="cph-prestige-settings-tile-icon" aria-hidden="true">⚙</span>
+        <span>
+          <span class="cph-prestige-settings-tile-title">Réglages et sauvegardes</span>
+          <span class="cph-prestige-settings-tile-subtitle">Sauvegardes, restauration et options</span>
+        </span>
+      </span>
+      <span class="cph-prestige-settings-tile-arrow" aria-hidden="true">›</span>`;
+    tile.addEventListener("click",()=>settings.click());
+    actions.parentNode.insertBefore(tile,actions.nextSibling);
+  }
+
   function apply(){
     const header=document.querySelector("header");
     if(!header||header.dataset.prestigeHeaderApplied==="1")return;
@@ -170,14 +248,12 @@
     if(guideWasInsideTitle)guide.remove();
     title.textContent="COPENHAGUE & MALMÖ";
     title.classList.add("cph-prestige-title");
-    settings.classList.add("cph-prestige-settings");
 
     const oldSettingsParent=settings.parentElement;
     const row=document.createElement("div");
     row.className="cph-prestige-title-row";
     title.parentNode.insertBefore(row,title);
     row.appendChild(title);
-    row.appendChild(settings);
 
     const saveIndicator=document.getElementById("saveIndicator");
     if(saveIndicator&&saveIndicator!==settings&&saveIndicator!==row){
@@ -195,6 +271,7 @@
     guide.classList.add("cph-prestige-guide");
     row.parentNode.insertBefore(flags,row.nextSibling);
     flags.parentNode.insertBefore(guide,flags.nextSibling);
+    createSettingsTile(settings);
   }
 
   function start(){
