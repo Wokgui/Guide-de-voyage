@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v312-static-v1";
-const RUNTIME_CACHE="copenhague-v312-runtime-v1";
+const STATIC_CACHE="copenhague-v312-header-static-v1";
+const RUNTIME_CACHE="copenhague-v312-header-runtime-v1";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -38,30 +38,6 @@ async function remember(request,response){
   return response;
 }
 
-async function injectPrestigeHeader(response){
-  if(!response||!response.ok)return response;
-  const type=response.headers.get("content-type")||"";
-  if(!type.includes("text/html"))return response;
-  let html=await response.text();
-  if(!html.includes("/header-prestige.js")){
-    html=html.replace(/<\/body>/i,'<script src="/header-prestige.js?v=312"></script></body>');
-  }
-  const headers=new Headers(response.headers);
-  headers.delete("content-length");
-  return new Response(html,{status:response.status,statusText:response.statusText,headers});
-}
-
-async function networkFirstNavigate(request,fallback){
-  try{
-    const response=await injectPrestigeHeader(await fetch(request));
-    return await remember(request,response);
-  }catch(_){
-    const cached=(await caches.match(request))||(fallback?await caches.match(fallback):undefined);
-    if(!cached)return Response.error();
-    return await injectPrestigeHeader(cached);
-  }
-}
-
 async function networkFirst(request,fallback){
   try{
     return await remember(request,await fetch(request));
@@ -83,7 +59,7 @@ self.addEventListener("fetch",event=>{
   const url=new URL(request.url);
 
   if(request.mode==="navigate"){
-    event.respondWith(networkFirstNavigate(request,"/index.html"));
+    event.respondWith(networkFirst(request,"/index.html"));
     return;
   }
 

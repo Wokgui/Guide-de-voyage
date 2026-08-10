@@ -90,6 +90,15 @@
         filter:saturate(.95);
       }
       .cph-prestige-guide{
+        display:block!important;
+        width:max-content!important;
+        max-width:min(72%,520px)!important;
+        margin:0 auto 10px!important;
+        padding:6px 18px!important;
+        border-radius:999px!important;
+        text-align:center!important;
+        font-size:clamp(12px,3.3vw,18px)!important;
+        line-height:1.15!important;
         color:#fff!important;
         border:1.5px solid #ddb36a!important;
         background:linear-gradient(135deg,#17657a,#0d536b)!important;
@@ -128,7 +137,7 @@
   function findGuideLabel(){
     return Array.from(document.querySelectorAll("header *")).find(element=>{
       if(element.children.length>3)return false;
-      return normalizedText(element)==="GUIDE PERSONNALISÉ";
+      return normalizedText(element).toLocaleUpperCase("fr")==="GUIDE PERSONNALISÉ";
     })||null;
   }
 
@@ -157,6 +166,8 @@
     addStyles();
     header.dataset.prestigeHeaderApplied="1";
 
+    const guideWasInsideTitle=title.contains(guide);
+    if(guideWasInsideTitle)guide.remove();
     title.textContent="COPENHAGUE & MALMÖ";
     title.classList.add("cph-prestige-title");
     settings.classList.add("cph-prestige-settings");
@@ -181,9 +192,9 @@
     flags.className=FLAG_ROW_CLASS;
     flags.setAttribute("aria-label","Danemark et Suède");
     flags.innerHTML="<span aria-hidden='true'>🇩🇰</span><span aria-hidden='true'>🇸🇪</span>";
-    guide.parentNode.insertBefore(flags,guide);
-
     guide.classList.add("cph-prestige-guide");
+    row.parentNode.insertBefore(flags,row.nextSibling);
+    flags.parentNode.insertBefore(guide,flags.nextSibling);
   }
 
   function start(){
