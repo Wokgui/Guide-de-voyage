@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v312-static-v1";
-const RUNTIME_CACHE="copenhague-v312-runtime-v1";
+const STATIC_CACHE="copenhague-v313-static-v1";
+const RUNTIME_CACHE="copenhague-v313-runtime-v1";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -44,7 +44,7 @@ async function injectPrestigeHeader(response){
   if(!type.includes("text/html"))return response;
   let html=await response.text();
   if(!html.includes("/header-prestige.js")){
-    html=html.replace(/<\/body>/i,'<script src="/header-prestige.js?v=312"></script></body>');
+    html=html.replace(/<\/body>/i,'<script src="/header-prestige.js?v=313"></script></body>');
   }
   const headers=new Headers(response.headers);
   headers.delete("content-length");
