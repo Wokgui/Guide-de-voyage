@@ -1,5 +1,23 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {"type": "header", "key": "host", "value": "guidedevoyage-voyages1\\.vercel\\.app"}
+      ],
+      "destination": "https://nord-7m4q9k2p.vercel.app/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {"type": "header", "key": "host", "value": "guidedevoyage-git-main-voyages1\\.vercel\\.app"}
+      ],
+      "destination": "https://nord-7m4q9k2p.vercel.app/:path*",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
