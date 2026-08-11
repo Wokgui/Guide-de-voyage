@@ -252,7 +252,10 @@
       const next=sharedProjection(state);
       const changes=diffShared(lastObserved,next);
       enqueueChanges(changes);
-      if(changes.length)setTopSaveStatus(navigator.onLine?"saving":"offline");
+      if(changes.length){
+        setTopSaveStatus(navigator.onLine?"saving":"offline");
+        window.dispatchEvent(new Event("guide-backup-change"));
+      }
       lastObserved=next;
     }
     return result;
@@ -917,6 +920,30 @@
   });
   setInterval(()=>void pollRemote(),20000);
 
+  async function importAccountBackup(payload){
+    const restored=payload&&isPlainObject(payload.state)?payload.state:payload;
+    if(!isPlainObject(restored))throw new Error("Sauvegarde du guide invalide");
+    applyingRemote=true;
+    try{
+      SHARED_KEYS.forEach(key=>{
+        state[key]=Object.prototype.hasOwnProperty.call(restored,key)
+          ?clone(restored[key])
+          :defaultForKey(key);
+      });
+      normalizeSharedState();
+      reconcileCustomPoints();
+      originalSaveState();
+      lastObserved=sharedProjection(state);
+      refreshFormValues();
+    }finally{
+      applyingRemote=false;
+    }
+    enqueueSnapshot(lastObserved);
+    setTopSaveStatus(navigator.onLine?"saving":"offline");
+    renderRemoteChanges();
+    await flushQueue();
+  }
+
   window.copenhagenSharedSync={
     flush:flushQueue,
     refresh:pollRemote,
@@ -924,6 +951,8 @@
     deviceId,
     tripId:TRIP_ID,
     client:sharedClient,
+    exportState:()=>sharedProjection(state),
+    importState:importAccountBackup,
     backups:{
       list:loadSnapshots,
       create:createSnapshot,

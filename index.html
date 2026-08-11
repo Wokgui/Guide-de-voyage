@@ -10824,5 +10824,22 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
 <script src="/shared-sync.js"></script>
 
 <script src="/header-prestige.js?v=317"></script>
+<script src="/cloud-backup.js?v=2"></script>
+<script>
+(async()=>{
+  await new Promise(resolve=>setTimeout(resolve,900));
+  try{await window.copenhagenSharedSync?.refresh()}catch(_){}
+  AutoBackupCloud.create({
+    appId:'guide-de-voyage',
+    eventName:'guide-backup-change',
+    triggerSelector:'#cphBottomSettingsTile',
+    replaceTrigger:true,
+    triggerAriaLabel:'Ouvrir les réglages et les sauvegardes',
+    localExisted:true,
+    getPayload:()=>({format:'guide-de-voyage-backup',version:1,state:window.copenhagenSharedSync.exportState()}),
+    applyPayload:payload=>window.copenhagenSharedSync.importState(payload)
+  });
+})();
+</script>
 </body>
 </html>

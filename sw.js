@@ -1,9 +1,10 @@
-const STATIC_CACHE="copenhague-v319-static-v1";
-const RUNTIME_CACHE="copenhague-v319-runtime-v1";
+const STATIC_CACHE="copenhague-v320-static-v1";
+const RUNTIME_CACHE="copenhague-v320-runtime-v1";
 const STATIC_FILES=[
   "/",
   "/index.html",
   "/shared-sync.js",
+  "/cloud-backup.js?v=2",
   "/header-prestige.js",
   "/manifest.webmanifest",
   "/icons/app-icon.svg",
