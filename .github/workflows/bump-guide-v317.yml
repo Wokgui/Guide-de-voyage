@@ -41,3 +41,4 @@ jobs:
           git add index.html
           git commit -m "Charger le correctif d’en-tête v317 sans blocage"
           git push origin HEAD:main
+# trigger-v317
