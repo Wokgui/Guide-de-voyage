@@ -30,6 +30,43 @@
       html body header .stats .stat.stat-todo span>i,
       html body header .stats .stat.stat-aside span>i{display:none!important;width:0!important;height:0!important;margin:0!important;padding:0!important;}
       .cph-counter-icon-hidden{display:none!important;}
+
+      /* Suivi : 3 tuiles centrées comme sur la maquette validée. */
+      html body.suivi-active header{padding-bottom:8px!important;}
+      html body.suivi-active header .stats{
+        display:grid!important;
+        grid-template-columns:repeat(3,minmax(0,1fr))!important;
+        align-items:stretch!important;
+        gap:8px!important;
+        margin-top:14px!important;
+        margin-bottom:6px!important;
+      }
+      html body.suivi-active header .stats .stat{
+        display:flex!important;
+        flex-direction:column!important;
+        align-items:center!important;
+        justify-content:center!important;
+        text-align:center!important;
+        min-height:76px!important;
+        padding:8px 5px!important;
+      }
+      html body.suivi-active header .stats .stat>b{
+        display:block!important;
+        margin:0 0 7px!important;
+        padding:0!important;
+        line-height:1!important;
+      }
+      html body.suivi-active header .stats .stat>span{
+        display:flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        width:100%!important;
+        margin:0!important;
+        padding:0!important;
+        line-height:1.05!important;
+        text-align:center!important;
+      }
+
       .cph-symmetric-controls{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto minmax(0,1fr)!important;align-items:center!important;gap:8px!important;width:100%!important;}
       .cph-symmetric-controls>.cph-side-control{width:100%!important;min-width:0!important;box-sizing:border-box!important;}
       .cph-borsen-icon-fixed{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:1.35em!important;min-width:1.35em!important;height:1.35em!important;line-height:1!important;vertical-align:middle!important;margin:0 .28em 0 0!important;transform:none!important;}
