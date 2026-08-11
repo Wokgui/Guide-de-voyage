@@ -11,7 +11,8 @@
     style.id=STYLE_ID;
     style.textContent=`
       /* En-tête validé : option Équilibré / City Guide. */
-      header #saveIndicator{display:none!important;}
+      header #saveIndicator,
+      header #backupSettingsButton{display:none!important;}
       header h1{
         margin:0 0 10px!important;
         padding:0!important;
