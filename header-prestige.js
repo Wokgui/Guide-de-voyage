@@ -43,7 +43,8 @@
         text-transform:uppercase!important;
         white-space:nowrap!important;
       }
-      .footer-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;width:min(calc(100% - 32px),360px)!important;margin:20px auto 38px!important;gap:10px!important;}
+      .footer-actions{display:none!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;width:min(calc(100% - 32px),360px)!important;margin:20px auto 38px!important;gap:10px!important;}
+      body.suivi-active .footer-actions{display:grid!important;}
       .footer-actions>button,.footer-actions>label{box-sizing:border-box!important;width:100%!important;min-width:0!important;min-height:76px!important;margin:0!important;padding:10px 8px!important;border:1px solid #c9d9d2!important;border-radius:17px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:6px!important;font-size:12px!important;font-weight:850!important;line-height:1.15!important;text-align:center!important;box-shadow:0 6px 17px rgba(30,76,65,.08)!important;}
       .footer-actions svg{width:24px!important;height:24px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
       #exportBtn{background:#eef7f4!important;color:#245e50!important;}
@@ -77,8 +78,8 @@
     if(!original||!footer)return false;
     const tile=document.createElement("button");
     tile.id=SETTINGS_TILE_ID; tile.type="button";
-    tile.setAttribute("aria-label","Ouvrir les réglages et les sauvegardes");
-    tile.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h4m4 0h8M4 17h8m4 0h4"/><circle cx="10" cy="7" r="2"/><circle cx="14" cy="17" r="2"/></svg><span>Réglages</span>`;
+    tile.setAttribute("aria-label","Ouvrir les sauvegardes");
+    tile.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19h12a4 4 0 0 0 .6-7.95A6.5 6.5 0 0 0 6.2 9.2 4.9 4.9 0 0 0 6 19z"/><path d="M12 11v6m0 0-2.5-2.5M12 17l2.5-2.5"/></svg><span>Sauvegarde</span>`;
     tile.addEventListener("click",function(){ original.click(); });
     footer.appendChild(tile); return true;
   }

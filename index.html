@@ -5268,14 +5268,10 @@ body.backup-settings-open{overflow:hidden}
 <a class="button maps top-shortcut-tile" href="https://www.google.com/maps/search/?api=1&amp;query=restaurants+snacks+open+now+near+me" target="_blank"><span class="tile-icon">🍽️</span><span class="tile-label">Restaurants ouverts</span></a>
 </div>
 <div class="history-actions" aria-label="Historique des actions">
+<div class="controls" id="dayButtons"></div>
 <button class="secondary" id="undoActionBtn" type="button">↶ Annuler</button>
 <button class="secondary" id="redoActionBtn" type="button">↷ Rétablir</button>
-</div>
-<div class="toolbar">
-<div class="options">
-<div class="controls" id="dayButtons"></div>
-<label><input id="hideDone" type="checkbox"/> Masquer terminées et de côté</label>
-</div>
+<label class="compact-hide-done"><input id="hideDone" type="checkbox"/> <span>Masquer terminées</span></label>
 </div>
 <div id="list"></div>
 </section>
@@ -5300,7 +5296,7 @@ body.backup-settings-open{overflow:hidden}
 <div class="map-list" id="mapList"></div>
 </section>
 <section class="panel" id="suivi">
-<div aria-live="polite" class="shared-sync-status is-connecting" id="sharedSyncStatus" role="status"><span aria-hidden="true" class="shared-sync-dot"></span><span id="sharedSyncStatusText">Connexion de la synchronisation…</span></div>
+<div aria-live="polite" class="shared-sync-status is-connecting" id="sharedSyncStatus" role="status" hidden><span aria-hidden="true" class="shared-sync-dot"></span><span id="sharedSyncStatusText">Connexion de la synchronisation…</span></div>
 <div id="pratique">
 <details class="stay-card stay-collapsible practical-collapsible">
 <summary class="stay-collapsible-summary">Pratique</summary>
@@ -5424,18 +5420,21 @@ body.backup-settings-open{overflow:hidden}
 <p><b>Au retour :</b> rejoindre Nørreport, puis prendre la ligne M2 direction « Københavns Lufthavn ». La station de l’aéroport est reliée directement au terminal 3.</p>
 <p><b>Billet :</b> acheter avant de monter un billet valable pour les zones 1 à 4. Un City Pass Small inclut également le centre et l’aéroport. Billets aux automates de la station, au guichet DSB du terminal 3 ou dans l’application DOT.</p>
 <div class="stay-actions"><a class="button maps" href="https://www.google.com/maps/dir/?api=1&amp;origin=Copenhagen+Airport&amp;destination=17B+Fiolstr%C3%A6de%2C+Copenhagen&amp;travelmode=transit" target="_blank">Aéroport → Airbnb</a><a class="button maps" href="https://www.google.com/maps/dir/?api=1&amp;origin=17B+Fiolstr%C3%A6de%2C+Copenhagen&amp;destination=Copenhagen+Airport&amp;travelmode=transit" target="_blank">Airbnb → aéroport</a></div>
-</details><article class="stay-card airport-info-card">
-<h3>🧳 Bagage retardé ou perdu</h3>
+</details><details class="stay-card airport-info-card stay-collapsible">
+<summary class="stay-collapsible-summary">🧳 Bagage retardé ou perdu</summary>
+<div class="suivi-collapsible-content">
 <p><b>Copenhague (CPH) :</b> avant de quitter la zone de livraison, aller au bureau du prestataire bagages indiqué pour le vol. Pour SWISS, suivre les indications du bureau de service bagages dans le hall d’arrivée. Après avoir quitté l’aéroport, utiliser le guide « Lost baggage » de CPH.</p>
 <p><b>Zurich (ZRH) :</b> signaler immédiatement le bagage au comptoir Lost &amp; Found / baggage tracing dans la zone d’arrivée, ou au service bagages de la compagnie, avant de sortir.</p>
 <p><b>Luxembourg (LUX) :</b> le comptoir des bagages perdus se trouve dans le hall de récupération des bagages. Contact : +352 2456 5003 ; baggage.claim@luxairgroup.lu.</p>
 <div class="stay-actions"><a class="button source" href="https://www.cph.dk/en/practical/baggage/lost-baggage" target="_blank">Service CPH</a><a class="button source" href="https://www.lux-airport.lu/fr/enregistrement-et-voyage/luggage-guidelines/" target="_blank">Service LUX</a></div>
-</article><article class="stay-card">
-<h3>🧳 Rappels utiles</h3>
+</div>
+</details><details class="stay-card stay-collapsible">
+<summary class="stay-collapsible-summary">🧳 Rappels utiles</summary>
+<div class="suivi-collapsible-content">
 <p style="text-align:justify;">Choisir toujours <b>DKK</b> sur les terminaux de paiement. Vérifier carte d’identité, billets, bagages, chargeurs et clés avant le départ.</p>
 <p style="text-align:justify;"><b>Billets confirmés.</b> Tous les horaires sont indiqués en heure locale.</p>
-
-</article></div>
+</div>
+</details></div>
 </section>
 <div class="footer-actions">
 <button class="secondary" id="exportBtn">Exporter le suivi</button>
@@ -6067,6 +6066,10 @@ function renderDayButtons(){
  daySelect.value=selectedDay;
  daySelect.onchange=()=>{selectedDay=daySelect.value;renderDayButtons();renderProgramme()};
  dayButtons.append(daySelect);
+ const daySelectLabel=document.createElement("span");
+ daySelectLabel.className="day-select-label";
+ daySelectLabel.textContent=daySelect.selectedOptions[0]?.textContent||"Tous les jours";
+ dayButtons.append(daySelectLabel);
 }
 function dayControl(day,a){
  const box=document.createElement("div");box.className="day-control";
@@ -6186,7 +6189,7 @@ function addPointEditor(day){
  const box=document.createElement('details');box.className='add-point-box';
  const listId='place-suggestions-'+normalizePlaceName(day).replace(/ /g,'-');
  const suggestions=[...new Set(DATA.map(p=>p.name))].sort((a,b)=>a.localeCompare(b,'fr')).map(n=>`<option value="${esc(n)}"></option>`).join('');
- box.innerHTML=`<summary>Ajouter moi-même un point à ${esc(day.charAt(0).toLowerCase()+day.slice(1))}</summary><form class="add-point-grid">
+ box.innerHTML=`<summary>Ajouter</summary><form class="add-point-grid">
  <label>Nom<input name="name" required list="${listId}" autocomplete="off" placeholder="Ex. Safari, boutique, café, monument"><datalist id="${listId}">${suggestions}</datalist></label>
  <label>Type<select name="type"><option value="visit">Visite</option><option value="restaurant">Restaurant / snack</option><option value="transport">Transport / arrêt</option></select></label>
  <div class="wide autofill-status small">Écris le nom : les autres cases se rempliront automatiquement et resteront modifiables.</div>
@@ -6210,7 +6213,7 @@ function addPointEditor(day){
 function orderEditor(day){
  const wrap=document.createElement('details');wrap.className='order-editor';
  if(reopenOrderDay===day){wrap.open=true;setTimeout(()=>{reopenOrderDay=null},0)}
- wrap.innerHTML=`<summary>Modifier l’ordre des points</summary>
+ wrap.innerHTML=`<summary>Modifier l’ordre</summary>
  <div class="order-help">Appuie sur <b>Déplacer…</b> à côté du lieu, puis choisis « au début », « à la fin », « avant… » ou « après… ». Ce système est conçu pour fonctionner sans glisser-déposer sur Android.</div>
  ${state.customOrderDays[day]?'<div class="order-notice">Ordre personnalisé actif : toutes les étapes restent conservées, même si l’horaire dépasse la fin calculée.</div>':''}
  <div class="order-list"></div>
@@ -6993,8 +6996,9 @@ function renderProgramme(){
    card.querySelector(".notes").oninput=e=>setNote(p.id,e.target.value);
    body.appendChild(card);previousDisplay=p;
   });
-  body.appendChild(orderEditor(day));
-  body.appendChild(addPointEditor(day));
+  const dayActions=document.createElement("div");dayActions.className="day-inline-actions";
+  dayActions.append(orderEditor(day),addPointEditor(day));
+  body.appendChild(dayActions);
   list.appendChild(section);
  });
  if(!shown)list.innerHTML='<div class="empty">Aucun point avec ces filtres.</div>';
@@ -10781,6 +10785,108 @@ document.addEventListener("click",function(e){
 .shared-sync-status.is-error{background:#fff0ec;border-color:#e1bbb2;color:#873d35}
 .shared-sync-status.is-error .shared-sync-dot{background:#b85f58}
 
+/* v323 — commandes compactes et actions propres à chaque onglet */
+#sharedSyncStatus{display:none!important}
+#programme .history-actions{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.35fr) minmax(0,.75fr) minmax(0,.75fr) minmax(0,1.35fr)!important;
+  gap:4px!important;
+  width:100%!important;
+  margin:0 0 5px!important;
+}
+#programme .history-actions>#dayButtons,
+#programme .history-actions>#undoActionBtn,
+#programme .history-actions>#redoActionBtn,
+#programme .history-actions>.compact-hide-done{
+  box-sizing:border-box!important;
+  grid-column:auto!important;
+  width:100%!important;
+  min-width:0!important;
+  height:30px!important;
+  min-height:30px!important;
+  margin:1px 0!important;
+}
+#programme .history-actions>#dayButtons{display:block!important;position:relative!important}
+#programme .history-actions .day-select{
+  -webkit-appearance:none!important;
+  appearance:none!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  height:30px!important;
+  min-height:30px!important;
+  margin:0!important;
+  padding:0 8px 0 5px!important;
+  border:1px solid #c8d9d3!important;
+  border-radius:8px!important;
+  background-color:#f7fbf9!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='5' viewBox='0 0 7 5'%3E%3Cpath d='M.7.8l2.8 2.8L6.3.8' fill='none' stroke='%23315f51' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+  background-repeat:no-repeat!important;
+  background-position:right 2px center!important;
+  color:#315f51!important;
+  font-size:8.4px!important;
+  font-weight:850!important;
+  text-overflow:ellipsis!important;
+  color:transparent!important;
+  opacity:0!important;
+}
+#programme .history-actions .day-select-label{
+  box-sizing:border-box!important;
+  position:absolute!important;
+  inset:0!important;
+  display:flex!important;
+  align-items:center!important;
+  padding:0 9px 0 5px!important;
+  border:1px solid #c8d9d3!important;
+  border-radius:8px!important;
+  background-color:#f7fbf9!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='5' viewBox='0 0 7 5'%3E%3Cpath d='M.7.8l2.8 2.8L6.3.8' fill='none' stroke='%23315f51' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+  background-repeat:no-repeat!important;
+  background-position:right 2px center!important;
+  color:#315f51!important;
+  font-size:8.4px!important;
+  font-weight:850!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  pointer-events:none!important;
+}
+#programme .history-actions>.compact-hide-done{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:3px!important;
+  padding:1px 3px!important;
+  border:1px solid #c8d9d3!important;
+  border-radius:8px!important;
+  background:#f7fbf9!important;
+  color:#315f51!important;
+  font-size:8.4px!important;
+  font-weight:850!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+}
+#programme .history-actions>.compact-hide-done input{width:12px!important;height:12px!important;min-width:12px!important;margin:0!important}
+#programme .day-inline-actions{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:6px!important;
+  margin:3px 0 7px!important;
+}
+#programme .day-inline-actions>details{min-width:0!important;margin:0!important;padding:0!important}
+#programme .day-inline-actions>details>summary{
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:34px!important;
+  padding:6px 8px!important;
+  font-size:11px!important;
+  font-weight:850!important;
+  text-align:center!important;
+}
+#programme .day-inline-actions>details[open]{grid-column:1/-1!important}
+#programme .day-inline-actions>details[open]>summary{margin-bottom:6px!important}
+
 /* v322 — commandes compactes du programme et recherche intégrée à la carte */
 #programme>.toolbar{padding:10px!important}
 #programme>.toolbar .options{
@@ -10836,7 +10942,7 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
 <script src="/vendor/supabase/supabase.js"></script>
 <script src="/shared-sync.js"></script>
 
-<script src="/header-prestige.js?v=322"></script>
+<script src="/header-prestige.js?v=323"></script>
 <script src="/cloud-backup.js?v=3"></script>
 <script>
 (async()=>{
@@ -10847,11 +10953,11 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
     eventName:'guide-backup-change',
     triggerSelector:'#cphBottomSettingsTile',
     replaceTrigger:true,
-    triggerAriaLabel:'Ouvrir les réglages et les sauvegardes',
+    triggerAriaLabel:'Ouvrir les sauvegardes',
     release:{
-      version:'guide-v322',
-      gitTag:'guide-v322-map-layout',
-      sourceZipUrl:'https://github.com/Wokgui/Guide-de-voyage/archive/refs/tags/guide-v322-map-layout.zip',
+      version:'guide-v323',
+      gitTag:'guide-v323-compact-tabs',
+      sourceZipUrl:'https://github.com/Wokgui/Guide-de-voyage/archive/refs/tags/guide-v323-compact-tabs.zip',
       deploymentUrl:'https://nord-7m4q9k2p.vercel.app/'
     },
     localExisted:true,
