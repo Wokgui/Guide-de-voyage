@@ -1,0 +1,59 @@
+name: Fix prestige header v314
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-prestige-v314.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Fix prestige selector and bust PWA cache
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          hp = Path('header-prestige.js')
+          s = hp.read_text(encoding='utf-8')
+          old = 'return normalizedText(element)==="GUIDE PERSONNALISÉ";'
+          new = 'return normalizedText(element).toLocaleUpperCase("fr-FR")==="GUIDE PERSONNALISÉ";'
+          if old not in s and new not in s:
+              raise SystemExit('Sélecteur Guide personnalisé introuvable')
+          s = s.replace(old, new)
+          hp.write_text(s, encoding='utf-8')
+
+          idx = Path('index.html')
+          s = idx.read_text(encoding='utf-8')
+          if '/header-prestige.js?v=313' in s:
+              s = s.replace('/header-prestige.js?v=313', '/header-prestige.js?v=314')
+          elif '/header-prestige.js?v=314' not in s:
+              raise SystemExit('Référence header-prestige dans index introuvable')
+          idx.write_text(s, encoding='utf-8')
+
+          sw = Path('sw.js')
+          s = sw.read_text(encoding='utf-8')
+          s = s.replace('copenhague-v313-static-v1', 'copenhague-v314-static-v1')
+          s = s.replace('copenhague-v313-runtime-v1', 'copenhague-v314-runtime-v1')
+          sw.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit fix
+        shell: bash
+        run: |
+          if git diff --quiet -- header-prestige.js index.html sw.js; then
+            echo "No change"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add header-prestige.js index.html sw.js
+          git commit -m "Corriger l’activation réelle de l’en-tête prestige"
+          git push origin HEAD:main
