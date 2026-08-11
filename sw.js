@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v329-static-v1";
-const RUNTIME_CACHE="copenhague-v329-runtime-v1";
+const STATIC_CACHE="copenhague-v330-static-v1";
+const RUNTIME_CACHE="copenhague-v330-runtime-v1";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -47,6 +47,18 @@ async function networkFirst(request,fallback){
   }
 }
 
+async function patchedHeader(request){
+  try{
+    const response=await fetch(request,{cache:"no-store"});
+    if(!response.ok)return response;
+    const source=await response.text();
+    const patch='\n;(function(){const s=document.createElement("style");s.textContent="html body.suivi-active header .stats .stat.stat-progress{display:none!important}";document.head.appendChild(s);})();\n';
+    return new Response(source+patch,{status:200,statusText:"OK",headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"no-store"}});
+  }catch(_){
+    return (await caches.match(request))||Response.error();
+  }
+}
+
 async function cacheFirst(request){
   const cached=await caches.match(request);
   if(cached)return cached;
@@ -70,7 +82,7 @@ self.addEventListener("fetch",event=>{
   }
 
   if(url.origin===self.location.origin && url.pathname==="/header-prestige.js"){
-    event.respondWith(networkFirst(request,"/header-prestige.js"));
+    event.respondWith(patchedHeader(request));
     return;
   }
 
