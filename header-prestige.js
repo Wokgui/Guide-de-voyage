@@ -32,9 +32,9 @@
         padding:0 13px!important;
         border:1.15px solid #d9ae62!important;
         border-radius:999px!important;
-        background:transparent!important;
+        background:linear-gradient(180deg,#176c7c 0%,#10596b 100%)!important;
         color:#fff!important;
-        box-shadow:none!important;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.08)!important;
         font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif!important;
         font-size:clamp(10px,2.65vw,12.5px)!important;
         line-height:1!important;
@@ -86,6 +86,21 @@
     if(sub)sub.textContent="GUIDE PERSONNALISÉ"; ensureFlags(title);
   }
 
-  function start(){applyHeader();ensureSettingsTile();setTimeout(ensureSettingsTile,400);setTimeout(ensureSettingsTile,1200);}
+  function installGoogleMapsHandoff(){
+    if(window.__cphGoogleMapsOpenPatched)return;
+    window.__cphGoogleMapsOpenPatched=true;
+    const nativeOpen=window.open.bind(window);
+    window.open=function(url,target,features){
+      const href=typeof url==="string"?url:String(url||"");
+      const isGoogleMaps=/^https:\/\/(?:www\.)?google\.[^/]+\/maps\//i.test(href)||/^https:\/\/maps\.google\./i.test(href);
+      if(isGoogleMaps){
+        window.location.assign(href);
+        return null;
+      }
+      return nativeOpen(url,target,features);
+    };
+  }
+
+  function start(){applyHeader();installGoogleMapsHandoff();ensureSettingsTile();setTimeout(ensureSettingsTile,400);setTimeout(ensureSettingsTile,1200);}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true}); else start();
 })();
