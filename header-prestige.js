@@ -10,7 +10,7 @@
     const style=document.createElement("style");
     style.id=STYLE_ID;
     style.textContent=`
-      /* En-tête validé : option Équilibré / City Guide. */
+      /* En-tête validé : titre élégant, drapeaux entre deux traits, badge bleu. */
       header #saveIndicator,
       header #backupSettingsButton{display:none!important;}
       header h1{
@@ -52,10 +52,7 @@
         background:#ddb36a;
         opacity:.95;
       }
-      .cph-balanced-flags span{
-        font-size:24px!important;
-        line-height:1!important;
-      }
+      .cph-balanced-flags span{font-size:24px!important;line-height:1!important;}
       header h1 .title-sub{
         display:block!important;
         width:max-content!important;
@@ -108,32 +105,31 @@
   }
 
   function ensureFlags(title){
-    let flags=title.querySelector("."+FLAG_ROW_CLASS);
-    if(flags)return flags;
-    flags=document.createElement("span");
+    if(title.querySelector("."+FLAG_ROW_CLASS))return;
+    const flags=document.createElement("span");
     flags.className=FLAG_ROW_CLASS;
     flags.setAttribute("aria-label","Danemark et Suède");
     flags.innerHTML="<span aria-hidden='true'>🇩🇰</span><span aria-hidden='true'>🇸🇪</span>";
     const sub=title.querySelector(".title-sub");
     if(sub)title.insertBefore(flags,sub); else title.appendChild(flags);
-    return flags;
   }
 
   function ensureSettingsTile(){
-    if(document.getElementById(SETTINGS_TILE_ID))return;
+    if(document.getElementById(SETTINGS_TILE_ID))return true;
     const original=document.getElementById("backupSettingsButton");
     const footer=document.querySelector(".footer-actions");
-    if(!original||!footer)return;
+    if(!original||!footer)return false;
     const tile=document.createElement("button");
     tile.id=SETTINGS_TILE_ID;
     tile.type="button";
     tile.setAttribute("aria-label","Ouvrir les réglages et les sauvegardes");
     tile.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.1"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.55V20.3h-3v-.09a1.7 1.7 0 0 0-1.03-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 7 15a1.7 1.7 0 0 0-1.55-1.03H5.3v-3h.15A1.7 1.7 0 0 0 7 9.94a1.7 1.7 0 0 0-.34-1.88L6.6 8l2.12-2.12.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 11.69 4.7v-.09h3v.09a1.7 1.7 0 0 0 1.03 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06L19.78 8l-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.55 1.03h.09v3h-.09A1.7 1.7 0 0 0 19.4 15z"/></svg><span>Réglages</span>`;
-    tile.addEventListener("click",()=>original.click());
+    tile.addEventListener("click",function(){ original.click(); });
     footer.appendChild(tile);
+    return true;
   }
 
-  function apply(){
+  function applyHeader(){
     const header=document.querySelector("header");
     const title=header&&header.querySelector("h1");
     if(!header||!title)return;
@@ -143,20 +139,22 @@
     if(main){
       const oldFlags=main.querySelector(".title-flags");
       if(oldFlags)oldFlags.style.display="none";
-      Array.from(main.childNodes).forEach(node=>{
-        if(node.nodeType===Node.TEXT_NODE&&/Copenhague/i.test(node.textContent||""))node.textContent="COPENHAGUE & MALMÖ ";
+      Array.from(main.childNodes).forEach(function(node){
+        if(node.nodeType===Node.TEXT_NODE&&/Copenhague/i.test(node.textContent||"")){
+          node.textContent="COPENHAGUE & MALMÖ ";
+        }
       });
     }
     if(sub)sub.textContent="GUIDE PERSONNALISÉ";
     ensureFlags(title);
-    ensureSettingsTile();
   }
 
   function start(){
-    apply();
-    const observer=new MutationObserver(()=>apply());
-    observer.observe(document.documentElement,{childList:true,subtree:true});
-    setTimeout(()=>observer.disconnect(),12000);
+    /* Important : pas de MutationObserver global. Le guide crée beaucoup de cartes au démarrage. */
+    applyHeader();
+    ensureSettingsTile();
+    setTimeout(ensureSettingsTile,400);
+    setTimeout(ensureSettingsTile,1200);
   }
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});
