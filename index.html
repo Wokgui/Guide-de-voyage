@@ -5272,11 +5272,9 @@ body.backup-settings-open{overflow:hidden}
 <button class="secondary" id="redoActionBtn" type="button">↷ Rétablir</button>
 </div>
 <div class="toolbar">
-<input autocomplete="off" class="programme-search" id="programmeSearch" placeholder="Rechercher un lieu, une adresse…" type="search" aria-label="Rechercher dans le programme"/>
-<div class="controls" id="dayButtons"></div>
 <div class="options">
-<label><input id="hideDone" type="checkbox"/> Masquer les visites terminées</label>
-<label><input id="hideAside" type="checkbox"/> Masquer les visites de côté</label>
+<div class="controls" id="dayButtons"></div>
+<label><input id="hideDone" type="checkbox"/> Masquer terminées et de côté</label>
 </div>
 </div>
 <div id="list"></div>
@@ -5284,6 +5282,7 @@ body.backup-settings-open{overflow:hidden}
 <section class="panel" id="carte">
 <div id="map"></div>
 <div class="toolbar map-toolbar compact-map-toolbar" style="margin-top:4px">
+<input autocomplete="off" class="map-search" id="mapSearch" placeholder="Rechercher un lieu, une adresse…" type="search" aria-label="Rechercher sur la carte"/>
 <select id="mapDay"><option value="Tous">Tous les jours</option></select>
 <select id="mapType">
 <option value="all">Tous les points</option>
@@ -6061,20 +6060,13 @@ function updateStats(adapt){
 }
 function renderDayButtons(){
  dayButtons.innerHTML="";
- const allButton=document.createElement("button");
- allButton.className="daybtn"+(selectedDay==="Tous"?" active":"");
- allButton.textContent=dayLabel("Tous");
- allButton.onclick=()=>{selectedDay="Tous";renderDayButtons();renderProgramme()};
  const daySelect=document.createElement("select");
  daySelect.className="day-select";
- daySelect.setAttribute("aria-label","Sélectionner un jour");
- const placeholder=document.createElement("option");
- placeholder.value="";placeholder.textContent="Choisir un jour";placeholder.disabled=true;
- daySelect.appendChild(placeholder);
- DAYS.slice(1).forEach(d=>{const option=document.createElement("option");option.value=d;option.textContent=dayLabel(d);daySelect.appendChild(option)});
- daySelect.value=selectedDay==="Tous"?"":selectedDay;
+ daySelect.setAttribute("aria-label","Choisir un jour");
+ DAYS.forEach(d=>{const option=document.createElement("option");option.value=d;option.textContent=d==="Tous"?"Tous les jours":dayLabel(d);daySelect.appendChild(option)});
+ daySelect.value=selectedDay;
  daySelect.onchange=()=>{selectedDay=daySelect.value;renderDayButtons();renderProgramme()};
- dayButtons.append(allButton,daySelect);
+ dayButtons.append(daySelect);
 }
 function dayControl(day,a){
  const box=document.createElement("div");box.className="day-control";
@@ -6806,16 +6798,12 @@ function pointSmallIcon(p){
 
 function renderProgramme(){
  const adapt=adaptiveAll();updateStats(adapt);list.innerHTML="";
- const programmeSearch=document.getElementById("programmeSearch");
- const normalizeSearchText=value=>(value||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
- const searchQuery=normalizeSearchText(programmeSearch?.value);
- const days=searchQuery?[...DAYS.slice(1),"Alternatives"]:(selectedDay==="Tous"?DAYS.slice(1):[selectedDay]);let shown=0;
+ const days=selectedDay==="Tous"?DAYS.slice(1):[selectedDay];let shown=0;
  days.forEach(day=>{
   const visibleDayItems=dayItems(day).filter(p=>{
    const st=itemState(p.id);
    const isAside=!!adapt[day]?.aside?.has(p.id);
-   if(hideDone.checked&&st.status!=="todo")return false;
-   if(hideAside.checked&&isAside)return false;
+   if(hideDone.checked&&(st.status!=="todo"||isAside))return false;
    return true;
   });
   if(dayItems(day).length&&visibleDayItems.length===0)return;
@@ -6826,13 +6814,7 @@ function renderProgramme(){
   dayItems(day).forEach(p=>{
    const st=itemState(p.id),isAside=adapt[day].aside.has(p.id),sc=adapt[day].schedule[p.id];
    const route=sc?.route||routeBetween(previousDisplay,p);
-   const q=searchQuery;
-   if(hideDone.checked&&st.status!=="todo")return;if(hideAside.checked&&isAside)return;
-   const searchable=normalizeSearchText([
-    p.name,p.details,p.desc,p.address,p.routeInstruction,p.openingHours,
-    p.price,p.reservation,p.type,foodRecommendation(p)
-   ].join(" "));
-   if(q&&!searchable.includes(q))return;
+   if(hideDone.checked&&(st.status!=="todo"||isAside))return;
    shown++;
    const card=document.createElement("article");
    const rs=reservationState(p.id);
@@ -7185,6 +7167,14 @@ function normalizedPointStatus(id){
 function pointIsVisited(p){
  return !!p && normalizedPointStatus(p.id)==="visited";
 }
+function normalizedMapSearch(value){
+ return (value||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+}
+function pointMatchesMapSearch(p){
+ const query=normalizedMapSearch(document.getElementById("mapSearch")?.value);
+ if(!query)return true;
+ return normalizedMapSearch([p.name,p.address,effectiveDay(p),natureLabel(p),p.desc,p.details].join(" ")).includes(query);
+}
 function pointsForMap(){
  const adapt=adaptiveAll();
  const remainingOnly=!!document.getElementById("mapShowRemaining")?.checked;
@@ -7194,6 +7184,7 @@ function pointsForMap(){
 
  return DATA.filter(p=>{
   if(p.inPlan===false||p.day==="Alternatives"||state.deletedIds.includes(p.id))return false;
+  if(!pointMatchesMapSearch(p))return false;
 
   const status=normalizedPointStatus(p.id);
   const day=effectiveDay(p);
@@ -7346,37 +7337,15 @@ function renderAll(){const adapt=adaptiveAll();updateStats(adapt);renderProgramm
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 dkkInput.oninput=()=>{eurInput.value=dkkInput.value?(Number(dkkInput.value)/7.4756).toFixed(2):""};
 eurInput.oninput=()=>{dkkInput.value=eurInput.value?(Number(eurInput.value)*7.4756).toFixed(2):""};
-const programmeSearch=document.getElementById("programmeSearch");
-if(programmeSearch){
- const refreshProgrammeSearch=(navigate=false)=>{
-  selectedDay="Tous";
-  renderDayButtons();
-  renderProgramme();
-  if(navigate){
-   requestAnimationFrame(()=>{
-    const firstCard=document.querySelector("#list .card");
-    if(!firstCard)return;
-    const details=firstCard.querySelector(".visit-details");
-    if(details)details.open=true;
-    firstCard.scrollIntoView({behavior:"smooth",block:"center"});
-   });
-  }
- };
- programmeSearch.addEventListener("input",refreshProgrammeSearch);
- programmeSearch.addEventListener("search",refreshProgrammeSearch);
- programmeSearch.addEventListener("change",refreshProgrammeSearch);
- programmeSearch.addEventListener("keydown",event=>{
-  if(event.key==="Enter"){
-   event.preventDefault();
-   refreshProgrammeSearch(true);
-   programmeSearch.blur();
-  }
- });
+const mapSearch=document.getElementById("mapSearch");
+if(mapSearch){
+ const refreshMapSearch=()=>map?renderMap(true):renderMapFallback();
+ mapSearch.addEventListener("input",refreshMapSearch);
+ mapSearch.addEventListener("search",refreshMapSearch);
+ mapSearch.addEventListener("change",refreshMapSearch);
 }
-hideDone.checked=!!state.filters.hideDone;
-hideAside.checked=!!state.filters.hideAside;
-hideDone.onchange=()=>{state.filters.hideDone=hideDone.checked;saveState();renderProgramme()};
-hideAside.onchange=()=>{state.filters.hideAside=hideAside.checked;saveState();renderProgramme()};
+hideDone.checked=!!state.filters.hideDone||!!state.filters.hideAside;
+hideDone.onchange=()=>{state.filters.hideDone=hideDone.checked;state.filters.hideAside=hideDone.checked;saveState();renderProgramme()};
 const globalNotes=document.getElementById('globalNotes'),globalNotesState=document.getElementById('globalNotesState');
 if(globalNotes){globalNotes.value=state.globalNotes||'';globalNotes.oninput=()=>{state.globalNotes=globalNotes.value;saveState();globalNotesState.textContent=''}}
 mapDay.innerHTML='<option value="Tous">Tous les jours</option>'+DAYS.slice(1).map(d=>`<option value="${d}">${dayLabel(d)}</option>`).join("");
@@ -10811,6 +10780,50 @@ document.addEventListener("click",function(e){
 .shared-sync-status.is-offline .shared-sync-dot{background:#c39222}
 .shared-sync-status.is-error{background:#fff0ec;border-color:#e1bbb2;color:#873d35}
 .shared-sync-status.is-error .shared-sync-dot{background:#b85f58}
+
+/* v322 — commandes compactes du programme et recherche intégrée à la carte */
+#programme>.toolbar{padding:10px!important}
+#programme>.toolbar .options{
+  display:grid!important;
+  grid-template-columns:minmax(125px,.9fr) minmax(0,1.35fr)!important;
+  align-items:stretch!important;
+  gap:9px!important;
+  width:100%!important;
+  margin:0!important;
+}
+#programme #dayButtons{display:block!important;width:100%!important;margin:0!important}
+#programme #dayButtons .day-select,
+#programme>.toolbar .options>label{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-height:46px!important;
+  margin:0!important;
+  border:1px solid #cadbd5!important;
+  border-radius:13px!important;
+  background:#f7fbf9!important;
+}
+#programme #dayButtons .day-select{padding:0 35px 0 12px!important;color:#244f45!important;font-weight:800!important}
+#programme>.toolbar .options>label{display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;padding:7px 10px!important;color:#355c52!important;font-size:12px!important;font-weight:750!important;text-align:left!important}
+#programme>.toolbar .options>label input{flex:0 0 auto!important}
+#carte .compact-map-toolbar{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
+#carte .map-search{
+  box-sizing:border-box!important;
+  grid-column:1/-1!important;
+  width:100%!important;
+  min-height:46px!important;
+  padding:0 14px 0 42px!important;
+  border:1px solid #cadbd5!important;
+  border-radius:14px!important;
+  background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23446b60' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 14px center!important;
+  color:#214b41!important;
+  font:700 14px system-ui!important;
+  box-shadow:0 5px 15px rgba(27,74,63,.07)!important;
+}
+#carte .map-status-options{grid-column:1/-1!important}
+@media(max-width:390px){
+  #programme>.toolbar .options{grid-template-columns:minmax(118px,.85fr) minmax(0,1.35fr)!important}
+  #programme>.toolbar .options>label{font-size:11.2px!important;padding-inline:7px!important}
+}
 </style>
 
 <script id="v308-pwa-service-worker">
@@ -10823,7 +10836,7 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
 <script src="/vendor/supabase/supabase.js"></script>
 <script src="/shared-sync.js"></script>
 
-<script src="/header-prestige.js?v=317"></script>
+<script src="/header-prestige.js?v=322"></script>
 <script src="/cloud-backup.js?v=3"></script>
 <script>
 (async()=>{
@@ -10836,9 +10849,9 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
     replaceTrigger:true,
     triggerAriaLabel:'Ouvrir les réglages et les sauvegardes',
     release:{
-      version:'guide-v321',
-      gitTag:'guide-v321-paired-backups',
-      sourceZipUrl:'https://github.com/Wokgui/Guide-de-voyage/archive/refs/tags/guide-v321-paired-backups.zip',
+      version:'guide-v322',
+      gitTag:'guide-v322-map-layout',
+      sourceZipUrl:'https://github.com/Wokgui/Guide-de-voyage/archive/refs/tags/guide-v322-map-layout.zip',
       deploymentUrl:'https://nord-7m4q9k2p.vercel.app/'
     },
     localExisted:true,
