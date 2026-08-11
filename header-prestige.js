@@ -42,12 +42,17 @@
       .cph-poi-title-fixed{display:flex!important;align-items:flex-start!important;justify-content:center!important;gap:.34em!important;width:auto!important;max-width:100%!important;flex:0 1 auto!important;flex-basis:auto!important;text-align:left!important;}
       .cph-poi-title-fixed>.cph-poi-icon{display:inline-flex!important;flex:0 0 auto!important;align-items:center!important;justify-content:center!important;width:1.25em!important;min-width:1.25em!important;line-height:1.12!important;margin:0!important;}
       .cph-poi-title-fixed>.cph-poi-name{display:block!important;flex:0 1 auto!important;width:auto!important;min-width:0!important;max-width:calc(100% - 1.6em)!important;line-height:inherit!important;text-align:left!important;white-space:normal!important;overflow-wrap:normal!important;word-break:normal!important;}
-      .cph-map-title-row{display:flex!important;align-items:flex-start!important;justify-content:center!important;gap:6px!important;width:100%!important;max-width:100%!important;text-align:left!important;}
+      .cph-map-title-row{display:flex!important;align-items:flex-start!important;justify-content:center!important;gap:4px!important;width:100%!important;max-width:100%!important;text-align:left!important;}
       .cph-map-title-row>.cph-map-icon{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 1.35em!important;width:1.35em!important;min-width:1.35em!important;max-width:1.35em!important;height:1.35em!important;line-height:1.1!important;margin:0!important;padding:0!important;transform:none!important;position:static!important;}
       .cph-map-title-row>.cph-map-name{display:block!important;flex:0 1 auto!important;min-width:0!important;max-width:calc(100% - 1.7em)!important;line-height:1.18!important;text-align:left!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;word-break:normal!important;}
       .cph-map-filter-label{box-sizing:border-box!important;min-height:var(--cph-map-filter-height,46px)!important;height:var(--cph-map-filter-height,46px)!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;font-size:var(--cph-map-filter-font,16px)!important;font-weight:var(--cph-map-filter-weight,700)!important;line-height:1.05!important;text-align:center!important;}
       .cph-map-filter-label input[type='checkbox']{flex:0 0 auto!important;}
-      @media(max-width:390px){header h1 .title-main{font-size:clamp(19px,5.55vw,23px)!important;letter-spacing:.012em!important}.cph-balanced-flags{width:min(82%,320px)!important;margin-top:7px!important}.cph-balanced-flags span{font-size:22px!important}header h1 .title-sub{width:58%!important;min-width:205px!important;height:28px!important;font-size:10.2px!important;padding:0 10px!important;letter-spacing:.18em!important}html body.suivi-active header .stats{gap:7px!important}html body.suivi-active header .stats .stat{min-width:88px!important;max-width:104px!important;padding:7px 10px!important}.cph-map-filter-label{font-size:var(--cph-map-filter-font,15px)!important;}}
+      #carte .map-place-line{display:flex!important;align-items:flex-start!important;justify-content:center!important;gap:4px!important;width:100%!important;line-height:1.2!important;}
+      #carte .map-place-line::after{content:none!important;display:none!important;width:0!important;flex:0 0 0!important;}
+      #carte .map-place-line>.map-place-icon{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 19px!important;width:19px!important;height:19px!important;margin:0!important;line-height:1!important;}
+      #carte .map-place-line>b{display:block!important;flex:0 1 auto!important;width:auto!important;max-width:calc(100% - 23px)!important;text-align:left!important;line-height:1.12!important;}
+      #carte .compact-status-options label.cph-map-filter-label{font-size:var(--cph-map-filter-font,16px)!important;font-weight:var(--cph-map-filter-weight,700)!important;line-height:1.05!important;}
+      @media(max-width:390px){header h1 .title-main{font-size:clamp(19px,5.55vw,23px)!important;letter-spacing:.012em!important}.cph-balanced-flags{width:min(82%,320px)!important;margin-top:7px!important}.cph-balanced-flags span{font-size:22px!important}header h1 .title-sub{width:58%!important;min-width:205px!important;height:28px!important;font-size:10.2px!important;padding:0 10px!important;letter-spacing:.18em!important}html body.suivi-active header .stats{gap:7px!important}html body.suivi-active header .stats .stat{min-width:88px!important;max-width:104px!important;padding:7px 10px!important}.cph-map-filter-label{font-size:var(--cph-map-filter-font,15px)!important;}#carte .compact-status-options label.cph-map-filter-label{font-size:var(--cph-map-filter-font,15px)!important;}}
     `;
     document.head.appendChild(style);
   }
@@ -75,14 +80,15 @@
     });
   }
 
-  function mapScope(){return document.querySelector("#mapPanel,#panel-map,[data-panel='map'],#mapList,.map-list,[id*='map'][class*='panel'],[class*='map'][class*='panel']")||document.body;}
+  function mapScope(){return document.querySelector("#carte")||document.querySelector("#mapPanel,#panel-map,[data-panel='map'],#mapList,.map-list,[id*='map'][class*='panel'],[class*='map'][class*='panel']")||document.body;}
   function harmonizeMapFilters(){
     const scope=mapScope();
-    const exact=(label)=>Array.from(scope.querySelectorAll("select,button,label,div,span")).find(el=>txt(el)===label);
-    const day=exact("Tous les jours"),points=exact("Tous les points");
+    const exact=(label)=>Array.from(scope.querySelectorAll("select,button,label,div,span,option")).find(el=>txt(el)===label);
+    const daySelect=scope.querySelector("#mapDay");
+    const day=daySelect||exact("Tous les jours"),points=exact("Tous les points");
     const reference=day||points;
-    if(reference){const r=reference.getBoundingClientRect(),cs=getComputedStyle(reference);const root=scope.style;const h=Math.max(42,Math.round(r.height||46));root.setProperty("--cph-map-filter-height",h+"px");root.setProperty("--cph-map-filter-font",cs.fontSize||"16px");root.setProperty("--cph-map-filter-weight",cs.fontWeight||"700");}
-    ["À visiter","Les visités","Les mis de côté"].forEach(label=>{
+    if(reference){const r=reference.getBoundingClientRect(),cs=getComputedStyle(reference);const root=scope.style;const h=Math.max(28,Math.round(r.height||30));root.setProperty("--cph-map-filter-height",h+"px");root.setProperty("--cph-map-filter-font",cs.fontSize||"16px");root.setProperty("--cph-map-filter-weight",cs.fontWeight||"700");}
+    ["À visiter","Les visités","Les mis de côté","Visités","Mis de côté"].forEach(label=>{
       Array.from(scope.querySelectorAll("label,button,div")).forEach(el=>{
         if(txt(el)!==label)return;
         let target=el;
@@ -94,6 +100,7 @@
 
   function alignAllMapIcons(){
     const scope=mapScope();
+    scope.querySelectorAll(".map-place-line").forEach(row=>{const icon=row.querySelector(":scope > .map-place-icon"),name=row.querySelector(":scope > b");if(icon&&name){row.classList.add("cph-map-title-row");icon.classList.add("cph-map-icon");name.classList.add("cph-map-name");}});
     const isIconText=s=>s&&s.length<=8&&!/[A-Za-zÀ-ÿ0-9]/.test(s);
     Array.from(scope.querySelectorAll("div,span,p,h2,h3,h4,strong,b")).forEach(parent=>{
       if(parent.classList.contains("cph-map-title-row"))return;
@@ -112,11 +119,12 @@
     });
   }
 
+  function iconOnlyReserved(){document.querySelectorAll(".mini-badge.booking.reserved").forEach(el=>{if(txt(el)!=="📅"){el.textContent="📅";}el.setAttribute("aria-label","Réservé");el.setAttribute("title","Réservé");});}
   function fixBorsen(){document.querySelectorAll("*").forEach(el=>{if(el.children.length===0&&/Børsen/.test(txt(el))){const p=el.parentElement;if(!p)return;const candidates=Array.from(p.children);const icon=candidates.find(x=>x!==el&&txt(x).length<=3);if(icon)icon.classList.add("cph-borsen-icon-fixed")}});}
   function symmetricControls(){const all=Array.from(document.querySelectorAll("button,[role='button'],label"));const undo=all.find(e=>/^Annuler$/i.test(txt(e))),redo=all.find(e=>/^Rétablir$/i.test(txt(e)));if(!undo||!redo||undo.parentElement!==redo.parentElement)return;const row=undo.parentElement;const kids=Array.from(row.children);const every=kids.find(e=>/Tous les jours/i.test(txt(e))),hide=kids.find(e=>/Masquer.*termin/i.test(txt(e)));if(every&&hide){row.classList.add("cph-symmetric-controls");every.classList.add("cph-side-control");hide.classList.add("cph-side-control")}}
   function applyHeader(){const header=document.querySelector("header"),title=header&&header.querySelector("h1");if(!header||!title)return;addStyles();const main=title.querySelector(".title-main"),sub=title.querySelector(".title-sub");if(main){const oldFlags=main.querySelector(".title-flags");if(oldFlags)oldFlags.style.display="none";Array.from(main.childNodes).forEach(node=>{if(node.nodeType===Node.TEXT_NODE&&/Copenhague/i.test(node.textContent||""))node.textContent="COPENHAGUE & MALMÖ "})}if(sub)sub.textContent="GUIDE PERSONNALISÉ";ensureFlags(title);}
   function installGoogleMapsHandoff(){if(window.__cphGoogleMapsOpenPatched)return;window.__cphGoogleMapsOpenPatched=true;const nativeOpen=window.open.bind(window);window.open=function(url,target,features){const href=typeof url==="string"?url:String(url||"");if(/^https:\/\/(?:www\.)?google\.[^/]+\/maps\//i.test(href)||/^https:\/\/maps\.google\./i.test(href)){window.location.assign(href);return null}return nativeOpen(url,target,features)}}
-  function polish(){cleanSuiviCounters();harmonizeMapFilters();alignAllMapIcons();fixPoiTitleIcons();fixBorsen();symmetricControls();}
+  function polish(){cleanSuiviCounters();harmonizeMapFilters();alignAllMapIcons();fixPoiTitleIcons();iconOnlyReserved();fixBorsen();symmetricControls();}
   function start(){applyHeader();installGoogleMapsHandoff();ensureSettingsTile();decorateFooterActions();polish();[300,900,1800].forEach(ms=>setTimeout(()=>{ensureSettingsTile();decorateFooterActions();polish()},ms));const observer=new MutationObserver(()=>{window.clearTimeout(window.__cphPolishTimer);window.__cphPolishTimer=window.setTimeout(polish,30);});observer.observe(document.body,{childList:true,subtree:true});}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
