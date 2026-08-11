@@ -19,28 +19,28 @@
       .cph-balanced-flags::before,.cph-balanced-flags::after{content:"";display:block;flex:1 1 auto;height:1px;max-width:120px;background:#ddb36a;opacity:.95;}
       .cph-balanced-flags span{font-size:24px!important;line-height:1!important;}
 
-      /* Badge conforme au visuel de référence : transparent, fin contour doré, capsule large et basse. */
+      /* Badge conforme au visuel de référence : capsule étroite, basse, transparente et contour doré fin. */
       header h1 .title-sub{
         box-sizing:border-box!important;
         display:flex!important;
         align-items:center!important;
         justify-content:center!important;
-        width:min(58vw,405px)!important;
-        min-width:245px!important;
-        max-width:82%!important;
-        height:31px!important;
+        width:56.5%!important;
+        min-width:0!important;
+        max-width:405px!important;
+        height:28px!important;
         margin:1px auto 0!important;
-        padding:0 22px!important;
-        border:1.5px solid #ddb36a!important;
+        padding:0 10px!important;
+        border:1px solid #ddb36a!important;
         border-radius:999px!important;
         background:transparent!important;
         color:#fff!important;
         box-shadow:none!important;
         font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif!important;
-        font-size:clamp(10.5px,2.75vw,13px)!important;
+        font-size:clamp(10px,2.65vw,12.5px)!important;
         line-height:1!important;
         font-weight:750!important;
-        letter-spacing:.20em!important;
+        letter-spacing:.22em!important;
         text-transform:uppercase!important;
         white-space:nowrap!important;
       }
@@ -50,7 +50,7 @@
         header h1 .title-main{font-size:clamp(19px,5.55vw,23px)!important;letter-spacing:.012em!important;}
         .cph-balanced-flags{width:min(82%,320px)!important;margin-top:7px!important;}
         .cph-balanced-flags span{font-size:22px!important;}
-        header h1 .title-sub{width:min(72vw,300px)!important;min-width:238px!important;height:29px!important;font-size:10.5px!important;padding:0 16px!important;letter-spacing:.18em!important;}
+        header h1 .title-sub{width:56.5%!important;min-width:0!important;height:27px!important;font-size:10.5px!important;padding:0 8px!important;letter-spacing:.20em!important;}
       }
     `;
     document.head.appendChild(style);
