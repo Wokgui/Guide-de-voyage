@@ -1,0 +1,57 @@
+name: Apply exact prestige header
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apply-exact-prestige.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Restore exact prestige header and refresh PWA cache
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          # Current v311 stays intact: only remove the temporary approximation
+          # and load the exact historical header-prestige.js.
+          p=Path('index.html')
+          text=p.read_text(encoding='utf-8')
+          text=re.sub(r'\n*<style id="city-guide-header-v312">.*?</style>\n*', '\n', text, count=1, flags=re.S)
+          script='<script src="/header-prestige.js?v=313"></script>'
+          if '/header-prestige.js' not in text:
+              text=text.replace('</body>', script+'\n</body>', 1)
+          p.write_text(text, encoding='utf-8')
+
+          # Force installed PWA to fetch the restored header.
+          sw=Path('sw.js')
+          if sw.exists():
+              s=sw.read_text(encoding='utf-8')
+              s=re.sub(r'const STATIC_CACHE="[^"]+";', 'const STATIC_CACHE="copenhague-v313-static-v1";', s, count=1)
+              s=re.sub(r'const RUNTIME_CACHE="[^"]+";', 'const RUNTIME_CACHE="copenhague-v313-runtime-v1";', s, count=1)
+              if '"/header-prestige.js"' not in s:
+                  s=s.replace('"/shared-sync.js",', '"/shared-sync.js",\n  "/header-prestige.js",', 1)
+              sw.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit exact prestige restoration
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html sw.js; then
+            echo "No change to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html sw.js
+          git commit -m "Restaurer exactement l’en-tête prestige validé"
+          git push origin HEAD:main
