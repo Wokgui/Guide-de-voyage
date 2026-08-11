@@ -5269,8 +5269,8 @@ body.backup-settings-open{overflow:hidden}
 </div>
 <div class="history-actions" aria-label="Historique des actions">
 <div class="controls" id="dayButtons"></div>
-<button class="secondary" id="undoActionBtn" type="button">↶ Annuler</button>
-<button class="secondary" id="redoActionBtn" type="button">↷ Rétablir</button>
+<button aria-label="Annuler" class="secondary" id="undoActionBtn" title="Annuler" type="button">↶</button>
+<button aria-label="Rétablir" class="secondary" id="redoActionBtn" title="Rétablir" type="button">↷</button>
 <label class="compact-hide-done"><input id="hideDone" type="checkbox"/> <span>Masquer terminées</span></label>
 </div>
 <div id="list"></div>
@@ -7276,6 +7276,7 @@ function switchTab(name){
  document.querySelectorAll(".panel").forEach(x=>x.classList.toggle("active",x.id===name));
  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.tab===name));
  document.body.classList.toggle("suivi-active",name==="suivi");
+ document.body.classList.toggle("sejour-active",name==="sejour");
  if(name==="carte"){
   initMap();
   if(typeof window.startLiveMapTracking==="function")window.startLiveMapTracking();
@@ -10787,9 +10788,16 @@ document.addEventListener("click",function(e){
 
 /* v323 — commandes compactes et actions propres à chaque onglet */
 #sharedSyncStatus{display:none!important}
+html:has(body.suivi-active),
+html:has(body.sejour-active),
+body.suivi-active,
+body.sejour-active{
+  min-height:100svh!important;
+  background:#edf5f1!important;
+}
 #programme .history-actions{
   display:grid!important;
-  grid-template-columns:minmax(0,1.35fr) minmax(0,.75fr) minmax(0,.75fr) minmax(0,1.35fr)!important;
+  grid-template-columns:minmax(0,1.65fr) minmax(34px,.42fr) minmax(34px,.42fr) minmax(0,1.65fr)!important;
   gap:4px!important;
   width:100%!important;
   margin:0 0 5px!important;
@@ -10807,6 +10815,13 @@ document.addEventListener("click",function(e){
   margin:1px 0!important;
 }
 #programme .history-actions>#dayButtons{display:block!important;position:relative!important}
+#programme .history-actions>#undoActionBtn,
+#programme .history-actions>#redoActionBtn{
+  padding:0!important;
+  font-size:20px!important;
+  font-weight:900!important;
+  line-height:1!important;
+}
 #programme .history-actions .day-select{
   -webkit-appearance:none!important;
   appearance:none!important;
@@ -10835,7 +10850,7 @@ document.addEventListener("click",function(e){
   inset:0!important;
   display:flex!important;
   align-items:center!important;
-  padding:0 9px 0 5px!important;
+  padding:0 8px 0 5px!important;
   border:1px solid #c8d9d3!important;
   border-radius:8px!important;
   background-color:#f7fbf9!important;
@@ -10955,9 +10970,9 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
     replaceTrigger:true,
     triggerAriaLabel:'Ouvrir les sauvegardes',
     release:{
-      version:'guide-v323',
-      gitTag:'guide-v323-compact-tabs',
-      sourceZipUrl:'https://github.com/Wokgui/Guide-de-voyage/archive/refs/tags/guide-v323-compact-tabs.zip',
+      version:'guide-v324',
+      gitTag:'guide-v324-unified-tab-backgrounds',
+      sourceZipUrl:'https://github.com/Wokgui/Guide-de-voyage/archive/refs/tags/guide-v324-unified-tab-backgrounds.zip',
       deploymentUrl:'https://nord-7m4q9k2p.vercel.app/'
     },
     localExisted:true,
