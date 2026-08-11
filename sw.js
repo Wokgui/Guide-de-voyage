@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v326-static-v1";
-const RUNTIME_CACHE="copenhague-v326-runtime-v1";
+const STATIC_CACHE="copenhague-v327-static-v1";
+const RUNTIME_CACHE="copenhague-v327-runtime-v1";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -41,7 +41,7 @@ async function remember(request,response){
 
 async function networkFirst(request,fallback){
   try{
-    return await remember(request,await fetch(request));
+    return await remember(request,await fetch(request,{cache:"no-store"}));
   }catch(_){
     return (await caches.match(request))||(fallback?await caches.match(fallback):undefined)||Response.error();
   }
@@ -66,6 +66,11 @@ self.addEventListener("fetch",event=>{
 
   if(url.hostname.endsWith(".supabase.co")){
     event.respondWith(fetch(request));
+    return;
+  }
+
+  if(url.origin===self.location.origin && url.pathname==="/header-prestige.js"){
+    event.respondWith(networkFirst(request,"/header-prestige.js"));
     return;
   }
 
