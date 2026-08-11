@@ -31,15 +31,17 @@
       html body header .stats .stat.stat-aside span>i{display:none!important;width:0!important;height:0!important;margin:0!important;padding:0!important;}
       .cph-counter-icon-hidden{display:none!important;}
 
-      /* Suivi : 3 tuiles centrées comme sur la maquette validée. */
-      html body.suivi-active header{padding-bottom:8px!important;}
+      /* Suivi : suppression de la barre de progression et tuiles compactes. */
+      html body.suivi-active header .progress-wrap{display:none!important;}
+      html body.suivi-active header{padding-bottom:9px!important;}
       html body.suivi-active header .stats{
         display:grid!important;
-        grid-template-columns:repeat(3,minmax(0,1fr))!important;
-        align-items:stretch!important;
-        gap:8px!important;
-        margin-top:14px!important;
-        margin-bottom:6px!important;
+        grid-template-columns:repeat(3,max-content)!important;
+        justify-content:space-evenly!important;
+        align-items:center!important;
+        gap:10px!important;
+        margin-top:12px!important;
+        margin-bottom:2px!important;
       }
       html body.suivi-active header .stats .stat{
         display:flex!important;
@@ -47,12 +49,15 @@
         align-items:center!important;
         justify-content:center!important;
         text-align:center!important;
-        min-height:76px!important;
-        padding:8px 5px!important;
+        width:auto!important;
+        min-width:94px!important;
+        max-width:112px!important;
+        min-height:62px!important;
+        padding:7px 14px!important;
       }
       html body.suivi-active header .stats .stat>b{
         display:block!important;
-        margin:0 0 7px!important;
+        margin:0 0 5px!important;
         padding:0!important;
         line-height:1!important;
       }
@@ -60,17 +65,18 @@
         display:flex!important;
         align-items:center!important;
         justify-content:center!important;
-        width:100%!important;
+        width:auto!important;
         margin:0!important;
         padding:0!important;
         line-height:1.05!important;
         text-align:center!important;
+        white-space:nowrap!important;
       }
 
       .cph-symmetric-controls{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto minmax(0,1fr)!important;align-items:center!important;gap:8px!important;width:100%!important;}
       .cph-symmetric-controls>.cph-side-control{width:100%!important;min-width:0!important;box-sizing:border-box!important;}
       .cph-borsen-icon-fixed{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:1.35em!important;min-width:1.35em!important;height:1.35em!important;line-height:1!important;vertical-align:middle!important;margin:0 .28em 0 0!important;transform:none!important;}
-      @media(max-width:390px){header h1 .title-main{font-size:clamp(19px,5.55vw,23px)!important;letter-spacing:.012em!important}.cph-balanced-flags{width:min(82%,320px)!important;margin-top:7px!important}.cph-balanced-flags span{font-size:22px!important}header h1 .title-sub{width:58%!important;min-width:205px!important;height:28px!important;font-size:10.2px!important;padding:0 10px!important;letter-spacing:.18em!important}}
+      @media(max-width:390px){header h1 .title-main{font-size:clamp(19px,5.55vw,23px)!important;letter-spacing:.012em!important}.cph-balanced-flags{width:min(82%,320px)!important;margin-top:7px!important}.cph-balanced-flags span{font-size:22px!important}header h1 .title-sub{width:58%!important;min-width:205px!important;height:28px!important;font-size:10.2px!important;padding:0 10px!important;letter-spacing:.18em!important}html body.suivi-active header .stats{gap:7px!important}html body.suivi-active header .stats .stat{min-width:88px!important;max-width:104px!important;padding:7px 10px!important}}
     `;
     document.head.appendChild(style);
   }
