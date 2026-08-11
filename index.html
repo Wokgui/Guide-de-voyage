@@ -10824,7 +10824,7 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
 <script src="/shared-sync.js"></script>
 
 <script src="/header-prestige.js?v=317"></script>
-<script src="/cloud-backup.js?v=2"></script>
+<script src="/cloud-backup.js?v=3"></script>
 <script>
 (async()=>{
   await new Promise(resolve=>setTimeout(resolve,900));
@@ -10835,6 +10835,12 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
     triggerSelector:'#cphBottomSettingsTile',
     replaceTrigger:true,
     triggerAriaLabel:'Ouvrir les réglages et les sauvegardes',
+    release:{
+      version:'guide-v321',
+      gitTag:'guide-v321-paired-backups',
+      sourceZipUrl:'https://github.com/Wokgui/Guide-de-voyage/archive/refs/tags/guide-v321-paired-backups.zip',
+      deploymentUrl:'https://nord-7m4q9k2p.vercel.app/'
+    },
     localExisted:true,
     getPayload:()=>({format:'guide-de-voyage-backup',version:1,state:window.copenhagenSharedSync.exportState()}),
     applyPayload:payload=>window.copenhagenSharedSync.importState(payload)
