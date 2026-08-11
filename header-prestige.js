@@ -128,7 +128,7 @@
   function findGuideLabel(){
     return Array.from(document.querySelectorAll("header *")).find(element=>{
       if(element.children.length>3)return false;
-      return normalizedText(element)==="GUIDE PERSONNALISÉ";
+      return normalizedText(element).toLocaleUpperCase("fr-FR")==="GUIDE PERSONNALISÉ";
     })||null;
   }
 
