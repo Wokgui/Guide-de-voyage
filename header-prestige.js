@@ -15,23 +15,22 @@
       header h1{margin:0 0 10px!important;padding:0!important;text-align:center!important;}
       header h1 .title-main{display:block!important;margin:0!important;padding:0!important;color:#fff!important;font-family:Georgia,"Times New Roman",serif!important;font-size:clamp(21px,6vw,31px)!important;line-height:1.08!important;font-weight:400!important;letter-spacing:.025em!important;text-transform:uppercase!important;white-space:nowrap!important;text-shadow:0 1px 1px rgba(0,0,0,.14)!important;}
       header h1 .title-main .title-flags{display:none!important;}
-      .cph-balanced-flags{display:flex!important;align-items:center!important;justify-content:center!important;gap:10px!important;width:min(76%,350px)!important;margin:8px auto 8px!important;line-height:1!important;}
-      .cph-balanced-flags::before,.cph-balanced-flags::after{content:"";display:block;flex:1 1 auto;height:1px;max-width:120px;background:#ddb36a;opacity:.95;}
+      .cph-balanced-flags{display:flex!important;align-items:center!important;justify-content:center!important;gap:12px!important;width:min(76%,350px)!important;margin:8px auto 9px!important;line-height:1!important;}
+      .cph-balanced-flags::before,.cph-balanced-flags::after{content:"";display:block;flex:1 1 auto;height:1px;max-width:120px;background:#d9ae62!important;opacity:1!important;}
       .cph-balanced-flags span{font-size:24px!important;line-height:1!important;}
 
-      /* Badge conforme au visuel de référence : capsule étroite, basse, transparente et contour doré fin. */
       header h1 .title-sub{
         box-sizing:border-box!important;
         display:flex!important;
         align-items:center!important;
         justify-content:center!important;
         width:56.5%!important;
-        min-width:0!important;
+        min-width:220px!important;
         max-width:405px!important;
-        height:28px!important;
-        margin:1px auto 0!important;
-        padding:0 10px!important;
-        border:1px solid #ddb36a!important;
+        height:29px!important;
+        margin:0 auto!important;
+        padding:0 13px!important;
+        border:1.15px solid #d9ae62!important;
         border-radius:999px!important;
         background:transparent!important;
         color:#fff!important;
@@ -39,8 +38,8 @@
         font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif!important;
         font-size:clamp(10px,2.65vw,12.5px)!important;
         line-height:1!important;
-        font-weight:750!important;
-        letter-spacing:.22em!important;
+        font-weight:700!important;
+        letter-spacing:.19em!important;
         text-transform:uppercase!important;
         white-space:nowrap!important;
       }
@@ -50,7 +49,7 @@
         header h1 .title-main{font-size:clamp(19px,5.55vw,23px)!important;letter-spacing:.012em!important;}
         .cph-balanced-flags{width:min(82%,320px)!important;margin-top:7px!important;}
         .cph-balanced-flags span{font-size:22px!important;}
-        header h1 .title-sub{width:56.5%!important;min-width:0!important;height:27px!important;font-size:10.5px!important;padding:0 8px!important;letter-spacing:.20em!important;}
+        header h1 .title-sub{width:58%!important;min-width:205px!important;height:28px!important;font-size:10.2px!important;padding:0 10px!important;letter-spacing:.18em!important;}
       }
     `;
     document.head.appendChild(style);
