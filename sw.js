@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v332-static-v1";
-const RUNTIME_CACHE="copenhague-v332-runtime-v1";
+const STATIC_CACHE="copenhague-v333-static-v1";
+const RUNTIME_CACHE="copenhague-v333-runtime-v1";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -25,11 +25,13 @@ self.addEventListener("install",event=>{
 });
 
 self.addEventListener("activate",event=>{
-  event.waitUntil(
-    caches.keys()
-      .then(keys=>Promise.all(keys.filter(key=>![STATIC_CACHE,RUNTIME_CACHE].includes(key)).map(key=>caches.delete(key))))
-      .then(()=>self.clients.claim())
-  );
+  event.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.filter(key=>![STATIC_CACHE,RUNTIME_CACHE].includes(key)).map(key=>caches.delete(key)));
+    await self.clients.claim();
+    const clients=await self.clients.matchAll({type:"window",includeUncontrolled:true});
+    await Promise.all(clients.map(client=>client.navigate(client.url).catch(()=>null)));
+  })());
 });
 
 async function remember(request,response){
@@ -53,7 +55,7 @@ async function patchedHeader(request){
     if(!response.ok)return response;
     const source=await response.text();
     const patch='\n;(function(){const s=document.createElement("style");s.textContent="html body.suivi-active header .stats .stat.stat-progress{display:none!important}";document.head.appendChild(s);})();\n';
-    return new Response(source+patch,{status:200,statusText:"OK",headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"no-store"}});
+    return new Response(source+patch,{status:200,statusText:"OK",headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"no-store, no-cache, must-revalidate"}});
   }catch(_){
     return (await caches.match(request))||Response.error();
   }
@@ -72,6 +74,7 @@ self.addEventListener("fetch",event=>{
   const url=new URL(request.url);
 
   if(request.mode==="navigate"){
+    event.waitUntil(self.registration.update().catch(()=>null));
     event.respondWith(networkFirst(request,"/index.html"));
     return;
   }
@@ -87,7 +90,7 @@ self.addEventListener("fetch",event=>{
   }
 
   if(url.origin===self.location.origin){
-    event.respondWith(cacheFirst(request));
+    event.respondWith(networkFirst(request));
     return;
   }
 
