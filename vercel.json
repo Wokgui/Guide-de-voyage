@@ -2,6 +2,14 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "redirects": [
     {
+      "source": "/cloud-backup.js",
+      "has": [
+        {"type": "query", "key": "v", "value": "3"}
+      ],
+      "destination": "/cloud-backup-loader.js",
+      "permanent": false
+    },
+    {
       "source": "/:path*",
       "has": [
         {"type": "header", "key": "host", "value": "guidedevoyage-voyages1\\.vercel\\.app"}
@@ -42,6 +50,12 @@
     },
     {
       "source": "/header-prestige.js",
+      "headers": [
+        {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}
+      ]
+    },
+    {
+      "source": "/ui-fixes-v7.js",
       "headers": [
         {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}
       ]
