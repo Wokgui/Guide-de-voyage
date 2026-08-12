@@ -17,7 +17,7 @@
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Copenhague" name="apple-mobile-web-app-title"/>
-<title>Copenhague &amp; Malmö — v337</title>
+<title>Copenhague &amp; Malmö — v338</title>
 <link href="/manifest.webmanifest" rel="manifest"/>
 <link href="/icons/app-icon.svg" rel="icon" type="image/svg+xml"/>
 <link href="/icons/app-icon-192.png" rel="apple-touch-icon"/>
@@ -5277,7 +5277,7 @@ body.backup-settings-open{overflow:hidden}
 </section>
 <section class="panel" id="carte">
 <div id="map"></div>
-<div class="toolbar map-toolbar compact-map-toolbar" style="margin-top:4px">
+<div class="toolbar map-toolbar compact-map-toolbar" style="margin-top:13px">
 <input autocomplete="off" class="map-search" id="mapSearch" placeholder="Rechercher un lieu, une adresse…" type="search" aria-label="Rechercher sur la carte"/>
 <select id="mapDay"><option value="Tous">Tous les jours</option></select>
 <select id="mapType">
@@ -5364,10 +5364,6 @@ body.backup-settings-open{overflow:hidden}
 <div class="list-status">
 <h2 class="tracking-section-title">Mis de côté</h2>
 <div id="asideList"></div>
-</div>
-<div class="list-status">
-<h2 class="tracking-section-title">Visites impossibles</h2>
-<div id="impossibleList"></div>
 </div>
 </div>
 </details>
@@ -5648,6 +5644,11 @@ function natureIconFor(p,label){
  const l=(label||"").toLowerCase();
  const name=(p?.name||"").toLowerCase();
  const source=`${name} ${p?.nature||""} ${label||""}`.toLowerCase();
+ if(l==="bibliothèque"||/biblioth[eè]que|bibliotek|black diamond/.test(source))return `<svg class="nature-svg library-svg" viewBox="0 0 32 32" role="img" aria-label="Bibliothèque">
+  <path d="M5 8.5c4.2-1.8 7.7-1.2 11 1.3v15c-3.3-2.5-6.8-3.1-11-1.3z" fill="#e8f1ef" stroke="#486f65" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M27 8.5c-4.2-1.8-7.7-1.2-11 1.3v15c3.3-2.5 6.8-3.1 11-1.3z" fill="#f5ead5" stroke="#486f65" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M16 10v15M8 12.5c2.1-.6 3.8-.3 5.5.7M24 12.5c-2.1-.6-3.8-.3-5.5.7M8 16c2.1-.6 3.8-.3 5.5.7M24 16c-2.1-.6-3.8-.3-5.5.7" fill="none" stroke="#7c9b91" stroke-width="1.15" stroke-linecap="round"/>
+ </svg>`;
  /* Icônes dédiées aux deux nouvelles visites : elles restent lisibles
     dans les petites pastilles du Programme, du Suivi et de la Carte. */
  if(l==="zoo"||/\bzoo\b/.test(source))return `<svg class="nature-svg zoo-svg" viewBox="0 0 32 32" role="img" aria-label="Zoo">
@@ -7029,7 +7030,6 @@ function renderTrackingLists(){
  const visiblePoints=DATA.filter(p=>!state.deletedIds.includes(p.id));
  const visitedItems=visiblePoints.filter(p=>itemState(p.id).status==="visited").sort(trackingChronologicalSort);
  const asideItems=visiblePoints.filter(p=>asideIds.has(p.id)).sort(trackingChronologicalSort);
- const impossibleItems=visiblePoints.filter(p=>itemState(p.id).status==="missed").sort(trackingChronologicalSort);
  const make=(p,kind)=>`<div class="status-card status-card-with-thumb" data-tracking-point-id="${p.id}">
   <div class="tracking-thumb" data-tracking-thumb-id="${p.id}" aria-hidden="true"></div>
   <div class="tracking-card-content"><div class="tracking-title-row"><span class="section-place-icon">${pointSmallIcon(p)}</span><b>${esc(p.name)}</b></div><span class="small">${esc(effectiveDay(p))} • ${esc(state.timeOverrides[p.id]||p.plannedStart||"")}</span><div class="map-actions"><button class="button maps tracking-map" data-id="${p.id}">Carte</button>${kind==="aside"?`<button class="button secondary tracking-restore" data-id="${p.id}">Remettre au programme</button><button class="button tracking-delete" data-id="${p.id}">Supprimer</button>`:kind==="impossible"?`<button class="button tracking-delete" data-id="${p.id}">Supprimer</button>`:`<button class="button secondary tracking-retry" data-id="${p.id}">Marquer à refaire</button>`}</div></div>
@@ -7042,7 +7042,6 @@ function renderTrackingLists(){
  }).join("");
  visitedList.innerHTML=visitedGroups||'<div class="empty">Aucun point visité.</div>';
  asideList.innerHTML=asideItems.length?asideItems.map(p=>make(p,"aside")).join(""):'<div class="empty">Aucun point de côté.</div>';
- impossibleList.innerHTML=impossibleItems.length?impossibleItems.map(p=>make(p,"impossible")).join(""):'<div class="empty">Aucun point impossible.</div>';
  document.querySelectorAll("[data-tracking-point-id]").forEach(card=>{
   const p=DATA.find(x=>x.id===card.dataset.trackingPointId);
   if(p)loadPointThumbnail(p,card,`[data-tracking-thumb-id="${p.id}"]`);
@@ -11051,20 +11050,21 @@ body.suivi-active header .stat span i{
   font-weight:850!important;
 }
 #carte .compact-status-options{
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  gap:7px!important;
+  grid-template-columns:.9fr .95fr 1.15fr!important;
+  gap:6px!important;
 }
 #carte .compact-status-options>label,
 #carte .compact-status-options .remaining-filter,
 #carte .compact-status-options .small-status-filter{
   width:100%!important;
-  min-height:38px!important;
-  height:38px!important;
-  padding:4px 7px!important;
-  border-radius:11px!important;
-  font-size:11.5px!important;
+  min-height:42px!important;
+  height:42px!important;
+  padding:4px 5px!important;
+  border-radius:12px!important;
+  font-size:12.5px!important;
   font-weight:850!important;
-  line-height:1.1!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
 }
 #carte .compact-status-options .remaining-filter{display:flex!important;grid-column:1!important;grid-row:1!important}
 #carte .compact-status-options label:has(#mapShowVisited){grid-column:2!important;grid-row:1!important}
@@ -11072,6 +11072,9 @@ body.suivi-active header .stat span i{
 #carte .compact-status-options input[type="checkbox"]{width:16px!important;height:16px!important;min-width:16px!important;flex-basis:16px!important}
 #carte .map-list-item-with-thumb{grid-template-columns:78px minmax(0,1fr)!important;column-gap:12px!important;min-height:92px!important}
 #carte .map-list-thumb{width:78px!important;height:78px!important;border-radius:12px!important;box-shadow:0 4px 12px rgba(24,70,59,.13)!important}
+#carte .map-list-content{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;width:100%!important;min-width:0!important;text-align:center!important}
+#carte .map-list-content>.map-place-line,#carte .map-list-content>.map-visit-time,#carte .map-list-content>.map-point-tools{width:100%!important;margin-left:auto!important;margin-right:auto!important;text-align:center!important}
+#carte .map-list-content>.map-point-tools{display:flex!important;align-items:center!important;justify-content:center!important;transform:none!important}
 #carte .map-place-line b{font-size:14.5px!important;line-height:1.12!important}
 #carte .map-visit-time,#carte .map-nature-badge{font-size:12px!important}
 .event-map-div-icon{display:grid!important;place-items:center!important}
@@ -11116,7 +11119,7 @@ body.suivi-active header .stat span{font-size:12px!important;line-height:1.05!im
 body.suivi-active header .stat span i{width:22px!important;height:22px!important;font-size:14px!important}
 @media(max-width:390px){
   #carte .compact-map-toolbar>select{font-size:12.5px!important;padding-left:9px!important}
-  #carte .compact-status-options>label{font-size:10.7px!important;padding-inline:4px!important}
+  #carte .compact-status-options>label{font-size:12.5px!important;padding-inline:4px!important}
   #carte .map-list-item-with-thumb{grid-template-columns:72px minmax(0,1fr)!important}
   #carte .map-list-thumb{width:72px!important;height:72px!important}
 }
@@ -11160,7 +11163,7 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
 <script src="/vendor/supabase/supabase.js"></script>
 <script src="/shared-sync.js"></script>
 
-<script src="/header-prestige.js?v=337"></script>
+<script src="/header-prestige.js?v=338"></script>
 <script src="/cloud-backup.js?v=3"></script>
 <script>
 (async()=>{
@@ -11173,9 +11176,9 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
     replaceTrigger:true,
     triggerAriaLabel:'Ouvrir les sauvegardes',
     release:{
-      version:'guide-v337',
-      gitTag:'guide-v337-map-icons-centered-above',
-      sourceZipUrl:'https://github.com/Wokgui/Guide-de-voyage/archive/refs/tags/guide-v337-map-icons-centered-above.zip',
+      version:'guide-v338',
+      gitTag:'guide-v338-map-card-consistency',
+      sourceZipUrl:'https://github.com/Wokgui/Guide-de-voyage/archive/refs/tags/guide-v338-map-card-consistency.zip',
       deploymentUrl:'https://nord-7m4q9k2p.vercel.app/'
     },
     localExisted:true,
