@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v343-static-v3";
-const RUNTIME_CACHE="copenhague-v343-runtime-v3";
+const STATIC_CACHE="copenhague-v343-static-v4";
+const RUNTIME_CACHE="copenhague-v343-runtime-v4";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -57,7 +57,7 @@ async function patchedHeader(request){
     const patch=`
 ;(function(){
   const style=document.createElement("style");
-  style.textContent="html body.suivi-active header .stats .stat.stat-progress{display:none!important}.cph-map-title-row,.cph-poi-title-fixed,.cph-titlepair-v334,.cph-titlepair-v335{display:flex!important;width:max-content!important;max-width:100%!important;align-items:flex-start!important;justify-content:flex-start!important;gap:6px!important;margin-left:auto!important;margin-right:auto!important;text-align:left!important}.cph-map-title-row>.cph-map-icon,.cph-poi-title-fixed>.cph-poi-icon,.cph-titlepair-v334>.cph-titleicon-v334,.cph-titlepair-v335>.cph-titleicon-v335,.cph-borsen-icon-fixed{display:inline-flex!important;flex:0 0 1.28em!important;width:1.28em!important;min-width:1.28em!important;height:1.16em!important;align-items:center!important;justify-content:center!important;margin:0!important;padding:0!important;line-height:1!important;position:static!important;transform:translateY(.02em)!important;text-align:center!important;vertical-align:top!important}.cph-map-title-row>.cph-map-name,.cph-poi-title-fixed>.cph-poi-name,.cph-titlepair-v334>.cph-titlename-v334,.cph-titlepair-v335>.cph-titlename-v335{display:block!important;flex:0 1 auto!important;width:auto!important;min-width:0!important;max-width:calc(100% - 1.65em)!important;margin:0!important;padding:0!important;line-height:1.16!important;text-align:left!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;word-break:normal!important}.cph-reserved-icon-only{min-width:0!important;width:auto!important;padding-left:8px!important;padding-right:8px!important;gap:0!important}.cph-reserved-icon-only .cph-reserved-label-hidden{display:none!important}html body #programme .visit-details:not([open]) .visit-summary .summary-point-map{border:0!important;outline:0!important;box-shadow:none!important;-webkit-appearance:none!important;appearance:none!important;filter:none!important}html body #programme .visit-details:not([open]) .visit-summary .summary-point-map:focus,html body #programme .visit-details:not([open]) .visit-summary .summary-point-map:focus-visible{outline:0!important;box-shadow:none!important}html body #programme .visit-details:not([open]) .visit-summary .mini-badge.nature{border:0!important;outline:0!important;box-shadow:none!important;filter:none!important}";
+  style.textContent="html body.suivi-active header .stats .stat.stat-progress{display:none!important}.cph-map-title-row,.cph-poi-title-fixed,.cph-titlepair-v334,.cph-titlepair-v335{display:flex!important;width:max-content!important;max-width:100%!important;align-items:flex-start!important;justify-content:flex-start!important;gap:6px!important;margin-left:auto!important;margin-right:auto!important;text-align:left!important}.cph-map-title-row>.cph-map-icon,.cph-poi-title-fixed>.cph-poi-icon,.cph-titlepair-v334>.cph-titleicon-v334,.cph-titlepair-v335>.cph-titleicon-v335,.cph-borsen-icon-fixed{display:inline-flex!important;flex:0 0 1.28em!important;width:1.28em!important;min-width:1.28em!important;height:1.16em!important;align-items:center!important;justify-content:center!important;margin:0!important;padding:0!important;line-height:1!important;position:static!important;transform:translateY(.02em)!important;text-align:center!important;vertical-align:top!important}.cph-map-title-row>.cph-map-name,.cph-poi-title-fixed>.cph-poi-name,.cph-titlepair-v334>.cph-titlename-v334,.cph-titlepair-v335>.cph-titlename-v335{display:block!important;flex:0 1 auto!important;width:auto!important;min-width:0!important;max-width:calc(100% - 1.65em)!important;margin:0!important;padding:0!important;line-height:1.16!important;text-align:left!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;word-break:normal!important}.cph-reserved-icon-only{min-width:0!important;width:auto!important;padding-left:8px!important;padding-right:8px!important;gap:0!important}.cph-reserved-icon-only .cph-reserved-label-hidden{display:none!important}html body #programme .visit-details:not([open]) .visit-summary .summary-point-map{border:0!important;outline:0!important;box-shadow:none!important;-webkit-appearance:none!important;appearance:none!important;filter:none!important;width:24px!important;min-width:24px!important;max-width:24px!important;padding:0!important}html body #programme .visit-details:not([open]) .visit-summary .summary-point-map:focus,html body #programme .visit-details:not([open]) .visit-summary .summary-point-map:focus-visible{outline:0!important;box-shadow:none!important}html body #programme .visit-details:not([open]) .visit-summary .summary-point-map::after{content:none!important;display:none!important}html body #programme .visit-details:not([open]) .visit-summary .mini-badge.nature{border:0!important;outline:0!important;box-shadow:none!important;filter:none!important}html body #programme .visit-details:not([open]) .summary-title-tools .summary-line:nth-child(2){grid-template-columns:max-content 24px max-content!important}";
   document.head.appendChild(style);
   const norm=e=>(e&&e.textContent||"").replace(/\\s+/g," ").trim();
   const isIcon=s=>!!s&&s.length<=8&&!/[A-Za-zÀ-ÿ0-9]/.test(s);
@@ -119,7 +119,15 @@ async function patchedHeader(request){
       }
     });
   }
-  function polishAll(){fix();reservedIconOnly();}
+  function orderProgrammeMap(){
+    document.querySelectorAll("#programme .summary-title-tools .summary-line").forEach(line=>{
+      const map=line.querySelector(":scope > .summary-point-map");
+      const visit=line.querySelector(":scope > .summary-visit-duration");
+      const walk=line.querySelector(":scope > .summary-walk-duration");
+      if(map&&visit&&walk&&map.previousElementSibling!==visit)line.insertBefore(map,walk);
+    });
+  }
+  function polishAll(){fix();reservedIconOnly();orderProgrammeMap();}
   polishAll();setTimeout(polishAll,200);setTimeout(polishAll,700);setTimeout(polishAll,1500);
   const observer=new MutationObserver(()=>{clearTimeout(window.__cphPair336Timer);window.__cphPair336Timer=setTimeout(polishAll,35)});
   observer.observe(document.body,{childList:true,subtree:true});
