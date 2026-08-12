@@ -17,7 +17,7 @@
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Copenhague" name="apple-mobile-web-app-title"/>
-<title>Copenhague &amp; Malmö — v338</title>
+<title>Copenhague &amp; Malmö — v339</title>
 <link href="/manifest.webmanifest" rel="manifest"/>
 <link href="/icons/app-icon.svg" rel="icon" type="image/svg+xml"/>
 <link href="/icons/app-icon-192.png" rel="apple-touch-icon"/>
@@ -11070,7 +11070,7 @@ body.suivi-active header .stat span i{
 #carte .compact-status-options label:has(#mapShowVisited){grid-column:2!important;grid-row:1!important}
 #carte .compact-status-options label:has(#mapShowAside){grid-column:3!important;grid-row:1!important}
 #carte .compact-status-options input[type="checkbox"]{width:16px!important;height:16px!important;min-width:16px!important;flex-basis:16px!important}
-#carte .map-list-item-with-thumb{grid-template-columns:78px minmax(0,1fr)!important;column-gap:12px!important;min-height:92px!important}
+#carte .map-list-item-with-thumb{grid-template-columns:78px minmax(0,1fr) 78px!important;column-gap:12px!important;min-height:92px!important}
 #carte .map-list-thumb{width:78px!important;height:78px!important;border-radius:12px!important;box-shadow:0 4px 12px rgba(24,70,59,.13)!important}
 #carte .map-list-content{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;width:100%!important;min-width:0!important;text-align:center!important}
 #carte .map-list-content>.map-place-line,#carte .map-list-content>.map-visit-time,#carte .map-list-content>.map-point-tools{width:100%!important;margin-left:auto!important;margin-right:auto!important;text-align:center!important}
@@ -11120,7 +11120,7 @@ body.suivi-active header .stat span i{width:22px!important;height:22px!important
 @media(max-width:390px){
   #carte .compact-map-toolbar>select{font-size:12.5px!important;padding-left:9px!important}
   #carte .compact-status-options>label{font-size:12.5px!important;padding-inline:4px!important}
-  #carte .map-list-item-with-thumb{grid-template-columns:72px minmax(0,1fr)!important}
+  #carte .map-list-item-with-thumb{grid-template-columns:72px minmax(0,1fr) 72px!important;column-gap:10px!important}
   #carte .map-list-thumb{width:72px!important;height:72px!important}
 }
 
@@ -11163,7 +11163,7 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
 <script src="/vendor/supabase/supabase.js"></script>
 <script src="/shared-sync.js"></script>
 
-<script src="/header-prestige.js?v=338"></script>
+<script src="/header-prestige.js?v=339"></script>
 <script src="/cloud-backup.js?v=3"></script>
 <script>
 (async()=>{
@@ -11176,9 +11176,9 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
     replaceTrigger:true,
     triggerAriaLabel:'Ouvrir les sauvegardes',
     release:{
-      version:'guide-v338',
-      gitTag:'guide-v338-map-card-consistency',
-      sourceZipUrl:'https://github.com/Wokgui/Guide-de-voyage/archive/refs/tags/guide-v338-map-card-consistency.zip',
+      version:'guide-v339',
+      gitTag:'guide-v339-whole-card-axis',
+      sourceZipUrl:'https://github.com/Wokgui/Guide-de-voyage/archive/refs/tags/guide-v339-whole-card-axis.zip',
       deploymentUrl:'https://nord-7m4q9k2p.vercel.app/'
     },
     localExisted:true,
