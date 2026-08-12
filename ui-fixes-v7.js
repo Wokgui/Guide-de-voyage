@@ -71,7 +71,7 @@ function normalizeReservations(){
    keep.removeAttribute("aria-hidden");
    badges.forEach(b=>{if(b!==keep)markDuplicate(b)});
   }
-  const scope=keep?.closest(".summary-title-tools")||summary;
+  const scope=summary;
   Array.from(scope.querySelectorAll("*")).forEach(el=>{
    if(el===keep||(keep&&(el.contains(keep)||keep.contains(el))))return;
    const raw=(el.textContent||"").replace(/\s+/g," ").trim();
