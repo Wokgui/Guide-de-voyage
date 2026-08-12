@@ -17,7 +17,7 @@
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Copenhague" name="apple-mobile-web-app-title"/>
-<title>Copenhague &amp; Malmö — v326</title>
+<title>Copenhague &amp; Malmö — v327</title>
 <link href="/manifest.webmanifest" rel="manifest"/>
 <link href="/icons/app-icon.svg" rel="icon" type="image/svg+xml"/>
 <link href="/icons/app-icon-192.png" rel="apple-touch-icon"/>
@@ -7239,7 +7239,7 @@ function renderMapFallback(){
  mapList.innerHTML="";
  const day=mapDay.value,type=mapType.value;
  pointsForMap().filter(p=>isHotelPoint(p)||((day==="Tous"||effectiveDay(p)===day)&&mapPointMatchesType(p,type))).sort(alphabeticalPointSort).forEach(p=>{
-   mapList.insertAdjacentHTML("beforeend",`<div class="map-list-item map-list-item-with-thumb"><div class="map-list-thumb" data-map-thumb-id="${p.id}"></div><div class="map-list-content"><div class="map-place-line"><span class="map-place-icon">${pointSmallIcon(p)}</span> <b>${esc(p.name)}</b></div><div class="map-visit-time">${esc(effectiveDay(p))} ${esc(state.timeOverrides[p.id]||p.plannedStart||"")}</div><span class="map-nature-badge">${esc(natureLabel(p))}</span><br><span class="small">${esc(p.address)}</span><br><a target="_blank" href="${googleMapsDirectionsUrl(p)}" aria-label="Ouvrir l’itinéraire dans Google Maps">Itinéraire Google Maps</a></div></div>`);
+   mapList.insertAdjacentHTML("beforeend",`<div class="map-list-item map-list-item-with-thumb"><div class="map-list-thumb" data-map-thumb-id="${p.id}"></div><div class="map-list-content"><span class="map-place-icon">${pointSmallIcon(p)}</span><div class="map-place-line"><b>${esc(p.name)}</b></div><div class="map-visit-time">${esc(effectiveDay(p))} ${esc(state.timeOverrides[p.id]||p.plannedStart||"")}</div><span class="map-nature-badge">${esc(natureLabel(p))}</span><br><span class="small">${esc(p.address)}</span><br><a target="_blank" href="${googleMapsDirectionsUrl(p)}" aria-label="Ouvrir l’itinéraire dans Google Maps">Itinéraire Google Maps</a></div></div>`);
    const item=mapList.lastElementChild;if(item)loadPointThumbnail(p,item,`[data-map-thumb-id="${p.id}"]`);
  });
 }
@@ -7253,7 +7253,7 @@ function renderMap(preserveViewport=false){
   markerById[p.id]=m;
   m.bindPopup(`<b>${esc(p.name)}</b><br>${esc(effectiveOpeningHours(p))}<br>${esc(p.price)}<br><a class="map-popup-route" target="_blank" rel="noopener" href="${googleMapsDirectionsUrl(p)}" aria-label="Ouvrir l’itinéraire vers ${esc(p.name)} dans Google Maps">🧭 Itinéraire Google Maps</a>`);
   bounds.push([p.lat,p.lng]);
-  mapList.insertAdjacentHTML("beforeend",`<div class="map-list-item map-list-item-with-thumb" data-point-id="${p.id}" role="button" tabindex="0"><div class="map-list-thumb" data-map-thumb-id="${p.id}"></div><div class="map-list-content"><div class="map-place-line"><span class="map-place-icon">${pointSmallIcon(p)}</span> <b>${esc(p.name)}</b></div><div class="map-visit-time">${esc(effectiveDay(p))} ${esc(state.timeOverrides[p.id]||p.plannedStart||"")}</div><div class="map-point-tools"><span class="map-nature-badge">${esc(natureLabel(p))}</span><a class="map-walk-icon" aria-label="Itinéraire à pied" target="_blank" href="${googleMapsDirectionsUrl(p)}" onclick="event.stopPropagation()">🚶</a></div></div></div>`);
+  mapList.insertAdjacentHTML("beforeend",`<div class="map-list-item map-list-item-with-thumb" data-point-id="${p.id}" role="button" tabindex="0"><div class="map-list-thumb" data-map-thumb-id="${p.id}"></div><div class="map-list-content"><span class="map-place-icon">${pointSmallIcon(p)}</span><div class="map-place-line"><b>${esc(p.name)}</b></div><div class="map-visit-time">${esc(effectiveDay(p))} ${esc(state.timeOverrides[p.id]||p.plannedStart||"")}</div><div class="map-point-tools"><span class="map-nature-badge">${esc(natureLabel(p))}</span></div></div><a class="map-walk-icon" aria-label="Itinéraire à pied" target="_blank" href="${googleMapsDirectionsUrl(p)}" onclick="event.stopPropagation()">🚶</a></div>`);
   const item=mapList.lastElementChild;if(item)loadPointThumbnail(p,item,`[data-map-thumb-id="${p.id}"]`);
  });
 
@@ -11121,6 +11121,143 @@ body.suivi-active header .stat span i{width:22px!important;height:22px!important
   #carte .map-list-thumb{width:72px!important;height:72px!important}
 }
 
+/* v327 — fiches Carte conformes au visuel : photo, icône, textes et marche séparés. */
+#carte .map-list{display:grid!important;gap:9px!important;margin-top:12px!important}
+#carte .map-list-item-with-thumb{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:90px minmax(0,1fr)!important;
+  grid-template-rows:minmax(110px,auto)!important;
+  align-items:center!important;
+  column-gap:8px!important;
+  min-height:128px!important;
+  margin:0!important;
+  padding:9px 38px 9px 10px!important;
+  border-radius:15px!important;
+  background:rgba(255,255,255,.93)!important;
+  box-shadow:0 3px 12px rgba(35,67,58,.06)!important;
+  box-sizing:border-box!important;
+}
+#carte .map-list-thumb{
+  grid-column:1!important;
+  grid-row:1!important;
+  align-self:center!important;
+  width:90px!important;
+  height:110px!important;
+  border-radius:11px!important;
+  box-shadow:0 3px 10px rgba(24,70,59,.14)!important;
+}
+#carte .map-list-content>.map-place-icon{
+  display:grid!important;
+  place-items:center!important;
+  width:28px!important;
+  height:28px!important;
+  margin:0 auto 3px!important;
+  padding:0!important;
+  font-size:23px!important;
+  line-height:1!important;
+}
+#carte .map-list-content>.map-place-icon>.nature-emoji,
+#carte .map-list-content>.map-place-icon>.nature-svg{
+  display:grid!important;
+  place-items:center!important;
+  width:25px!important;
+  height:25px!important;
+  min-width:25px!important;
+  max-width:25px!important;
+  max-height:25px!important;
+  margin:0!important;
+  font-size:22px!important;
+  line-height:1!important;
+  transform:none!important;
+}
+#carte .map-list-content{
+  grid-column:2!important;
+  grid-row:1!important;
+  align-self:center!important;
+  justify-self:stretch!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:108px!important;
+  padding:0!important;
+  text-align:center!important;
+}
+#carte .map-place-line{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  min-height:36px!important;
+  margin:0!important;
+  padding:0!important;
+}
+#carte .map-place-line::after{display:none!important;content:none!important}
+#carte .map-place-line>b{
+  display:block!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  color:#132f2a!important;
+  font-size:15.5px!important;
+  font-weight:900!important;
+  line-height:1.16!important;
+  text-align:center!important;
+  overflow-wrap:anywhere!important;
+}
+#carte .map-visit-time{
+  width:100%!important;
+  margin:3px 0 7px!important;
+  color:#176754!important;
+  font-size:12.5px!important;
+  font-weight:900!important;
+  line-height:1.1!important;
+  text-align:center!important;
+}
+#carte .map-point-tools{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  transform:none!important;
+}
+#carte .map-nature-badge{
+  min-height:27px!important;
+  padding:4px 12px!important;
+  font-size:11.5px!important;
+  line-height:1!important;
+  box-sizing:border-box!important;
+}
+#carte .map-list-item-with-thumb>.map-walk-icon{
+  position:absolute!important;
+  right:7px!important;
+  bottom:7px!important;
+  z-index:2!important;
+  display:grid!important;
+  place-items:center!important;
+  width:29px!important;
+  height:32px!important;
+  min-width:29px!important;
+  min-height:32px!important;
+  padding:0!important;
+  margin:0!important;
+  font-size:23px!important;
+  line-height:1!important;
+  text-decoration:none!important;
+  transform:none!important;
+}
+@media(max-width:390px){
+  #carte .map-list-item-with-thumb{grid-template-columns:88px minmax(0,1fr)!important;grid-template-rows:minmax(108px,auto)!important;column-gap:9px!important;min-height:126px!important;padding-left:9px!important;padding-right:36px!important}
+  #carte .map-list-thumb{width:88px!important;height:108px!important}
+  #carte .map-list-content>.map-place-icon{width:26px!important;height:26px!important;margin:0 auto 3px!important}
+  #carte .map-place-line>b{font-size:15px!important}
+}
+
 /* Les emojis de lieu ont désormais le même carré et la même ligne de base que les SVG. */
 .nature-emoji{
   display:inline-grid!important;
@@ -11160,7 +11297,7 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
 <script src="/vendor/supabase/supabase.js"></script>
 <script src="/shared-sync.js"></script>
 
-<script src="/header-prestige.js?v=326"></script>
+<script src="/header-prestige.js?v=327"></script>
 <script src="/cloud-backup.js?v=3"></script>
 <script>
 (async()=>{
@@ -11173,9 +11310,9 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
     replaceTrigger:true,
     triggerAriaLabel:'Ouvrir les sauvegardes',
     release:{
-      version:'guide-v326',
-      gitTag:'guide-v326-map-categories-and-hotel',
-      sourceZipUrl:'https://github.com/Wokgui/Guide-de-voyage/archive/refs/tags/guide-v326-map-categories-and-hotel.zip',
+      version:'guide-v327',
+      gitTag:'guide-v327-map-card-layout',
+      sourceZipUrl:'https://github.com/Wokgui/Guide-de-voyage/archive/refs/tags/guide-v327-map-card-layout.zip',
       deploymentUrl:'https://nord-7m4q9k2p.vercel.app/'
     },
     localExisted:true,
