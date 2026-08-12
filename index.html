@@ -17,7 +17,7 @@
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Copenhague" name="apple-mobile-web-app-title"/>
-<title>Copenhague &amp; Malmö — v340</title>
+<title>Copenhague &amp; Malmö — v341</title>
 <link href="/manifest.webmanifest" rel="manifest"/>
 <link href="/icons/app-icon.svg" rel="icon" type="image/svg+xml"/>
 <link href="/icons/app-icon-192.png" rel="apple-touch-icon"/>
@@ -5262,10 +5262,10 @@ body.backup-settings-open{overflow:hidden}
 <main>
 <section class="panel active" id="programme">
 <div class="quickbar">
-<a class="button hotel-walk-top top-shortcut-tile" id="airbnbWalkTop" href="#" target="_blank"><span class="tile-icon hotel-bed-icon">🛏️</span></a>
-<a class="button hotel-uber-top top-shortcut-tile" id="airbnbUberTop" href="#" target="_blank" rel="noopener" aria-label="Commander un Uber vers l’Airbnb"><span class="tile-icon uber-tile-icon" aria-hidden="true"><svg class="uber-logo-svg" viewBox="0 0 72 30"><rect x="1" y="1" width="70" height="28" rx="8" fill="#000"/><text x="36" y="20.5" text-anchor="middle" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="800" letter-spacing="0.8">UBER</text></svg></span></a>
-<a class="button maps top-shortcut-tile" href="https://www.google.com/maps/search/?api=1&amp;query=cafe+bakery+open+now+near+me" target="_blank"><span class="tile-icon">☕</span></a>
-<a class="button maps top-shortcut-tile" href="https://www.google.com/maps/search/?api=1&amp;query=restaurants+snacks+open+now+near+me" target="_blank"><span class="tile-icon">🍽️</span><span class="tile-label">Restaurants ouverts</span></a>
+<a class="button hotel-walk-top top-shortcut-tile" id="airbnbWalkTop" href="#" target="_blank" aria-label="Itinéraire vers le logement"><span class="tile-icon hotel-bed-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 18v-7m18 7v-5a2 2 0 0 0-2-2H9a3 3 0 0 0-3 3v4m-3-3h18M7 11V8h4a2 2 0 0 1 2 2v1"/></svg></span><span class="tile-label">Logement</span></a>
+<a class="button hotel-uber-top top-shortcut-tile" id="airbnbUberTop" href="#" target="_blank" rel="noopener" aria-label="Commander un Uber vers l’Airbnb"><span class="tile-icon uber-tile-icon" aria-hidden="true"><svg class="uber-logo-svg" viewBox="0 0 72 30"><rect x="1" y="1" width="70" height="28" rx="8" fill="#000"/><text x="36" y="20.5" text-anchor="middle" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="800" letter-spacing="0.8">UBER</text></svg></span><span class="tile-label">Uber</span></a>
+<a class="button maps top-shortcut-tile" href="https://www.google.com/maps/search/?api=1&amp;query=cafe+bakery+open+now+near+me" target="_blank" aria-label="Chercher un café ouvert"><span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8h13v7a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8Zm13 2h1.5a2.5 2.5 0 0 1 0 5H17M7 3v2m4-2v2m4-2v2"/></svg></span><span class="tile-label">Café</span></a>
+<a class="button maps top-shortcut-tile" href="https://www.google.com/maps/search/?api=1&amp;query=restaurants+snacks+open+now+near+me" target="_blank" aria-label="Chercher un restaurant ouvert"><span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3v8m-3-8v5a3 3 0 0 0 6 0V3M7 11v10m9-18v18m0-18c3 2 4 5 4 8h-4"/></svg></span><span class="tile-label">Restaurant</span></a>
 </div>
 <div class="history-actions" aria-label="Historique des actions">
 <div class="controls" id="dayButtons"></div>
@@ -6845,7 +6845,7 @@ function renderProgramme(){
      <div class="summary-title-tools ${rs==="yes"?"has-reservation":"no-reservation"}">
       <div class="summary-line"><span class="mini-badge nature">${natureIcon} ${esc(pointNature)}</span>${rs==="yes"?'<span class="mini-badge booking reserved">📅 Réservé</span>':""}</div>
       <div class="summary-line">
-        <button class="map-title-button summary-point-map" type="button" aria-label="Ouvrir la carte de ${esc(p.name)}">📍</button>
+        <button class="map-title-button summary-point-map" type="button" aria-label="Ouvrir la carte de ${esc(p.name)}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/></svg></button>
         <span class="summary-visit-duration"><span class="visit-duration-icon" aria-hidden="true">◷</span>${state.durationOverrides[p.id]||p.durationMins} min</span>
         <span class="summary-walk-duration">🚶 ${route.mins} min</span>
       </div>
@@ -11153,6 +11153,385 @@ body.suivi-active header .stat span i{width:22px!important;height:22px!important
 }
 </style>
 
+<style id="v341-raccourcis-ruban-et-visites-harmonieuses">
+/* Les quatre fonctions restent à leur emplacement historique, au-dessus du choix du jour. */
+#programme .quickbar{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:0!important;
+  width:100%!important;
+  margin:0 0 8px!important;
+  padding:0!important;
+  overflow:hidden!important;
+  border:1px solid #cfddd7!important;
+  border-radius:13px!important;
+  background:#fffef9!important;
+  box-shadow:0 4px 12px rgba(20,66,56,.08)!important;
+}
+#programme .quickbar>.top-shortcut-tile,
+#programme .quickbar>.hotel-walk-top.top-shortcut-tile,
+#programme .quickbar>:nth-child(2){
+  box-sizing:border-box!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:3px!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:50px!important;
+  min-height:50px!important;
+  margin:0!important;
+  padding:5px 2px!important;
+  border:0!important;
+  border-right:1px solid #d8e3df!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:#145b4e!important;
+  box-shadow:none!important;
+  text-decoration:none!important;
+}
+#programme .quickbar>.top-shortcut-tile:last-child{border-right:0!important}
+#programme .quickbar>#airbnbUberTop{background:transparent!important}
+#programme .quickbar .tile-icon,
+#programme .quickbar .hotel-bed-icon{
+  display:grid!important;
+  place-items:center!important;
+  width:21px!important;
+  height:21px!important;
+  min-width:21px!important;
+  margin:0!important;
+  padding:0!important;
+  font-size:0!important;
+  line-height:1!important;
+  color:#147565!important;
+}
+#programme .quickbar .tile-icon>svg:not(.uber-logo-svg){
+  width:21px!important;
+  height:21px!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:1.8!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+#programme .quickbar .uber-tile-icon{width:34px!important;height:17px!important}
+#programme .quickbar .uber-logo-svg{width:34px!important;height:17px!important}
+#programme .quickbar .tile-label{
+  display:block!important;
+  max-width:100%!important;
+  margin:0!important;
+  overflow:hidden!important;
+  color:#214f46!important;
+  font-size:10.5px!important;
+  font-weight:850!important;
+  line-height:1.05!important;
+  text-align:center!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+/* Carte repliée inspirée de la maquette validée : chaque information a sa propre ligne. */
+#programme .visit-details:not([open]) .visit-summary{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:108px minmax(0,1fr) 12px!important;
+  align-items:center!important;
+  gap:8px!important;
+  min-height:142px!important;
+  padding:8px!important;
+  overflow:hidden!important;
+}
+#programme .visit-details:not([open]) .visit-summary-thumb{
+  grid-column:1!important;
+  grid-row:1!important;
+  align-self:center!important;
+  width:108px!important;
+  min-width:108px!important;
+  max-width:108px!important;
+  height:126px!important;
+  min-height:126px!important;
+  border-radius:13px!important;
+}
+#programme .visit-details:not([open]) .visit-summary .summary-main{
+  grid-column:2!important;
+  grid-row:1!important;
+  align-self:stretch!important;
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-areas:
+    "title time"
+    "tools tools"
+    "action action"
+    "meta meta"!important;
+  grid-template-rows:auto 1fr auto auto!important;
+  gap:4px 7px!important;
+  width:100%!important;
+  min-width:0!important;
+  height:auto!important;
+  min-height:126px!important;
+  margin:0!important;
+  padding:0!important;
+  position:relative!important;
+  overflow:visible!important;
+}
+#programme .visit-details:not([open]) .summary-title-row{display:contents!important}
+#programme .visit-details:not([open]) .visit-summary .summary-title,
+#programme .visit-details:not([open]) .visit-summary .summary-title.cph-program-meta-fixed{
+  grid-area:title!important;
+  align-self:start!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  grid-template-rows:auto auto!important;
+  gap:2px!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:auto!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  position:static!important;
+  overflow:visible!important;
+  text-align:left!important;
+}
+#programme .visit-details:not([open]) .visit-summary .summary-title-name{
+  display:block!important;
+  grid-row:1!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+  position:static!important;
+  overflow:visible!important;
+  font-size:14px!important;
+  font-weight:900!important;
+  line-height:1.12!important;
+  text-align:left!important;
+  text-overflow:clip!important;
+  white-space:normal!important;
+}
+#programme .visit-details:not([open]) .visit-summary .title-stars,
+#programme .visit-details:not([open]) .visit-summary .cph-stars{
+  display:block!important;
+  grid-row:2!important;
+  justify-self:start!important;
+  align-self:start!important;
+  width:max-content!important;
+  min-width:0!important;
+  max-width:100%!important;
+  height:auto!important;
+  margin:0!important;
+  padding:0!important;
+  position:static!important;
+  color:#aa7900!important;
+  font-size:15px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  letter-spacing:1px!important;
+  text-align:left!important;
+  transform:none!important;
+  white-space:nowrap!important;
+}
+#programme .visit-details:not([open]) .visit-summary .summary-top-time{
+  grid-area:time!important;
+  align-self:start!important;
+  justify-self:end!important;
+  display:block!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:auto!important;
+  margin:0!important;
+  padding:0!important;
+  position:static!important;
+  color:#075b4d!important;
+  font-size:16px!important;
+  font-weight:950!important;
+  line-height:1.12!important;
+  text-align:right!important;
+  transform:none!important;
+  white-space:nowrap!important;
+}
+#programme .visit-details:not([open]) .summary-title-tools,
+#programme .visit-details:not([open]) .summary-title-tools.no-reservation,
+#programme .visit-details:not([open]) .summary-title-tools.has-reservation{
+  grid-area:tools!important;
+  align-self:center!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  grid-template-rows:auto auto!important;
+  gap:7px!important;
+  width:100%!important;
+  min-width:0!important;
+  height:auto!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  position:static!important;
+  overflow:visible!important;
+  transform:none!important;
+}
+#programme .visit-details:not([open]) .summary-title-tools .summary-line:first-child,
+#programme .visit-details:not([open]) .summary-title-tools .summary-line:first-child.reservation-below{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:5px!important;
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  position:static!important;
+  transform:none!important;
+}
+#programme .visit-details:not([open]) .summary-title-tools .mini-badge.nature{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:5px!important;
+  width:auto!important;
+  max-width:100%!important;
+  min-height:0!important;
+  height:auto!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:#58736a!important;
+  font-size:12px!important;
+  font-weight:750!important;
+  line-height:1.2!important;
+}
+#programme .visit-details:not([open]) .summary-title-tools .summary-line:nth-child(2){
+  display:grid!important;
+  grid-template-columns:auto 1fr 1fr!important;
+  align-items:center!important;
+  justify-items:center!important;
+  gap:7px!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  position:static!important;
+}
+#programme .visit-details:not([open]) .summary-point-map,
+#programme .visit-details:not([open]) .summary-visit-duration,
+#programme .visit-details:not([open]) .summary-walk-duration{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:3px!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  position:static!important;
+  color:#58736a!important;
+  font-size:10.5px!important;
+  font-weight:700!important;
+  line-height:1.15!important;
+  text-align:center!important;
+  transform:none!important;
+  white-space:nowrap!important;
+}
+#programme .visit-details:not([open]) .summary-point-map{
+  color:#075b4d!important;
+  font-size:0!important;
+  font-weight:900!important;
+  background:transparent!important;
+  border:0!important;
+}
+#programme .visit-details:not([open]) .summary-title-tools .summary-line:nth-child(2)>.summary-point-map{
+  box-sizing:border-box!important;
+  width:58px!important;
+  min-width:58px!important;
+  max-width:58px!important;
+  height:24px!important;
+  min-height:24px!important;
+  overflow:visible!important;
+}
+#programme .visit-details:not([open]) .summary-point-map>svg{width:17px!important;height:17px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.9!important}
+#programme .visit-details:not([open]) .summary-point-map::after{content:"Carte";font-size:11.5px!important}
+#programme .visit-details:not([open]) .visit-summary .go-now-summary{
+  grid-area:action!important;
+  align-self:end!important;
+  justify-self:center!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  width:clamp(118px,72%,145px)!important;
+  min-width:118px!important;
+  max-width:145px!important;
+  height:35px!important;
+  min-height:35px!important;
+  margin:0 auto!important;
+  padding:5px 10px!important;
+  position:relative!important;
+  left:auto!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:auto!important;
+  border-radius:10px!important;
+  font-size:0!important;
+  text-indent:0!important;
+  transform:none!important;
+}
+#programme .visit-details:not([open]) .visit-summary .go-now-summary::before{
+  content:"➤"!important;
+  display:inline-block!important;
+  position:static!important;
+  color:#fff!important;
+  font-size:15px!important;
+  line-height:1!important;
+  transform:rotate(-38deg)!important;
+}
+#programme .visit-details:not([open]) .visit-summary .go-now-summary::after{
+  content:"J’y vais"!important;
+  display:inline-block!important;
+  width:auto!important;
+  height:auto!important;
+  margin:0!important;
+  padding:0!important;
+  position:static!important;
+  inset:auto!important;
+  color:#fff!important;
+  font-size:11.5px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  text-align:center!important;
+  transform:none!important;
+}
+#programme .visit-details:not([open]) .summary-meta:not(:has(> :nth-child(2))){display:none!important}
+#programme .visit-details:not([open]) .visit-summary .chevron{
+  grid-column:3!important;
+  grid-row:1!important;
+  align-self:end!important;
+  justify-self:end!important;
+  margin:0 0 2px!important;
+  position:static!important;
+  font-size:16px!important;
+  transform:none!important;
+}
+@media(max-width:390px){
+  #programme .visit-details:not([open]) .visit-summary{grid-template-columns:100px minmax(0,1fr) 11px!important;gap:7px!important;min-height:137px!important;padding:7px!important}
+  #programme .visit-details:not([open]) .visit-summary-thumb{width:100px!important;min-width:100px!important;max-width:100px!important;height:123px!important;min-height:123px!important}
+  #programme .visit-details:not([open]) .visit-summary .summary-main{min-height:123px!important}
+  #programme .visit-details:not([open]) .visit-summary .summary-title-name{font-size:13.5px!important}
+  #programme .visit-details:not([open]) .visit-summary .summary-top-time{font-size:15px!important}
+  #programme .visit-details:not([open]) .summary-title-tools .summary-line:nth-child(2){gap:4px!important}
+  #programme .visit-details:not([open]) .summary-visit-duration,
+  #programme .visit-details:not([open]) .summary-walk-duration{font-size:9.8px!important}
+}
+</style>
+
 <script id="v308-pwa-service-worker">
 if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost"||location.hostname==="127.0.0.1")){
   window.addEventListener("load",()=>{
@@ -11163,7 +11542,7 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
 <script src="/vendor/supabase/supabase.js"></script>
 <script src="/shared-sync.js"></script>
 
-<script src="/header-prestige.js?v=340"></script>
+<script src="/header-prestige.js?v=341"></script>
 <script src="/cloud-backup.js?v=3"></script>
 <script>
 (async()=>{
@@ -11176,9 +11555,9 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
     replaceTrigger:true,
     triggerAriaLabel:'Ouvrir les sauvegardes',
     release:{
-      version:'guide-v340',
-      gitTag:'guide-v340-optical-card-balance',
-      sourceZipUrl:'https://github.com/Wokgui/Guide-de-voyage/archive/refs/tags/guide-v340-optical-card-balance.zip',
+      version:'guide-v341',
+      gitTag:'guide-v341-programme-ribbon-cards',
+      sourceZipUrl:'https://github.com/Wokgui/Guide-de-voyage/archive/refs/tags/guide-v341-programme-ribbon-cards.zip',
       deploymentUrl:'https://nord-7m4q9k2p.vercel.app/'
     },
     localExisted:true,
