@@ -6,7 +6,7 @@
       "has": [
         {"type": "query", "key": "v", "value": "3"}
       ],
-      "destination": "/cloud-backup-loader.js",
+      "destination": "/cloud-backup-loader.js?v=4",
       "permanent": false
     },
     {
@@ -56,6 +56,18 @@
     },
     {
       "source": "/ui-fixes-v7.js",
+      "headers": [
+        {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}
+      ]
+    },
+    {
+      "source": "/cloud-backup-loader.js",
+      "headers": [
+        {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}
+      ]
+    },
+    {
+      "source": "/day-style-v1.js",
       "headers": [
         {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}
       ]
