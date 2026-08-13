@@ -1,9 +1,9 @@
 (function(){
 "use strict";
-["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12","__cphUiFixesStableV13","__cphUiFixesStableV14","__cphUiFixesStableV15","__cphUiFixesStableV16","__cphUiFixesStableV17","__cphUiFixesStableV18","__cphUiFixesStableV19","__cphUiFixesStableV20","__cphUiFixesStableV21","__cphUiFixesStableV22","__cphUiFixesStableV23","__cphUiFixesStableV24","__cphUiFixesStableV25","__cphUiFixesStableV26","__cphUiFixesStableV27","__cphUiFixesStableV28","__cphUiFixesStableV29"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
-const GLOBAL_KEY="__cphUiFixesStableV29";
-const STYLE_ID="cph-ui-fixes-v29";
-["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11","cph-ui-fixes-v12","cph-ui-fixes-v13","cph-ui-fixes-v14","cph-ui-fixes-v15","cph-ui-fixes-v16","cph-ui-fixes-v17","cph-ui-fixes-v18","cph-ui-fixes-v19","cph-ui-fixes-v20","cph-ui-fixes-v21","cph-ui-fixes-v22","cph-ui-fixes-v23","cph-ui-fixes-v24","cph-ui-fixes-v25","cph-ui-fixes-v26","cph-ui-fixes-v27","cph-ui-fixes-v28",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
+["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12","__cphUiFixesStableV13","__cphUiFixesStableV14","__cphUiFixesStableV15","__cphUiFixesStableV16","__cphUiFixesStableV17","__cphUiFixesStableV18","__cphUiFixesStableV19","__cphUiFixesStableV20","__cphUiFixesStableV21","__cphUiFixesStableV22","__cphUiFixesStableV23","__cphUiFixesStableV24","__cphUiFixesStableV25","__cphUiFixesStableV26","__cphUiFixesStableV27","__cphUiFixesStableV28","__cphUiFixesStableV29","__cphUiFixesStableV30"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
+const GLOBAL_KEY="__cphUiFixesStableV30";
+const STYLE_ID="cph-ui-fixes-v30";
+["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11","cph-ui-fixes-v12","cph-ui-fixes-v13","cph-ui-fixes-v14","cph-ui-fixes-v15","cph-ui-fixes-v16","cph-ui-fixes-v17","cph-ui-fixes-v18","cph-ui-fixes-v19","cph-ui-fixes-v20","cph-ui-fixes-v21","cph-ui-fixes-v22","cph-ui-fixes-v23","cph-ui-fixes-v24","cph-ui-fixes-v25","cph-ui-fixes-v26","cph-ui-fixes-v27","cph-ui-fixes-v28","cph-ui-fixes-v29",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
 let observer=null,scheduled=false;
 const norm=e=>(e&&e.textContent||"").replace(/\s+/g," ").trim();
 function important(el,name,value){if(el)el.style.setProperty(name,value,"important")}
@@ -154,6 +154,8 @@ html body #programme .visit-details:not([open]) .summary-title-tools .cph-reserv
  font-size:0!important;
  line-height:1!important;
  overflow:visible!important;
+ transform:translateY(-1px)!important;
+ transform-origin:center!important;
 }
 html body #programme .visit-details:not([open]) .summary-title-tools .cph-reserved-one>.cph-reserved-date-icon{
  display:block!important;
