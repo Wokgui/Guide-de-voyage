@@ -1,118 +1,66 @@
 (function(){
 "use strict";
-const STYLE_ID="cph-day-style-v3";
-const PALETTE={
- lundi:{bg:"#f8e9df",border:"#d7aa8d",ink:"#6d4937"},
- mardi:{bg:"#f7e8d8",border:"#d6a677",ink:"#6f4a2c"},
- mercredi:{bg:"#e7f0df",border:"#a9c392",ink:"#3f6240"},
- jeudi:{bg:"#e4eef7",border:"#9dbbd2",ink:"#355d78"},
- vendredi:{bg:"#eee5f5",border:"#bba5d2",ink:"#634a7c"},
- samedi:{bg:"#f7ead9",border:"#d8b27c",ink:"#75532f"},
- dimanche:{bg:"#f3e5e8",border:"#d4a8b0",ink:"#744e57"}
-};
-const norm=e=>(e&&e.textContent||"").replace(/\s+/g," ").trim();
-const dayRx=/^(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\b/i;
-function addStyle(){
- ["cph-day-style-v1","cph-day-style-v2"].forEach(id=>document.getElementById(id)?.remove());
- if(document.getElementById(STYLE_ID))return;
- const s=document.createElement("style");
- s.id=STYLE_ID;
- s.textContent=`
-#programme .cph-day-card-v3{
+if(window.__cphDayStyleV4)return;
+window.__cphDayStyleV4=true;
+["cph-day-style-v1","cph-day-style-v2","cph-day-style-v3","cph-day-style-v4"].forEach(id=>document.getElementById(id)?.remove());
+const s=document.createElement("style");
+s.id="cph-day-style-v4";
+s.textContent=`
+/* Style validé : grand cadre coloré + en-tête teinté collé aux 3 bords. */
+#programme .day-section{
+ --cph-day-bg:#f7e8d8;
+ --cph-day-border:#d6a677;
+ --cph-day-ink:#6f4a2c;
  box-sizing:border-box!important;
- border:1.5px solid var(--cph-day-border)!important;
- border-radius:18px!important;
+ position:relative!important;
  overflow:hidden!important;
- background:rgba(255,255,255,.58)!important;
+ padding:0!important;
+ border:1.5px solid var(--cph-day-border)!important;
+ border-left:1.5px solid var(--cph-day-border)!important;
+ border-radius:18px!important;
+ background:#fff!important;
+ box-shadow:0 6px 18px color-mix(in srgb,var(--cph-day-border) 13%,transparent)!important;
 }
-#programme .cph-day-header-v3{
+#programme .day-section::before{content:none!important;display:none!important}
+#programme .day-section:has(.day-Lundi){--cph-day-bg:#f8e9df;--cph-day-border:#d7aa8d;--cph-day-ink:#6d4937}
+#programme .day-section:has(.day-Mardi){--cph-day-bg:#f7e8d8;--cph-day-border:#d6a677;--cph-day-ink:#6f4a2c}
+#programme .day-section:has(.day-Mercredi){--cph-day-bg:#e7f0df;--cph-day-border:#a9c392;--cph-day-ink:#3f6240}
+#programme .day-section:has(.day-Jeudi){--cph-day-bg:#e4eef7;--cph-day-border:#9dbbd2;--cph-day-ink:#355d78}
+#programme .day-section:has(.day-Vendredi){--cph-day-bg:#eee5f5;--cph-day-border:#bba5d2;--cph-day-ink:#634a7c}
+#programme .day-section:has(.day-Samedi){--cph-day-bg:#f7ead9;--cph-day-border:#d8b27c;--cph-day-ink:#75532f}
+#programme .day-section:has(.day-Dimanche){--cph-day-bg:#f3e5e8;--cph-day-border:#d4a8b0;--cph-day-ink:#744e57}
+#programme .day-section>.day-banner,
+#programme .day-section .day-banner{
  box-sizing:border-box!important;
- background:var(--cph-day-bg)!important;
- color:var(--cph-day-ink)!important;
+ width:100%!important;
+ max-width:none!important;
+ margin:0!important;
+ margin-top:0!important;
+ margin-left:0!important;
+ margin-right:0!important;
  border:0!important;
  border-bottom:1px solid color-mix(in srgb,var(--cph-day-border) 58%,transparent)!important;
  border-radius:17px 17px 0 0!important;
+ background:var(--cph-day-bg)!important;
+ color:var(--cph-day-ink)!important;
  box-shadow:none!important;
- position:relative!important;
- z-index:2!important;
 }
-#programme .cph-day-header-v3 .cph-day-title-v3{color:var(--cph-day-ink)!important}
-#programme .cph-day-header-v3 .cph-day-departure-v3{background:rgba(255,255,255,.78)!important;color:var(--cph-day-ink)!important}
+#programme .day-section .day-banner *{color:inherit}
+#programme .day-section .day-body{
+ box-sizing:border-box!important;
+ margin:0!important;
+ padding:7px!important;
+ background:#fff!important;
+}
 `;
- document.head.appendChild(s);
-}
-function leafDays(root){
- return Array.from(root.querySelectorAll("span,div,strong,b,h2,h3,h4"))
-  .filter(el=>dayRx.test(norm(el))&&norm(el).length<70)
-  .filter(el=>!Array.from(el.children).some(c=>dayRx.test(norm(c))&&norm(c).length<70));
-}
-function visits(el){return Math.max(el?.querySelectorAll?.(".visit-details").length||0,el?.querySelectorAll?.(".visit-summary").length||0)}
-function containsOtherDay(el,current,days){return days.some(d=>d!==current&&el.contains(d))}
-function findOuterDayCard(dayEl,days,root){
- let n=dayEl,best=null;
- while(n&&n!==root&&n!==document.body){
-  if(visits(n)>0&&!containsOtherDay(n,dayEl,days))best=n;
-  const p=n.parentElement;
-  if(!p||p===root||containsOtherDay(p,dayEl,days))break;
-  n=p;
- }
- return best;
-}
-function departureLeaf(card){
- return Array.from(card.querySelectorAll("span,div,p,strong,b,small,button,label"))
-  .filter(el=>/départ\s+prévu/i.test(norm(el))&&norm(el).length<110)
-  .sort((a,b)=>a.children.length-b.children.length||norm(a).length-norm(b).length)[0]||null;
-}
-function lca(a,b,limit){
- const set=new Set();let n=a;
- while(n){set.add(n);if(n===limit)break;n=n.parentElement}
- n=b;while(n){if(set.has(n))return n;if(n===limit)break;n=n.parentElement}
- return null;
-}
-function findHeader(card,dayEl,dep){
- let h=lca(dayEl,dep,card);
- if(!h||h===card)return null;
- while(h.parentElement&&h.parentElement!==card&&visits(h.parentElement)===0)h=h.parentElement;
- return h;
-}
-function clearLegacy(){
- document.querySelectorAll("#programme .cph-day-card-v1,#programme .cph-day-card-v2").forEach(e=>e.classList.remove("cph-day-card-v1","cph-day-card-v2"));
- document.querySelectorAll("#programme .cph-day-header-v1,#programme .cph-day-header-v2").forEach(e=>e.classList.remove("cph-day-header-v1","cph-day-header-v2"));
- document.querySelectorAll("#programme .cph-day-title-v3,#programme .cph-day-departure-v3").forEach(e=>e.classList.remove("cph-day-title-v3","cph-day-departure-v3"));
-}
-function flush(card,header){
- ["margin-left","margin-right","margin-top","width","max-width"].forEach(p=>header.style.removeProperty(p));
- const cr=card.getBoundingClientRect(),hr=header.getBoundingClientRect();
- if(!cr.width||!hr.width)return;
- const left=Math.max(0,hr.left-cr.left);
- const right=Math.max(0,cr.right-hr.right);
- const top=Math.max(0,hr.top-cr.top);
- header.style.setProperty("margin-left",`${-left}px`,"important");
- header.style.setProperty("margin-right",`${-right}px`,"important");
- header.style.setProperty("margin-top",`${-top}px`,"important");
- header.style.setProperty("width",`calc(100% + ${left+right}px)`,"important");
- header.style.setProperty("max-width","none","important");
-}
-function apply(){
- const root=document.getElementById("programme");if(!root)return;
- addStyle();clearLegacy();
- const days=leafDays(root),seen=new Set();
- days.forEach(dayEl=>{
-  const card=findOuterDayCard(dayEl,days,root);if(!card||seen.has(card))return;
-  const dep=departureLeaf(card);if(!dep)return;
-  const header=findHeader(card,dayEl,dep);if(!header||visits(header)>0)return;
-  const key=(norm(dayEl).toLowerCase().match(dayRx)||[])[1];
-  const p=PALETTE[key]||PALETTE.mardi;
-  card.classList.add("cph-day-card-v3");header.classList.add("cph-day-header-v3");
-  dayEl.classList.add("cph-day-title-v3");dep.classList.add("cph-day-departure-v3");
-  card.style.setProperty("--cph-day-bg",p.bg);card.style.setProperty("--cph-day-border",p.border);card.style.setProperty("--cph-day-ink",p.ink);
-  flush(card,header);seen.add(card);
+document.head.appendChild(s);
+/* Nettoie les marges inline laissées par les essais précédents. */
+function clean(){
+ document.querySelectorAll("#programme .day-banner").forEach(h=>{
+  ["margin-left","margin-right","margin-top","width","max-width"].forEach(p=>h.style.removeProperty(p));
  });
- document.documentElement.dataset.cphDayStyle=`v3-${seen.size}`;
+ document.documentElement.dataset.cphDayStyle="v4-direct";
 }
-let timer=0;const schedule=()=>{clearTimeout(timer);timer=setTimeout(()=>requestAnimationFrame(apply),45)};
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",schedule,{once:true});else schedule();
-[120,300,700,1400,2600,4200].forEach(ms=>setTimeout(schedule,ms));
-window.addEventListener("resize",schedule,{passive:true});
-new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true});
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",clean,{once:true});else clean();
+[150,500,1200,2500].forEach(ms=>setTimeout(clean,ms));
 })();
