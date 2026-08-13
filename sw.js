@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v343-static-v28";
-const RUNTIME_CACHE="copenhague-v343-runtime-v28";
+const STATIC_CACHE="copenhague-v343-static-v29";
+const RUNTIME_CACHE="copenhague-v343-runtime-v29";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -10,8 +10,8 @@ const STATIC_FILES=[
   "/day-style-v1.js?v=5",
   "/manifest.webmanifest",
   "/icons/app-icon.svg",
-  "/icons/app-icon-192.png",
-  "/icons/app-icon-512.png",
+  "/icons/app-icon-192.png?v=2",
+  "/icons/app-icon-512.png?v=2",
   "/vendor/leaflet/leaflet.css",
   "/vendor/leaflet/leaflet.js",
   "/vendor/supabase/supabase.js",
