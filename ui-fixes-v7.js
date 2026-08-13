@@ -1,9 +1,9 @@
 (function(){
 "use strict";
-["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12","__cphUiFixesStableV13","__cphUiFixesStableV14","__cphUiFixesStableV15","__cphUiFixesStableV16","__cphUiFixesStableV17","__cphUiFixesStableV18","__cphUiFixesStableV19","__cphUiFixesStableV20","__cphUiFixesStableV21","__cphUiFixesStableV22","__cphUiFixesStableV23","__cphUiFixesStableV24","__cphUiFixesStableV25","__cphUiFixesStableV26","__cphUiFixesStableV27","__cphUiFixesStableV28"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
-const GLOBAL_KEY="__cphUiFixesStableV28";
-const STYLE_ID="cph-ui-fixes-v28";
-["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11","cph-ui-fixes-v12","cph-ui-fixes-v13","cph-ui-fixes-v14","cph-ui-fixes-v15","cph-ui-fixes-v16","cph-ui-fixes-v17","cph-ui-fixes-v18","cph-ui-fixes-v19","cph-ui-fixes-v20","cph-ui-fixes-v21","cph-ui-fixes-v22","cph-ui-fixes-v23","cph-ui-fixes-v24","cph-ui-fixes-v25","cph-ui-fixes-v26","cph-ui-fixes-v27",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
+["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12","__cphUiFixesStableV13","__cphUiFixesStableV14","__cphUiFixesStableV15","__cphUiFixesStableV16","__cphUiFixesStableV17","__cphUiFixesStableV18","__cphUiFixesStableV19","__cphUiFixesStableV20","__cphUiFixesStableV21","__cphUiFixesStableV22","__cphUiFixesStableV23","__cphUiFixesStableV24","__cphUiFixesStableV25","__cphUiFixesStableV26","__cphUiFixesStableV27","__cphUiFixesStableV28","__cphUiFixesStableV29"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
+const GLOBAL_KEY="__cphUiFixesStableV29";
+const STYLE_ID="cph-ui-fixes-v29";
+["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11","cph-ui-fixes-v12","cph-ui-fixes-v13","cph-ui-fixes-v14","cph-ui-fixes-v15","cph-ui-fixes-v16","cph-ui-fixes-v17","cph-ui-fixes-v18","cph-ui-fixes-v19","cph-ui-fixes-v20","cph-ui-fixes-v21","cph-ui-fixes-v22","cph-ui-fixes-v23","cph-ui-fixes-v24","cph-ui-fixes-v25","cph-ui-fixes-v26","cph-ui-fixes-v27","cph-ui-fixes-v28",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
 let observer=null,scheduled=false;
 const norm=e=>(e&&e.textContent||"").replace(/\s+/g," ").trim();
 function important(el,name,value){if(el)el.style.setProperty(name,value,"important")}
@@ -151,8 +151,15 @@ html body #programme .visit-details:not([open]) .summary-title-tools .cph-reserv
  border-radius:0!important;
  background:transparent!important;
  box-shadow:none!important;
- font-size:15px!important;
+ font-size:0!important;
  line-height:1!important;
+ overflow:visible!important;
+}
+html body #programme .visit-details:not([open]) .summary-title-tools .cph-reserved-one>.cph-reserved-date-icon{
+ display:block!important;
+ width:17px!important;
+ height:17px!important;
+ overflow:visible!important;
 }
 
 `;
@@ -268,7 +275,7 @@ function normalizeReservations(){
   if(!one){
    one=document.createElement("span");
    one.className="cph-reserved-one";
-   one.textContent="📅";
+   one.innerHTML='<svg class="cph-reserved-date-icon" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><rect x="1" y="2.5" width="16" height="14.5" rx="3.2" fill="#d98218"/><path d="M1 7h16" stroke="#fff" stroke-width="1.45"/><path d="M5 1.5v3.4M13 1.5v3.4" stroke="#d98218" stroke-width="2" stroke-linecap="round"/><text x="9" y="14.2" text-anchor="middle" font-family="Arial, sans-serif" font-size="7.2" font-weight="700" fill="#fff">31</text></svg>';
    one.setAttribute("aria-label","Réservé");
    one.setAttribute("title","Réservé");
    const nature=summary.querySelector(".summary-title-tools .summary-line:first-child .mini-badge.nature")||summary.querySelector(".mini-badge.nature");
