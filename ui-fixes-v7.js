@@ -1,9 +1,8 @@
 (function(){
 "use strict";
-const STYLE_ID="cph-ui-fixes-v8";
+const STYLE_ID="cph-ui-fixes-v9";
 function addStyles(){
- const old=document.getElementById("cph-ui-fixes-v7");
- if(old)old.remove();
+ ["cph-ui-fixes-v7","cph-ui-fixes-v8"].forEach(id=>document.getElementById(id)?.remove());
  if(document.getElementById(STYLE_ID))return;
  const s=document.createElement("style");
  s.id=STYLE_ID;
@@ -18,12 +17,13 @@ function addStyles(){
 #programme .mini-badge.booking.reserved.cph-reserved-simple>*{display:none!important}
 #programme .mini-badge.booking.reserved.cph-reserved-simple::before{content:"📅"!important;display:block!important;font-size:15px!important;line-height:1!important;margin:0!important;padding:0!important}
 #programme .mini-badge.booking.reserved.cph-reserved-simple::after{content:none!important;display:none!important}
-/* Ligne Programme : réglages déjà validés. */
-#programme .history-actions{grid-template-columns:minmax(0,1fr) 48px 48px minmax(0,1fr)!important;gap:5px!important;align-items:center!important}
-#programme .history-actions>#dayButtons,#programme .history-actions>.compact-hide-done{box-sizing:border-box!important;width:100%!important;height:42px!important;min-height:42px!important;max-height:42px!important;margin:0!important}
-#programme .history-actions .day-select,#programme .history-actions .day-select-label,#programme .history-actions>.compact-hide-done{box-sizing:border-box!important;height:42px!important;min-height:42px!important;max-height:42px!important;font-size:13px!important;font-weight:850!important;line-height:1.05!important}
+/* Barre Programme : quatre tuiles de même hauteur ; les deux tuiles texte de même largeur. */
+#programme .history-actions{grid-template-columns:minmax(0,1fr) 52px 52px minmax(0,1fr)!important;gap:5px!important;align-items:center!important}
+#programme .history-actions>#dayButtons,#programme .history-actions>.compact-hide-done,#programme .history-actions>#undoActionBtn,#programme .history-actions>#redoActionBtn{box-sizing:border-box!important;height:36px!important;min-height:36px!important;max-height:36px!important;margin:0!important;align-self:center!important}
+#programme .history-actions>#dayButtons,#programme .history-actions>.compact-hide-done{width:100%!important;min-width:0!important;max-width:none!important;overflow:hidden!important}
+#programme .history-actions .day-select,#programme .history-actions .day-select-label,#programme .history-actions>.compact-hide-done{box-sizing:border-box!important;height:36px!important;min-height:36px!important;max-height:36px!important;font-size:14px!important;font-weight:850!important;line-height:1!important}
 #programme .history-actions .day-select-label,#programme .history-actions>.compact-hide-done{display:flex!important;align-items:center!important;justify-content:center!important;padding:0 5px!important;text-align:center!important}
-#programme .history-actions>#undoActionBtn,#programme .history-actions>#redoActionBtn{box-sizing:border-box!important;width:48px!important;min-width:48px!important;max-width:48px!important;height:42px!important;min-height:42px!important;max-height:42px!important;margin:0!important;padding:0!important;border-radius:10px!important;font-size:23px!important;line-height:1!important;touch-action:manipulation!important}
+#programme .history-actions>#undoActionBtn,#programme .history-actions>#redoActionBtn{width:52px!important;min-width:52px!important;max-width:52px!important;padding:0!important;border-radius:10px!important;font-size:25px!important;line-height:1!important;touch-action:manipulation!important}
 /* Carte : réglage déjà validé. */
 #carte .map-list-item .map-walk-icon.cph-map-go-now{position:absolute!important;right:7px!important;bottom:7px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:62px!important;min-width:62px!important;max-width:62px!important;height:30px!important;min-height:30px!important;max-height:30px!important;margin:0!important;padding:0 6px!important;border:0!important;outline:0!important;border-radius:9px!important;background:linear-gradient(180deg,#199d7c,#08785f)!important;box-shadow:none!important;color:#fff!important;font-size:10px!important;font-weight:900!important;line-height:1!important;text-decoration:none!important;transform:none!important;z-index:3!important;touch-action:manipulation!important}
 `;
@@ -104,7 +104,7 @@ function polish(){
   prepareNatureBadges();
   normalizeReservations();
   mapGoButtons();
-  document.documentElement.dataset.cphUiFixes="v8";
+  document.documentElement.dataset.cphUiFixes="v9";
  }finally{
   if(observer&&document.body)observer.observe(document.body,{childList:true,subtree:true});
  }
