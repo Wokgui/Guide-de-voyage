@@ -1,9 +1,9 @@
 (function(){
 "use strict";
-["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
-const GLOBAL_KEY="__cphUiFixesStableV12";
-const STYLE_ID="cph-ui-fixes-v12";
-["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
+["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12","__cphUiFixesStableV13"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
+const GLOBAL_KEY="__cphUiFixesStableV13";
+const STYLE_ID="cph-ui-fixes-v13";
+["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11","cph-ui-fixes-v12",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
 let observer=null,scheduled=false;
 const norm=e=>(e&&e.textContent||"").replace(/\s+/g," ").trim();
 function important(el,name,value){if(el)el.style.setProperty(name,value,"important")}
@@ -19,15 +19,15 @@ function addStyles(){
 /* Réservations : tout marquage d'origine est caché ; un seul calendrier simple est recréé. */
 #programme .visit-summary .cph-reserved-original-hidden,#programme .visit-summary .mini-badge.booking.reserved{display:none!important}
 #programme .visit-summary .cph-reserved-one{display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:20px!important;min-width:20px!important;max-width:20px!important;height:22px!important;min-height:22px!important;max-height:22px!important;margin:0 0 0 4px!important;padding:0!important;border:0!important;outline:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;filter:none!important;font-size:16px!important;line-height:1!important;vertical-align:middle!important}
-/* Barre Programme : boutons centraux réduits et case ancrée pour rester entièrement visible. */
+/* Barre Programme : boutons centraux réduits, case ancrée et textes latéraux entièrement visibles. */
 #programme .history-actions{display:grid!important;grid-template-columns:minmax(0,1fr) 42px 42px minmax(0,1fr)!important;gap:4px!important;align-items:center!important;width:100%!important}
 #programme .history-actions>#dayButtons,#programme .history-actions>.compact-hide-done{box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:none!important;justify-self:stretch!important;overflow:hidden!important}
 #programme .history-actions>#dayButtons,#programme .history-actions>.compact-hide-done,#programme .history-actions>#undoActionBtn,#programme .history-actions>#redoActionBtn{box-sizing:border-box!important;margin:0!important;align-self:center!important}
-#programme .history-actions .day-select,#programme .history-actions .day-select-label,#programme .history-actions>.compact-hide-done{font-size:14.5px!important;font-weight:850!important;line-height:1!important}
-#programme .history-actions .day-select-label{display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;padding-left:5px!important;padding-right:5px!important}
-#programme .history-actions>.compact-hide-done{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;padding-left:25px!important;padding-right:3px!important;white-space:nowrap!important}
+#programme .history-actions .day-select,#programme .history-actions .day-select-label,#programme .history-actions>.compact-hide-done{font-size:12px!important;font-weight:850!important;line-height:1!important}
+#programme .history-actions .day-select-label{display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;padding-left:5px!important;padding-right:5px!important;white-space:nowrap!important}
+#programme .history-actions>.compact-hide-done{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;padding-left:25px!important;padding-right:3px!important;white-space:normal!important}
 #programme .history-actions>.compact-hide-done input[type="checkbox"]{display:block!important;visibility:visible!important;opacity:1!important;position:absolute!important;left:5px!important;top:50%!important;transform:translateY(-50%)!important;z-index:2!important;width:16px!important;min-width:16px!important;max-width:16px!important;height:16px!important;min-height:16px!important;max-height:16px!important;margin:0!important;padding:0!important;flex:none!important}
-#programme .history-actions>.compact-hide-done span{display:block!important;min-width:0!important;max-width:100%!important;overflow:hidden!important;text-overflow:clip!important;white-space:nowrap!important}
+#programme .history-actions>.compact-hide-done span{display:block!important;min-width:0!important;max-width:100%!important;overflow:visible!important;text-overflow:clip!important;white-space:normal!important;line-height:.95!important;text-align:center!important}
 #programme .history-actions>#undoActionBtn,#programme .history-actions>#redoActionBtn{width:42px!important;min-width:42px!important;max-width:42px!important;padding:0!important;border-radius:10px!important;font-size:24px!important;line-height:1!important;touch-action:manipulation!important}
 /* Carte : bouton J'y vais déjà validé. */
 #carte .map-list-item .map-walk-icon.cph-map-go-now{position:absolute!important;right:7px!important;bottom:7px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:62px!important;min-width:62px!important;max-width:62px!important;height:30px!important;min-height:30px!important;max-height:30px!important;margin:0!important;padding:0 6px!important;border:0!important;outline:0!important;border-radius:9px!important;background:linear-gradient(180deg,#199d7c,#08785f)!important;box-shadow:none!important;color:#fff!important;font-size:10px!important;font-weight:900!important;line-height:1!important;text-decoration:none!important;transform:none!important;z-index:3!important;touch-action:manipulation!important}
@@ -125,8 +125,9 @@ function fixHistoryActions(){
   [day,undo,redo,hide].forEach(el=>{important(el,"box-sizing","border-box");important(el,"height",`${h}px`);important(el,"min-height",`${h}px`);important(el,"max-height",`${h}px`);important(el,"margin","0");important(el,"align-self","center")});
   [day,hide].forEach(el=>{important(el,"width","100%");important(el,"min-width","0");important(el,"max-width","none")});
   const dayControls=Array.from(day.querySelectorAll("button,label,select,.day-select,.day-select-label"));
-  dayControls.forEach(el=>{important(el,"box-sizing","border-box");important(el,"height",`${h}px`);important(el,"min-height",`${h}px`);important(el,"max-height",`${h}px`);important(el,"margin","0");important(el,"font-size","14.5px");important(el,"line-height","1")});
-  important(hide,"position","relative");important(hide,"font-size","14.5px");important(hide,"line-height","1");important(hide,"padding-left","25px");important(hide,"padding-right","3px");
+  dayControls.forEach(el=>{important(el,"box-sizing","border-box");important(el,"height",`${h}px`);important(el,"min-height",`${h}px`);important(el,"max-height",`${h}px`);important(el,"margin","0");important(el,"font-size","12px");important(el,"line-height","1")});
+  important(hide,"position","relative");important(hide,"font-size","12px");important(hide,"line-height","1");important(hide,"padding-left","25px");important(hide,"padding-right","3px");important(hide,"white-space","normal");
+  const hideText=hide.querySelector("span");if(hideText){important(hideText,"white-space","normal");important(hideText,"line-height",".95");important(hideText,"text-align","center");important(hideText,"overflow","visible")}
   const check=hide.querySelector('input[type="checkbox"]');
   if(check){important(check,"display","block");important(check,"visibility","visible");important(check,"opacity","1");important(check,"position","absolute");important(check,"left","5px");important(check,"top","50%");important(check,"transform","translateY(-50%)");important(check,"z-index","2");important(check,"width","16px");important(check,"min-width","16px");important(check,"max-width","16px");important(check,"height","16px");important(check,"min-height","16px");important(check,"max-height","16px");important(check,"margin","0");important(check,"padding","0");important(check,"flex","none")}
   [undo,redo].forEach(el=>{important(el,"width","42px");important(el,"min-width","42px");important(el,"max-width","42px");important(el,"font-size","24px");important(el,"padding","0");important(el,"line-height","1")});
@@ -142,7 +143,7 @@ function mapGoButtons(){
 function polish(){
  scheduled=false;
  if(observer)observer.disconnect();
- try{addStyles();prepareNatureBadges();normalizeReservations();fixHistoryActions();mapGoButtons();document.documentElement.dataset.cphUiFixes="v12";}
+ try{addStyles();prepareNatureBadges();normalizeReservations();fixHistoryActions();mapGoButtons();document.documentElement.dataset.cphUiFixes="v13";}
  finally{if(observer&&document.body)observer.observe(document.body,{childList:true,subtree:true});}
 }
 function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>setTimeout(polish,30));}
