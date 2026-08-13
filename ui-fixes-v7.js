@@ -1,9 +1,9 @@
 (function(){
 "use strict";
-["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12","__cphUiFixesStableV13","__cphUiFixesStableV14","__cphUiFixesStableV15","__cphUiFixesStableV16","__cphUiFixesStableV17","__cphUiFixesStableV18","__cphUiFixesStableV19","__cphUiFixesStableV20","__cphUiFixesStableV21","__cphUiFixesStableV22"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
-const GLOBAL_KEY="__cphUiFixesStableV22";
-const STYLE_ID="cph-ui-fixes-v22";
-["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11","cph-ui-fixes-v12","cph-ui-fixes-v13","cph-ui-fixes-v14","cph-ui-fixes-v15","cph-ui-fixes-v16","cph-ui-fixes-v17","cph-ui-fixes-v18","cph-ui-fixes-v19","cph-ui-fixes-v20","cph-ui-fixes-v21",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
+["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12","__cphUiFixesStableV13","__cphUiFixesStableV14","__cphUiFixesStableV15","__cphUiFixesStableV16","__cphUiFixesStableV17","__cphUiFixesStableV18","__cphUiFixesStableV19","__cphUiFixesStableV20","__cphUiFixesStableV21","__cphUiFixesStableV22","__cphUiFixesStableV23"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
+const GLOBAL_KEY="__cphUiFixesStableV23";
+const STYLE_ID="cph-ui-fixes-v23";
+["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11","cph-ui-fixes-v12","cph-ui-fixes-v13","cph-ui-fixes-v14","cph-ui-fixes-v15","cph-ui-fixes-v16","cph-ui-fixes-v17","cph-ui-fixes-v18","cph-ui-fixes-v19","cph-ui-fixes-v20","cph-ui-fixes-v21","cph-ui-fixes-v22",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
 let observer=null,scheduled=false;
 const norm=e=>(e&&e.textContent||"").replace(/\s+/g," ").trim();
 function important(el,name,value){if(el)el.style.setProperty(name,value,"important")}
@@ -105,6 +105,41 @@ html body #programme .visit-details:not([open]) .summary-title-tools .summary-wa
 }
 html body #programme .visit-details:not([open]) .summary-title-tools .summary-point-map.cph-summary-meta{
  font-size:0!important;
+}
+/* Réservation : une seule icône, de la même échelle que le type de lieu. */
+html body #programme .visit-details:not([open]) .summary-title-tools .mini-badge.booking.reserved.cph-reserved-original-hidden{
+ display:none!important;
+ visibility:hidden!important;
+ width:0!important;
+ min-width:0!important;
+ max-width:0!important;
+ height:0!important;
+ min-height:0!important;
+ max-height:0!important;
+ margin:0!important;
+ padding:0!important;
+ overflow:hidden!important;
+}
+html body #programme .visit-details:not([open]) .summary-title-tools .cph-reserved-one{
+ box-sizing:border-box!important;
+ display:inline-flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ flex:0 0 17px!important;
+ width:17px!important;
+ min-width:17px!important;
+ max-width:17px!important;
+ height:17px!important;
+ min-height:17px!important;
+ max-height:17px!important;
+ margin:0!important;
+ padding:0!important;
+ border:0!important;
+ border-radius:0!important;
+ background:transparent!important;
+ box-shadow:none!important;
+ font-size:15px!important;
+ line-height:1!important;
 }
 
 `;
@@ -267,7 +302,7 @@ function mapGoButtons(){
 function polish(){
  scheduled=false;
  if(observer)observer.disconnect();
- try{addStyles();prepareNatureBadges();normalizeSummaryMeta();normalizeReservations();fixHistoryActions();mapGoButtons();document.documentElement.dataset.cphUiFixes="v22";}
+ try{addStyles();prepareNatureBadges();normalizeSummaryMeta();normalizeReservations();fixHistoryActions();mapGoButtons();document.documentElement.dataset.cphUiFixes="v23";}
  finally{if(observer&&document.body)observer.observe(document.body,{childList:true,subtree:true});}
 }
 function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>setTimeout(polish,30));}
