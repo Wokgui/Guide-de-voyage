@@ -1,9 +1,9 @@
 (function(){
 "use strict";
-["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12","__cphUiFixesStableV13"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
-const GLOBAL_KEY="__cphUiFixesStableV13";
-const STYLE_ID="cph-ui-fixes-v13";
-["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11","cph-ui-fixes-v12",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
+["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12","__cphUiFixesStableV13","__cphUiFixesStableV14"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
+const GLOBAL_KEY="__cphUiFixesStableV14";
+const STYLE_ID="cph-ui-fixes-v14";
+["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11","cph-ui-fixes-v12","cph-ui-fixes-v13",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
 let observer=null,scheduled=false;
 const norm=e=>(e&&e.textContent||"").replace(/\s+/g," ").trim();
 function important(el,name,value){if(el)el.style.setProperty(name,value,"important")}
@@ -31,9 +31,100 @@ function addStyles(){
 #programme .history-actions>#undoActionBtn,#programme .history-actions>#redoActionBtn{width:42px!important;min-width:42px!important;max-width:42px!important;padding:0!important;border-radius:10px!important;font-size:24px!important;line-height:1!important;touch-action:manipulation!important}
 /* Carte : bouton J'y vais déjà validé. */
 #carte .map-list-item .map-walk-icon.cph-map-go-now{position:absolute!important;right:7px!important;bottom:7px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:62px!important;min-width:62px!important;max-width:62px!important;height:30px!important;min-height:30px!important;max-height:30px!important;margin:0!important;padding:0 6px!important;border:0!important;outline:0!important;border-radius:9px!important;background:linear-gradient(180deg,#199d7c,#08785f)!important;box-shadow:none!important;color:#fff!important;font-size:10px!important;font-weight:900!important;line-height:1!important;text-decoration:none!important;transform:none!important;z-index:3!important;touch-action:manipulation!important}
+/* Programme : les trois métadonnées reprennent la taille du type de lieu. */
+html body #programme .visit-details:not([open]) .summary-title-tools .cph-summary-meta{
+ display:inline-flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ gap:3px!important;
+ font-size:var(--cph-summary-meta-text-size,12px)!important;
+ line-height:1.2!important;
+ white-space:nowrap!important;
+}
+html body #programme .visit-details:not([open]) .summary-title-tools .cph-summary-meta-icon{
+ box-sizing:border-box!important;
+ display:inline-grid!important;
+ place-items:center!important;
+ flex:0 0 17px!important;
+ width:17px!important;
+ min-width:17px!important;
+ max-width:17px!important;
+ height:17px!important;
+ min-height:17px!important;
+ max-height:17px!important;
+ margin:0!important;
+ padding:0!important;
+ font-size:17px!important;
+ line-height:1!important;
+ vertical-align:middle!important;
+ transform:none!important;
+}
+html body #programme .visit-details:not([open]) .summary-title-tools svg.cph-summary-meta-icon{
+ width:17px!important;
+ height:17px!important;
+ stroke-width:1.9!important;
+}
+html body #programme .visit-details:not([open]) .summary-title-tools .cph-summary-meta-label,
+html body #programme .visit-details:not([open]) .summary-title-tools .summary-point-map.cph-summary-meta::after{
+ font-size:var(--cph-summary-meta-text-size,12px)!important;
+ font-weight:700!important;
+ line-height:1.2!important;
+}
+html body #programme .visit-details:not([open]) .summary-title-tools .summary-point-map.cph-summary-meta{
+ font-size:0!important;
+}
+
 `;
  document.head.appendChild(s);
 }
+
+function wrapMetaLabel(container){
+ if(!container||container.querySelector(":scope > .cph-summary-meta-label"))return;
+ Array.from(container.childNodes).filter(n=>n.nodeType===Node.TEXT_NODE&&(n.textContent||"").trim()).forEach(n=>{
+  const label=document.createElement("span");
+  label.className="cph-summary-meta-label";
+  label.textContent=(n.textContent||"").trim();
+  container.insertBefore(label,n);
+  n.remove();
+ });
+}
+function normalizeSummaryMeta(){
+ const scope=document.querySelector("#programme");
+ if(!scope)return;
+ const ref=scope.querySelector(".mini-badge.nature .cph-nature-label");
+ if(ref)scope.style.setProperty("--cph-summary-meta-text-size",getComputedStyle(ref).fontSize);
+ scope.querySelectorAll(".visit-summary").forEach(summary=>{
+  const location=summary.querySelector(".summary-point-map");
+  if(location){
+   location.classList.add("cph-summary-meta");
+   location.querySelector(":scope > svg")?.classList.add("cph-summary-meta-icon");
+  }
+  const visit=summary.querySelector(".summary-visit-duration");
+  if(visit){
+   visit.classList.add("cph-summary-meta");
+   visit.querySelector(":scope > .visit-duration-icon")?.classList.add("cph-summary-meta-icon");
+   wrapMetaLabel(visit);
+  }
+  const walk=summary.querySelector(".summary-walk-duration");
+  if(walk){
+   walk.classList.add("cph-summary-meta");
+   if(!walk.querySelector(":scope > .cph-summary-meta-icon")){
+    const raw=norm(walk);
+    const match=raw.match(/^(\S+)\s*(.*)$/);
+    if(match){
+     const icon=document.createElement("span");
+     icon.className="cph-summary-meta-icon";
+     icon.textContent=match[1];
+     const label=document.createElement("span");
+     label.className="cph-summary-meta-label";
+     label.textContent=match[2];
+     walk.replaceChildren(icon,label);
+    }
+   }
+  }
+ });
+}
+
 function prepareNatureBadges(){
  document.querySelectorAll("#programme .mini-badge.nature").forEach(badge=>{
   badge.classList.add("cph-nature-autoalign");
@@ -143,7 +234,7 @@ function mapGoButtons(){
 function polish(){
  scheduled=false;
  if(observer)observer.disconnect();
- try{addStyles();prepareNatureBadges();normalizeReservations();fixHistoryActions();mapGoButtons();document.documentElement.dataset.cphUiFixes="v13";}
+ try{addStyles();prepareNatureBadges();normalizeSummaryMeta();normalizeReservations();fixHistoryActions();mapGoButtons();document.documentElement.dataset.cphUiFixes="v14";}
  finally{if(observer&&document.body)observer.observe(document.body,{childList:true,subtree:true});}
 }
 function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>setTimeout(polish,30));}
