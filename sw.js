@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v343-static-v10";
-const RUNTIME_CACHE="copenhague-v343-runtime-v10";
+const STATIC_CACHE="copenhague-v343-static-v11";
+const RUNTIME_CACHE="copenhague-v343-runtime-v11";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -31,8 +31,6 @@ self.addEventListener("activate",event=>{
     const keys=await caches.keys();
     await Promise.all(keys.filter(key=>![STATIC_CACHE,RUNTIME_CACHE].includes(key)).map(key=>caches.delete(key)));
     await self.clients.claim();
-    const clients=await self.clients.matchAll({type:"window",includeUncontrolled:true});
-    await Promise.all(clients.map(client=>client.navigate(client.url).catch(()=>null)));
   })());
 });
 
