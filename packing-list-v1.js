@@ -85,6 +85,7 @@
   let items=load();
   let editingId=null;
   let suppressClickUntil=0;
+  let openCategories=new Set();
   let persistedSnapshot=JSON.stringify(items);
 
   function makeId(){
@@ -183,14 +184,25 @@
     const list=document.getElementById('packingList');
     const progress=document.getElementById('packingProgress');
     if(!list||!progress)return;
+    if(list.children.length){
+      openCategories=new Set([...list.querySelectorAll('.packing-category[open]')].map(section=>section.dataset.category));
+    }
     list.replaceChildren();
     CATEGORIES.forEach(category=>{
-      const section=document.createElement('section');
+      const section=document.createElement('details');
       section.className='packing-category';
       section.dataset.category=category.id;
-      const heading=document.createElement('h3');
+      section.open=openCategories.has(category.id);
+      const heading=document.createElement('summary');
       const categoryItems=items.filter(item=>(item.category||inferCategory(item.text))===category.id);
-      heading.innerHTML='<span aria-hidden="true">'+category.icon+'</span><span>'+category.label+'</span><small>'+categoryItems.length+'</small>';
+      const remaining=categoryItems.filter(item=>!item.checked).length;
+      heading.innerHTML='<span class="packing-category-title"><span aria-hidden="true">'+category.icon+'</span><span>'+category.label+'</span></span><small title="'+remaining+' restant'+(remaining===1?'':'s')+' à prendre" aria-label="'+remaining+' restant'+(remaining===1?'':'s')+' à prendre">'+remaining+'</small>';
+      heading.addEventListener('click',()=>{
+        requestAnimationFrame(()=>{
+          if(section.open)openCategories.add(category.id);
+          else openCategories.delete(category.id);
+        });
+      });
       const categoryList=document.createElement('div');
       categoryList.className='packing-category-items';
       section.append(heading,categoryList);
