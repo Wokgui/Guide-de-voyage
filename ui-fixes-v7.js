@@ -1,9 +1,9 @@
 (function(){
 "use strict";
-["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12","__cphUiFixesStableV13","__cphUiFixesStableV14","__cphUiFixesStableV15","__cphUiFixesStableV16","__cphUiFixesStableV17","__cphUiFixesStableV18","__cphUiFixesStableV19","__cphUiFixesStableV20","__cphUiFixesStableV21","__cphUiFixesStableV22","__cphUiFixesStableV23","__cphUiFixesStableV24","__cphUiFixesStableV25","__cphUiFixesStableV26","__cphUiFixesStableV27"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
-const GLOBAL_KEY="__cphUiFixesStableV27";
-const STYLE_ID="cph-ui-fixes-v27";
-["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11","cph-ui-fixes-v12","cph-ui-fixes-v13","cph-ui-fixes-v14","cph-ui-fixes-v15","cph-ui-fixes-v16","cph-ui-fixes-v17","cph-ui-fixes-v18","cph-ui-fixes-v19","cph-ui-fixes-v20","cph-ui-fixes-v21","cph-ui-fixes-v22","cph-ui-fixes-v23","cph-ui-fixes-v24","cph-ui-fixes-v25","cph-ui-fixes-v26",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
+["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12","__cphUiFixesStableV13","__cphUiFixesStableV14","__cphUiFixesStableV15","__cphUiFixesStableV16","__cphUiFixesStableV17","__cphUiFixesStableV18","__cphUiFixesStableV19","__cphUiFixesStableV20","__cphUiFixesStableV21","__cphUiFixesStableV22","__cphUiFixesStableV23","__cphUiFixesStableV24","__cphUiFixesStableV25","__cphUiFixesStableV26","__cphUiFixesStableV27","__cphUiFixesStableV28"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
+const GLOBAL_KEY="__cphUiFixesStableV28";
+const STYLE_ID="cph-ui-fixes-v28";
+["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11","cph-ui-fixes-v12","cph-ui-fixes-v13","cph-ui-fixes-v14","cph-ui-fixes-v15","cph-ui-fixes-v16","cph-ui-fixes-v17","cph-ui-fixes-v18","cph-ui-fixes-v19","cph-ui-fixes-v20","cph-ui-fixes-v21","cph-ui-fixes-v22","cph-ui-fixes-v23","cph-ui-fixes-v24","cph-ui-fixes-v25","cph-ui-fixes-v26","cph-ui-fixes-v27",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
 let observer=null,scheduled=false;
 const norm=e=>(e&&e.textContent||"").replace(/\s+/g," ").trim();
 function important(el,name,value){if(el)el.style.setProperty(name,value,"important")}
@@ -31,6 +31,19 @@ function addStyles(){
 #programme .history-actions>#undoActionBtn,#programme .history-actions>#redoActionBtn{width:42px!important;min-width:42px!important;max-width:42px!important;padding:0!important;border-radius:10px!important;font-size:24px!important;line-height:1!important;touch-action:manipulation!important}
 /* Carte : bouton J'y vais déjà validé. */
 #carte .map-list-item .map-walk-icon.cph-map-go-now{position:absolute!important;right:7px!important;bottom:7px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:62px!important;min-width:62px!important;max-width:62px!important;height:30px!important;min-height:30px!important;max-height:30px!important;margin:0!important;padding:0 6px!important;border:0!important;outline:0!important;border-radius:9px!important;background:linear-gradient(180deg,#199d7c,#08785f)!important;box-shadow:none!important;color:#fff!important;font-size:10px!important;font-weight:900!important;line-height:1!important;text-decoration:none!important;transform:none!important;z-index:3!important;touch-action:manipulation!important}
+/* Programme : la ligne du type de lieu garde la même hauteur pour toutes les icônes. */
+html body #programme .visit-details:not([open]) .summary-title-tools .summary-line:first-child{
+ box-sizing:border-box!important;
+ height:17px!important;
+ min-height:17px!important;
+ max-height:17px!important;
+}
+html body #programme .visit-details:not([open]) .summary-title-tools .summary-line:first-child .mini-badge.nature{
+ box-sizing:border-box!important;
+ height:17px!important;
+ min-height:17px!important;
+ max-height:17px!important;
+}
 /* Programme : les trois métadonnées reprennent la taille du type de lieu. */
 html body #programme .visit-details:not([open]) .summary-title-tools .cph-summary-meta{
  display:inline-flex!important;
@@ -302,7 +315,7 @@ function mapGoButtons(){
 function polish(){
  scheduled=false;
  if(observer)observer.disconnect();
- try{addStyles();prepareNatureBadges();normalizeSummaryMeta();normalizeReservations();fixHistoryActions();mapGoButtons();document.documentElement.dataset.cphUiFixes="v27";}
+ try{addStyles();prepareNatureBadges();normalizeSummaryMeta();normalizeReservations();fixHistoryActions();mapGoButtons();document.documentElement.dataset.cphUiFixes="v28";}
  finally{if(observer&&document.body)observer.observe(document.body,{childList:true,subtree:true});}
 }
 function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>setTimeout(polish,30));}
