@@ -22,34 +22,36 @@
 .packing-category-items{display:grid;gap:7px;min-height:4px;padding:8px}
 .packing-item{
   display:grid;
-  grid-template-columns:26px minmax(0,1fr);
-  align-items:start;
+  grid-template-columns:34px minmax(0,1fr) 34px;
+  align-items:center;
   gap:8px;
   min-height:48px;
-  padding:9px 7px 9px 10px;
+  padding:9px 8px;
   border:1px solid var(--line);
   border-radius:13px;
   background:#fffdf9;
   touch-action:pan-y;
   transition:border-color .16s,box-shadow .16s,transform .16s;
 }
-.packing-item.is-editing{grid-template-columns:26px minmax(0,1fr) 34px;border-color:#91afa5;box-shadow:0 4px 14px #365e5220}
+.packing-item.is-editing{border-color:#91afa5;box-shadow:0 4px 14px #365e5220}
 .packing-list.is-reordering{touch-action:none;user-select:none}
 .packing-item.is-dragging{z-index:3;border-color:var(--sage-dark);background:#f0f7f4;box-shadow:0 12px 28px #274d4140;transform:scale(1.015);cursor:grabbing}
 .packing-item input{
   width:22px;
   height:22px;
-  margin:2px 0 0;
+  margin:0 auto;
   accent-color:var(--sage-dark);
 }
 .packing-label-button{
   width:100%;min-width:0;padding:1px 0;border:0;background:transparent;color:var(--ink);
-  font:inherit;font-size:15px;line-height:1.35;text-align:left;cursor:text;
+  font:inherit;font-size:15px;line-height:1.35;text-align:center;cursor:text;
 }
-.packing-edit-input{width:100%;min-width:0;min-height:36px;padding:6px 8px;border:1px solid #9ab7ad;border-radius:9px;background:#fff;color:var(--ink);font:inherit;font-size:15px}
+.packing-edit-input{width:100%;min-width:0;min-height:36px;padding:6px 8px;border:1px solid #9ab7ad;border-radius:9px;background:#fff;color:var(--ink);font:inherit;font-size:15px;text-align:center}
 .packing-item:has(input[type=checkbox]:checked):not(.is-editing) .packing-label-button{color:#71817e;text-decoration:line-through;text-decoration-thickness:1px}
 .packing-remove{
-  display:none;
+  display:grid;
+  visibility:hidden;
+  pointer-events:none;
   place-items:center;
   width:34px;
   height:34px;
@@ -61,7 +63,7 @@
   font-size:18px;
   line-height:1;
 }
-.packing-item.is-editing .packing-remove{display:grid}
+.packing-item.is-editing .packing-remove{visibility:visible;pointer-events:auto}
 .packing-add{margin:13px 0 0;padding:12px;border-radius:14px;background:#f4f1e8}
 .packing-add>label{display:block;margin-bottom:14px;font-size:15px;font-weight:850;text-align:center}
 .packing-add>select{width:100%;min-height:42px;margin:0 0 7px;padding:8px 10px;border:1px solid var(--line);border-radius:11px;background:#fff;font:inherit}
@@ -69,8 +71,7 @@
 .packing-add-row input{min-width:0;min-height:44px;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:white;font:inherit}
 .packing-add-row button{min-height:44px;padding:8px 14px;border:0;border-radius:11px;background:var(--sage-dark);color:white;font-weight:850}
 @media(max-width:390px){
-  .packing-item{grid-template-columns:24px minmax(0,1fr);gap:6px;padding-left:8px}
-  .packing-item.is-editing{grid-template-columns:24px minmax(0,1fr) 32px}
+  .packing-item{grid-template-columns:32px minmax(0,1fr) 32px;gap:6px;padding-left:8px}
   .packing-label-button,.packing-edit-input{font-size:14px}
   .packing-add-row{grid-template-columns:1fr}
 }
