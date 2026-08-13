@@ -22,7 +22,8 @@
 <link href="/icons/app-icon.svg" rel="icon" type="image/svg+xml"/>
 <link href="/icons/app-icon-192.png?v=2" rel="apple-touch-icon"/>
 <link href="/vendor/leaflet/leaflet.css" rel="stylesheet"/>
-<link href="/packing-list-v1.css?v=1" rel="stylesheet"/>
+<link href="/packing-list-v1.css?v=2" rel="stylesheet"/>
+<link href="/section-history-v1.css?v=1" rel="stylesheet"/>
 <style>
 :root {
  --ink:#263a37; --muted:#667b76; --cream:#f7f3e9; --paper:#fffdf8;
@@ -5311,6 +5312,10 @@ body.backup-settings-open{overflow:hidden}
 </article>
 <article class="practical-card global-notes-box practical-card-centered">
 <h3 class="practical-title">Mes notes générales</h3>
+<div class="section-history-tools notes-history-tools" aria-label="Historique des notes générales">
+<button id="notesUndoBtn" type="button" aria-label="Annuler la dernière modification des notes"><span aria-hidden="true">↶</span><small>Annuler</small></button>
+<button id="notesRedoBtn" type="button" aria-label="Rétablir la dernière modification des notes"><span aria-hidden="true">↷</span><small>Rétablir</small></button>
+</div>
 <textarea id="globalNotes" placeholder="Adresses repérées, idées, choses à acheter, remarques pour le séjour…"></textarea>
 <div class="note-save-state" id="globalNotesState" hidden></div>
 </article>
@@ -5370,7 +5375,10 @@ body.backup-settings-open{overflow:hidden}
 </details>
 </section>
 <section class="panel" id="sejour">
-
+<div class="section-history-tools stay-history-tools" aria-label="Historique de la page Airbnb et Vol">
+<button id="stayUndoBtn" type="button" aria-label="Annuler la dernière modification de la page"><span aria-hidden="true">↶</span><small>Annuler</small></button>
+<button id="stayRedoBtn" type="button" aria-label="Rétablir la dernière modification de la page"><span aria-hidden="true">↷</span><small>Rétablir</small></button>
+</div>
 <div class="stay-grid">
 <details class="stay-card stay-collapsible">
 <summary class="stay-collapsible-summary">✈️ Vol aller</summary>
@@ -5439,6 +5447,7 @@ body.backup-settings-open{overflow:hidden}
 <div class="packing-list" id="packingList"></div>
 <form class="packing-add" id="packingAddForm">
 <label for="packingAddInput">Ajouter une affaire</label>
+<select id="packingAddCategory" aria-label="Section de la nouvelle affaire"><option value="organisation">Organisation</option><option value="vetements">Vêtements</option><option value="informatique">Informatique</option><option value="salle-de-bains">Salle de bains</option><option value="autres">Autres</option></select>
 <div class="packing-add-row"><input id="packingAddInput" autocomplete="off" placeholder="Ce que je dois emporter"/><button type="submit">Ajouter</button></div>
 </form>
 </div>
@@ -6223,21 +6232,27 @@ function addPointEditor(day){
  return box;
 }
 
-function orderEditor(day){
+function orderEditor(day,dayBody){
  const wrap=document.createElement('details');wrap.className='order-editor';
  if(reopenOrderDay===day){wrap.open=true;setTimeout(()=>{reopenOrderDay=null},0)}
  wrap.innerHTML=`<summary>Modifier l’ordre</summary>
- <div class="order-help">Appuie sur <b>Déplacer…</b> à côté du lieu, puis choisis « au début », « à la fin », « avant… » ou « après… ». Ce système est conçu pour fonctionner sans glisser-déposer sur Android.</div>
+ <div class="order-help">Les boutons <b>Déplacer…</b> apparaissent directement sur les tuiles déjà affichées ci-dessus. Choisis ensuite « au début », « à la fin », « avant… » ou « après… ».</div>
  ${state.customOrderDays[day]?'<div class="order-notice">Ordre personnalisé actif : toutes les étapes restent conservées, même si l’horaire dépasse la fin calculée.</div>':''}
- <div class="order-list"></div>
  <div class="order-tools"><button class="button secondary undo-order" type="button">↩ Annuler le dernier déplacement</button><button class="button secondary reset-order" type="button">Rétablir l’ordre conseillé</button></div>`;
- const listEl=wrap.querySelector('.order-list'),items=dayItems(day);
- items.forEach((p,i)=>{
-  const row=document.createElement('div');row.className='order-row';row.dataset.id=p.id;
-  row.innerHTML=`<span class="order-number">${i+1}</span><span class="order-name">${icon(p.type)} ${esc(p.name)}</span><button type="button" class="order-move">Déplacer…</button>`;
-  row.querySelector('.order-move').onclick=e=>{e.preventDefault();openMoveMenu(day,p.id)};
-  listEl.appendChild(row);
- });
+ const syncCardButtons=()=>{
+  dayBody.classList.toggle('order-mode',wrap.open);
+  dayBody.querySelectorAll('.card-order-move').forEach(button=>button.remove());
+  if(!wrap.open)return;
+  dayBody.querySelectorAll('.card[data-point-id]').forEach(card=>{
+   const button=document.createElement('button');
+   button.type='button';button.className='order-move card-order-move';button.textContent='↕ Déplacer…';
+   button.setAttribute('aria-label','Déplacer '+(card.querySelector('.summary-title-name')?.textContent||'ce point'));
+   button.onclick=event=>{event.preventDefault();event.stopPropagation();openMoveMenu(day,card.dataset.pointId)};
+   card.prepend(button);
+  });
+ };
+ wrap.addEventListener('toggle',syncCardButtons);
+ setTimeout(syncCardButtons,0);
  const undo=wrap.querySelector('.undo-order');undo.disabled=!Array.isArray(state.orderUndo[day])||!state.orderUndo[day].length;
  undo.onclick=e=>{e.preventDefault();undoDayOrder(day)};
  wrap.querySelector('.reset-order').onclick=e=>{e.preventDefault();resetDayOrder(day)};
@@ -7012,7 +7027,7 @@ function renderProgramme(){
    body.appendChild(card);previousDisplay=p;
   });
   const dayActions=document.createElement("div");dayActions.className="day-inline-actions";
-  dayActions.append(orderEditor(day),addPointEditor(day));
+  dayActions.append(orderEditor(day,body),addPointEditor(day));
   body.appendChild(dayActions);
   list.appendChild(section);
  });
@@ -11697,6 +11712,7 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
 </script>
 <script src="/ui-fixes-v7.js?v=28"></script>
 <script src="/day-style-v1.js?v=5"></script>
-<script src="/packing-list-v1.js?v=1"></script>
+<script src="/section-history-v1.js?v=1"></script>
+<script src="/packing-list-v1.js?v=2"></script>
 </body>
 </html>
