@@ -63,7 +63,7 @@
 }
 .packing-item.is-editing .packing-remove{display:grid}
 .packing-add{margin:13px 0 0;padding:12px;border-radius:14px;background:#f4f1e8}
-.packing-add>label{display:block;margin-bottom:7px;font-size:15px;font-weight:850;text-align:center}
+.packing-add>label{display:block;margin-bottom:14px;font-size:15px;font-weight:850;text-align:center}
 .packing-add>select{width:100%;min-height:42px;margin:0 0 7px;padding:8px 10px;border:1px solid var(--line);border-radius:11px;background:#fff;font:inherit}
 .packing-add-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}
 .packing-add-row input{min-width:0;min-height:44px;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:white;font:inherit}
