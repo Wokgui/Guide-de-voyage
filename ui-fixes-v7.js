@@ -1,9 +1,9 @@
 (function(){
 "use strict";
-["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12","__cphUiFixesStableV13","__cphUiFixesStableV14","__cphUiFixesStableV15","__cphUiFixesStableV16","__cphUiFixesStableV17","__cphUiFixesStableV18","__cphUiFixesStableV19"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
-const GLOBAL_KEY="__cphUiFixesStableV19";
-const STYLE_ID="cph-ui-fixes-v19";
-["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11","cph-ui-fixes-v12","cph-ui-fixes-v13","cph-ui-fixes-v14","cph-ui-fixes-v15","cph-ui-fixes-v16","cph-ui-fixes-v17","cph-ui-fixes-v18",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
+["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12","__cphUiFixesStableV13","__cphUiFixesStableV14","__cphUiFixesStableV15","__cphUiFixesStableV16","__cphUiFixesStableV17","__cphUiFixesStableV18","__cphUiFixesStableV19","__cphUiFixesStableV20"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
+const GLOBAL_KEY="__cphUiFixesStableV20";
+const STYLE_ID="cph-ui-fixes-v20";
+["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11","cph-ui-fixes-v12","cph-ui-fixes-v13","cph-ui-fixes-v14","cph-ui-fixes-v15","cph-ui-fixes-v16","cph-ui-fixes-v17","cph-ui-fixes-v18","cph-ui-fixes-v19",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
 let observer=null,scheduled=false;
 const norm=e=>(e&&e.textContent||"").replace(/\s+/g," ").trim();
 function important(el,name,value){if(el)el.style.setProperty(name,value,"important")}
@@ -99,7 +99,7 @@ html body #programme .visit-details:not([open]) .summary-title-tools .summary-vi
  font-size:17px!important;
 }
 html body #programme .visit-details:not([open]) .summary-title-tools .summary-walk-duration .cph-summary-meta-icon{
- font-size:15px!important;
+ font-size:17px!important;
 }
 html body #programme .visit-details:not([open]) .summary-title-tools .summary-point-map.cph-summary-meta{
  font-size:0!important;
@@ -265,7 +265,7 @@ function mapGoButtons(){
 function polish(){
  scheduled=false;
  if(observer)observer.disconnect();
- try{addStyles();prepareNatureBadges();normalizeSummaryMeta();normalizeReservations();fixHistoryActions();mapGoButtons();document.documentElement.dataset.cphUiFixes="v19";}
+ try{addStyles();prepareNatureBadges();normalizeSummaryMeta();normalizeReservations();fixHistoryActions();mapGoButtons();document.documentElement.dataset.cphUiFixes="v20";}
  finally{if(observer&&document.body)observer.observe(document.body,{childList:true,subtree:true});}
 }
 function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>setTimeout(polish,30));}
