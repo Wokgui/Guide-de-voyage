@@ -1,12 +1,12 @@
-const STATIC_CACHE="copenhague-v343-static-v7";
-const RUNTIME_CACHE="copenhague-v343-runtime-v7";
+const STATIC_CACHE="copenhague-v343-static-v8";
+const RUNTIME_CACHE="copenhague-v343-runtime-v8";
 const STATIC_FILES=[
   "/",
   "/index.html",
   "/shared-sync.js",
   "/cloud-backup.js?v=3",
   "/header-prestige.js?v=343",
-  "/ui-fixes-v6.js?v=2",
+  "/ui-fixes-v7.js?v=9",
   "/manifest.webmanifest",
   "/icons/app-icon.svg",
   "/icons/app-icon-192.png",
@@ -134,7 +134,7 @@ async function patchedHeader(request){
   observer.observe(document.body,{childList:true,subtree:true});
 })();
 `;
-    const extras=`\n;(function(){const s=document.createElement("script");s.src="/ui-fixes-v6.js?v=2";s.async=false;document.head.appendChild(s)})();\n`;
+    const extras=`\n;(function(){const s=document.createElement("script");s.src="/ui-fixes-v7.js?v=9";s.async=false;document.head.appendChild(s)})();\n`;
     return new Response(source+patch+extras,{status:200,statusText:"OK",headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"no-store, no-cache, must-revalidate"}});
   }catch(_){
     return (await caches.match(request))||Response.error();
