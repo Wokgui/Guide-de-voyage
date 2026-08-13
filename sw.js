@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v343-static-v32";
-const RUNTIME_CACHE="copenhague-v343-runtime-v32";
+const STATIC_CACHE="copenhague-v343-static-v33";
+const RUNTIME_CACHE="copenhague-v343-runtime-v33";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -8,7 +8,7 @@ const STATIC_FILES=[
   "/header-prestige.js?v=343",
   "/ui-fixes-v7.js?v=30",
   "/day-style-v1.js?v=5",
-  "/packing-list-v1.css?v=3",
+  "/packing-list-v1.css?v=4",
   "/packing-list-v1.js?v=3",
   "/section-history-v1.css?v=1",
   "/section-history-v1.js?v=1",
