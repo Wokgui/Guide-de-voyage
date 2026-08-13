@@ -1,30 +1,32 @@
 (function(){
 "use strict";
-const STYLE_ID="cph-ui-fixes-v9";
+const GLOBAL_KEY="__cphUiFixesStableV10";
+if(window[GLOBAL_KEY]&&typeof window[GLOBAL_KEY].stop==="function")window[GLOBAL_KEY].stop();
+const STYLE_ID="cph-ui-fixes-v10";
+["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
+let observer=null,scheduled=false;
+const norm=e=>(e&&e.textContent||"").replace(/\s+/g," ").trim();
+function important(el,name,value){if(el)el.style.setProperty(name,value,"important")}
 function addStyles(){
- ["cph-ui-fixes-v7","cph-ui-fixes-v8"].forEach(id=>document.getElementById(id)?.remove());
  if(document.getElementById(STYLE_ID))return;
  const s=document.createElement("style");
  s.id=STYLE_ID;
  s.textContent=`
-/* Programme : alignement stable, sans recalcul ni oscillation verticale. */
+/* Types de lieux : alignement fixe, sans calcul vertical ni oscillation. */
 #programme .mini-badge.nature.cph-nature-autoalign{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;line-height:1!important;vertical-align:middle!important}
-#programme .mini-badge.nature.cph-nature-autoalign>.cph-nature-icon{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;margin:0!important;padding:0!important;position:static!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;line-height:1!important;vertical-align:middle!important;transform:none!important;will-change:auto!important}
+#programme .mini-badge.nature.cph-nature-autoalign>.cph-nature-icon{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;margin:0!important;padding:0!important;position:static!important;inset:auto!important;line-height:1!important;vertical-align:middle!important;transform:none!important;will-change:auto!important}
 #programme .mini-badge.nature.cph-nature-autoalign>.cph-nature-label{display:inline-flex!important;align-items:center!important;justify-content:center!important;margin:0!important;padding:0!important;line-height:1!important;vertical-align:middle!important}
-/* Réservations : exactement un calendrier simple, sans seconde icône ni texte Réservé. */
-#programme .cph-reserved-duplicate{display:none!important}
-#programme .mini-badge.booking.reserved.cph-reserved-simple{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:18px!important;min-width:18px!important;max-width:18px!important;height:22px!important;min-height:22px!important;max-height:22px!important;margin:0 0 0 3px!important;padding:0!important;border:0!important;outline:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;filter:none!important;font-size:0!important;line-height:1!important;overflow:visible!important;vertical-align:middle!important}
-#programme .mini-badge.booking.reserved.cph-reserved-simple>*{display:none!important}
-#programme .mini-badge.booking.reserved.cph-reserved-simple::before{content:"📅"!important;display:block!important;font-size:15px!important;line-height:1!important;margin:0!important;padding:0!important}
-#programme .mini-badge.booking.reserved.cph-reserved-simple::after{content:none!important;display:none!important}
-/* Barre Programme : quatre tuiles de même hauteur ; les deux tuiles texte de même largeur. */
-#programme .history-actions{grid-template-columns:minmax(0,1fr) 52px 52px minmax(0,1fr)!important;gap:5px!important;align-items:center!important}
-#programme .history-actions>#dayButtons,#programme .history-actions>.compact-hide-done,#programme .history-actions>#undoActionBtn,#programme .history-actions>#redoActionBtn{box-sizing:border-box!important;height:36px!important;min-height:36px!important;max-height:36px!important;margin:0!important;align-self:center!important}
-#programme .history-actions>#dayButtons,#programme .history-actions>.compact-hide-done{width:100%!important;min-width:0!important;max-width:none!important;overflow:hidden!important}
-#programme .history-actions .day-select,#programme .history-actions .day-select-label,#programme .history-actions>.compact-hide-done{box-sizing:border-box!important;height:36px!important;min-height:36px!important;max-height:36px!important;font-size:14px!important;font-weight:850!important;line-height:1!important}
-#programme .history-actions .day-select-label,#programme .history-actions>.compact-hide-done{display:flex!important;align-items:center!important;justify-content:center!important;padding:0 5px!important;text-align:center!important}
-#programme .history-actions>#undoActionBtn,#programme .history-actions>#redoActionBtn{width:52px!important;min-width:52px!important;max-width:52px!important;padding:0!important;border-radius:10px!important;font-size:25px!important;line-height:1!important;touch-action:manipulation!important}
-/* Carte : réglage déjà validé. */
+/* Réservations : tout marquage d'origine est caché ; un seul calendrier simple est recréé. */
+#programme .visit-summary .cph-reserved-original-hidden,#programme .visit-summary .mini-badge.booking.reserved{display:none!important}
+#programme .visit-summary .cph-reserved-one{display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:20px!important;min-width:20px!important;max-width:20px!important;height:22px!important;min-height:22px!important;max-height:22px!important;margin:0 0 0 4px!important;padding:0!important;border:0!important;outline:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;filter:none!important;font-size:16px!important;line-height:1!important;vertical-align:middle!important}
+/* Barre Programme : deux colonnes texte strictement égales ; hauteur appliquée d'après les 3 contrôles de droite. */
+#programme .history-actions{display:grid!important;grid-template-columns:minmax(0,1fr) 56px 56px minmax(0,1fr)!important;gap:5px!important;align-items:center!important;width:100%!important}
+#programme .history-actions>#dayButtons,#programme .history-actions>.compact-hide-done{box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:none!important;justify-self:stretch!important;overflow:hidden!important}
+#programme .history-actions>#dayButtons,#programme .history-actions>.compact-hide-done,#programme .history-actions>#undoActionBtn,#programme .history-actions>#redoActionBtn{box-sizing:border-box!important;margin:0!important;align-self:center!important}
+#programme .history-actions .day-select,#programme .history-actions .day-select-label,#programme .history-actions>.compact-hide-done{font-size:14.5px!important;font-weight:850!important;line-height:1!important}
+#programme .history-actions .day-select-label,#programme .history-actions>.compact-hide-done{display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;padding-left:5px!important;padding-right:5px!important}
+#programme .history-actions>#undoActionBtn,#programme .history-actions>#redoActionBtn{width:56px!important;min-width:56px!important;max-width:56px!important;padding:0!important;border-radius:10px!important;font-size:27px!important;line-height:1!important;touch-action:manipulation!important}
+/* Carte : bouton J'y vais déjà validé. */
 #carte .map-list-item .map-walk-icon.cph-map-go-now{position:absolute!important;right:7px!important;bottom:7px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:62px!important;min-width:62px!important;max-width:62px!important;height:30px!important;min-height:30px!important;max-height:30px!important;margin:0!important;padding:0 6px!important;border:0!important;outline:0!important;border-radius:9px!important;background:linear-gradient(180deg,#199d7c,#08785f)!important;box-shadow:none!important;color:#fff!important;font-size:10px!important;font-weight:900!important;line-height:1!important;text-decoration:none!important;transform:none!important;z-index:3!important;touch-action:manipulation!important}
 `;
  document.head.appendChild(s);
@@ -47,78 +49,99 @@ function prepareNatureBadges(){
   badge.appendChild(label);
  });
 }
-function markDuplicate(el){
- if(!el||el.classList.contains("cph-reserved-simple"))return;
- el.classList.add("cph-reserved-duplicate");
- el.setAttribute("aria-hidden","true");
-}
-function looksLikeCalendarOnly(el){
+function iconOnly(el){
  if(!el)return false;
- const txt=(el.textContent||"").replace(/\s+/g,"").trim();
- const cls=String(el.className||"");
- const aria=`${el.getAttribute("aria-label")||""} ${el.getAttribute("title")||""}`;
- return /^[📅🗓️🗓]$/.test(txt)||/reserv|booking/i.test(`${cls} ${aria}`);
+ const t=norm(el).replace(/\s+/g,"");
+ if(/^[📅🗓️🗓]$/.test(t))return true;
+ if(el.matches?.("svg,img,i,.icon,[class*='icon']"))return true;
+ if(el.getAttribute?.("aria-hidden")==="true"&&!/[A-Za-zÀ-ÿ0-9]/.test(t))return true;
+ return false;
+}
+function hideOriginal(el){
+ if(!el||el.classList?.contains("cph-reserved-one"))return;
+ el.classList?.add("cph-reserved-original-hidden");
+ el.setAttribute?.("aria-hidden","true");
 }
 function normalizeReservations(){
  document.querySelectorAll("#programme .visit-summary").forEach(summary=>{
-  const badges=Array.from(summary.querySelectorAll(".mini-badge.booking.reserved"));
-  const keep=badges.find(b=>b.closest(".summary-title-tools"))||badges[0]||null;
-  if(keep){
-   keep.classList.add("cph-reserved-simple");
-   keep.classList.remove("cph-reserved-duplicate");
-   if(keep.getAttribute("aria-label")!=="Réservé")keep.setAttribute("aria-label","Réservé");
-   if(keep.getAttribute("title")!=="Réservé")keep.setAttribute("title","Réservé");
-   keep.removeAttribute("aria-hidden");
-   badges.forEach(b=>{if(b!==keep)markDuplicate(b)});
-  }
-  const scope=summary;
-  Array.from(scope.querySelectorAll("*")).forEach(el=>{
-   if(el===keep||(keep&&(el.contains(keep)||keep.contains(el))))return;
-   const raw=(el.textContent||"").replace(/\s+/g," ").trim();
-   const withoutCalendar=raw.replace(/[📅🗓️🗓]/g,"").replace(/\s+/g," ").trim();
-   if(/^réservé$/i.test(withoutCalendar)||/^reserve$/i.test(withoutCalendar)){
-    const prev=el.previousElementSibling;
-    const next=el.nextElementSibling;
-    markDuplicate(el);
-    if(looksLikeCalendarOnly(prev))markDuplicate(prev);
-    if(looksLikeCalendarOnly(next))markDuplicate(next);
-   }
+  const all=Array.from(summary.querySelectorAll("*"));
+  let hasReservation=!!summary.querySelector(".mini-badge.booking.reserved");
+  all.forEach(el=>{
+   if(el.classList.contains("cph-reserved-one"))return;
+   const raw=norm(el);
+   const noCalendar=raw.replace(/[📅🗓️🗓]/g,"").replace(/\s+/g," ").trim();
+   const attrs=`${el.getAttribute("aria-label")||""} ${el.getAttribute("title")||""}`;
+   if(/^réservé$/i.test(noCalendar)||/^reserve$/i.test(noCalendar)||/réserv|reserv/i.test(attrs))hasReservation=true;
   });
+  if(!hasReservation){summary.querySelectorAll(":scope .cph-reserved-one").forEach(e=>e.remove());return;}
+  summary.querySelectorAll(".mini-badge.booking.reserved").forEach(hideOriginal);
+  all.forEach(el=>{
+   if(el.classList.contains("cph-reserved-one"))return;
+   const raw=norm(el);
+   const noCalendar=raw.replace(/[📅🗓️🗓]/g,"").replace(/\s+/g," ").trim();
+   const attrs=`${el.getAttribute("aria-label")||""} ${el.getAttribute("title")||""}`;
+   const exact=/^réservé$/i.test(noCalendar)||/^reserve$/i.test(noCalendar);
+   const attrReserved=/réserv|reserv/i.test(attrs);
+   if(!exact&&!attrReserved)return;
+   const prev=el.previousElementSibling,next=el.nextElementSibling;
+   hideOriginal(el);
+   if(iconOnly(prev))hideOriginal(prev);
+   if(iconOnly(next))hideOriginal(next);
+  });
+  let one=summary.querySelector(".cph-reserved-one");
+  summary.querySelectorAll(".cph-reserved-one").forEach((e,i)=>{if(i>0)e.remove()});
+  if(!one){
+   one=document.createElement("span");
+   one.className="cph-reserved-one";
+   one.textContent="📅";
+   one.setAttribute("aria-label","Réservé");
+   one.setAttribute("title","Réservé");
+   const nature=summary.querySelector(".summary-title-tools .summary-line:first-child .mini-badge.nature")||summary.querySelector(".mini-badge.nature");
+   const line=nature?.parentElement||summary.querySelector(".summary-title-tools .summary-line:first-child")||summary.querySelector(".summary-title-tools")||summary;
+   if(nature&&nature.parentElement===line)nature.insertAdjacentElement("afterend",one);else line.appendChild(one);
+  }
+ });
+}
+function measureNativeHeight(row,controls){
+ const saved=Number(row.dataset.cphNativeActionHeight||0);
+ if(saved>=24&&saved<=60)return saved;
+ const values=controls.map(el=>el?.getBoundingClientRect().height||0).filter(v=>v>=24&&v<=60).sort((a,b)=>a-b);
+ const h=values.length?values[Math.floor(values.length/2)]:34;
+ row.dataset.cphNativeActionHeight=String(h);
+ return h;
+}
+function fixHistoryActions(){
+ document.querySelectorAll("#programme .history-actions").forEach(row=>{
+  const day=row.querySelector(":scope > #dayButtons")||row.querySelector("#dayButtons");
+  const undo=row.querySelector("#undoActionBtn");
+  const redo=row.querySelector("#redoActionBtn");
+  const hide=row.querySelector(":scope > .compact-hide-done")||row.querySelector(".compact-hide-done");
+  if(!day||!undo||!redo||!hide)return;
+  const h=measureNativeHeight(row,[undo,redo,hide]);
+  important(row,"display","grid");important(row,"grid-template-columns","minmax(0,1fr) 56px 56px minmax(0,1fr)");important(row,"gap","5px");important(row,"align-items","center");
+  [day,undo,redo,hide].forEach(el=>{important(el,"box-sizing","border-box");important(el,"height",`${h}px`);important(el,"min-height",`${h}px`);important(el,"max-height",`${h}px`);important(el,"margin","0");important(el,"align-self","center")});
+  [day,hide].forEach(el=>{important(el,"width","100%");important(el,"min-width","0");important(el,"max-width","none")});
+  const dayControls=Array.from(day.querySelectorAll("button,label,select,.day-select,.day-select-label"));
+  dayControls.forEach(el=>{important(el,"box-sizing","border-box");important(el,"height",`${h}px`);important(el,"min-height",`${h}px`);important(el,"max-height",`${h}px`);important(el,"margin","0");important(el,"font-size","14.5px");important(el,"line-height","1")});
+  important(hide,"font-size","14.5px");important(hide,"line-height","1");
+  [undo,redo].forEach(el=>{important(el,"width","56px");important(el,"min-width","56px");important(el,"max-width","56px");important(el,"font-size","27px");important(el,"padding","0");important(el,"line-height","1")});
  });
 }
 function mapGoButtons(){
  document.querySelectorAll("#carte .map-walk-icon").forEach(a=>{
-  if(!a.classList.contains("cph-map-go-now"))a.classList.add("cph-map-go-now");
-  if((a.textContent||"").trim()!=="J’y vais")a.textContent="J’y vais";
-  if(a.getAttribute("aria-label")!=="J’y vais")a.setAttribute("aria-label","J’y vais");
-  if(a.getAttribute("title")!=="J’y vais")a.setAttribute("title","J’y vais");
+  a.classList.add("cph-map-go-now");
+  if(norm(a)!=="J’y vais")a.textContent="J’y vais";
+  a.setAttribute("aria-label","J’y vais");a.setAttribute("title","J’y vais");
  });
 }
-let observer=null;
-let scheduled=false;
 function polish(){
  scheduled=false;
  if(observer)observer.disconnect();
- try{
-  addStyles();
-  prepareNatureBadges();
-  normalizeReservations();
-  mapGoButtons();
-  document.documentElement.dataset.cphUiFixes="v9";
- }finally{
-  if(observer&&document.body)observer.observe(document.body,{childList:true,subtree:true});
- }
+ try{addStyles();prepareNatureBadges();normalizeReservations();fixHistoryActions();mapGoButtons();document.documentElement.dataset.cphUiFixes="v10";}
+ finally{if(observer&&document.body)observer.observe(document.body,{childList:true,subtree:true});}
 }
-function schedule(){
- if(scheduled)return;
- scheduled=true;
- requestAnimationFrame(()=>setTimeout(polish,30));
-}
-function start(){
- observer=new MutationObserver(schedule);
- polish();
- [150,500,1200].forEach(ms=>setTimeout(schedule,ms));
- window.addEventListener("resize",schedule,{passive:true});
-}
+function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>setTimeout(polish,30));}
+function start(){observer=new MutationObserver(schedule);polish();[150,500,1200].forEach(ms=>setTimeout(schedule,ms));window.addEventListener("resize",schedule,{passive:true});}
+window[GLOBAL_KEY]={stop(){observer?.disconnect();observer=null;scheduled=false;}};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
