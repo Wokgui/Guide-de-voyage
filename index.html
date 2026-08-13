@@ -22,6 +22,7 @@
 <link href="/icons/app-icon.svg" rel="icon" type="image/svg+xml"/>
 <link href="/icons/app-icon-192.png?v=2" rel="apple-touch-icon"/>
 <link href="/vendor/leaflet/leaflet.css" rel="stylesheet"/>
+<link href="/packing-list-v1.css?v=1" rel="stylesheet"/>
 <style>
 :root {
  --ink:#263a37; --muted:#667b76; --cream:#f7f3e9; --paper:#fffdf8;
@@ -5412,7 +5413,7 @@ body.backup-settings-open{overflow:hidden}
 <label class="stay-field">Bagages inclus<textarea id="flightBackBags">Pour chaque segment : 1 bagage enregistré jusqu’à 23 kg et 1 bagage à main jusqu’à 8 kg.</textarea></label>
 <div class="stay-actions"><a class="button maps" id="stayAirportRoute" href="#" target="_blank">Trajet vers l’aéroport</a></div>
 </details><details class="stay-card airport-info-card stay-collapsible">
-<summary class="stay-collapsible-summary">🚇 À l’aéroport</summary>
+<summary class="stay-collapsible-summary">🛫 À l’aéroport</summary>
 <p><b>À l’arrivée :</b> suivre les panneaux vers le métro à la sortie du terminal 3, prendre la ligne M2 jusqu’à Nørreport, puis marcher environ 8 minutes vers l’Airbnb. Le trajet entre l’aéroport et Nørreport dure environ 15 minutes.</p>
 <p><b>Au retour :</b> rejoindre Nørreport, puis prendre la ligne M2 direction « Københavns Lufthavn ». La station de l’aéroport est reliée directement au terminal 3.</p>
 <p><b>Billet :</b> acheter avant de monter un billet valable pour les zones 1 à 4. Un City Pass Small inclut également le centre et l’aéroport. Billets aux automates de la station, au guichet DSB du terminal 3 ou dans l’application DOT.</p>
@@ -5426,10 +5427,20 @@ body.backup-settings-open{overflow:hidden}
 <div class="stay-actions"><a class="button source" href="https://www.cph.dk/en/practical/baggage/lost-baggage" target="_blank">Service CPH</a><a class="button source" href="https://www.lux-airport.lu/fr/enregistrement-et-voyage/luggage-guidelines/" target="_blank">Service LUX</a></div>
 </div>
 </details><details class="stay-card stay-collapsible">
-<summary class="stay-collapsible-summary">🧳 Rappels utiles</summary>
+<summary class="stay-collapsible-summary">🔔 Rappels utiles</summary>
 <div class="suivi-collapsible-content">
 <p style="text-align:justify;">Choisir toujours <b>DKK</b> sur les terminaux de paiement. Vérifier carte d’identité, billets, bagages, chargeurs et clés avant le départ.</p>
 <p style="text-align:justify;"><b>Billets confirmés.</b> Tous les horaires sont indiqués en heure locale.</p>
+</div>
+</details><details class="stay-card stay-collapsible packing-card">
+<summary class="stay-collapsible-summary">🎒 A prendre avec</summary>
+<div class="packing-content">
+<div class="packing-progress" id="packingProgress" aria-live="polite"></div>
+<div class="packing-list" id="packingList"></div>
+<form class="packing-add" id="packingAddForm">
+<label for="packingAddInput">Ajouter une affaire</label>
+<div class="packing-add-row"><input id="packingAddInput" autocomplete="off" placeholder="Ce que je dois emporter"/><button type="submit">Ajouter</button></div>
+</form>
 </div>
 </details></div>
 </section>
@@ -11686,5 +11697,6 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
 </script>
 <script src="/ui-fixes-v7.js?v=28"></script>
 <script src="/day-style-v1.js?v=5"></script>
+<script src="/packing-list-v1.js?v=1"></script>
 </body>
 </html>
