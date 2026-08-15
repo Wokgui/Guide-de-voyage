@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v343-static-v41";
-const RUNTIME_CACHE="copenhague-v343-runtime-v41";
+const STATIC_CACHE="copenhague-v343-static-v42";
+const RUNTIME_CACHE="copenhague-v343-runtime-v42";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -50,6 +50,37 @@ async function networkFirst(request,fallback){
     return await remember(request,await fetch(request,{cache:"no-store"}));
   }catch(_){
     return (await caches.match(request))||(fallback?await caches.match(fallback):undefined)||Response.error();
+  }
+}
+
+/* Empêche le premier rendu avec l'ancien petit style.
+   La page reste sur son fond crème pendant quelques instants et n'est révélée
+   qu'une fois la feuille de style Prestige réellement installée. */
+function injectPrestigeGate(html){
+  if(!html||html.includes('id="cph-prestige-gate"'))return html;
+  const gate=`<style id="cph-prestige-gate">html{background:#f6efe2}html:not(.cph-prestige-ready) body{visibility:hidden!important}</style><script id="cph-prestige-gate-script">(function(){var done=false,obs=null,timer=null;function reveal(){if(done)return;done=true;if(timer)clearTimeout(timer);if(obs)obs.disconnect();requestAnimationFrame(function(){requestAnimationFrame(function(){document.documentElement.classList.add('cph-prestige-ready')})})}function check(){if(document.getElementById('cph343')){reveal();return true}return false}if(check())return;obs=new MutationObserver(check);obs.observe(document.documentElement,{childList:true,subtree:true});timer=setTimeout(reveal,4000)})();</script>`;
+  return html.replace(/<head([^>]*)>/i,`<head$1>${gate}`);
+}
+
+async function patchedNavigation(request,fallback){
+  let response;
+  try{
+    response=await fetch(request,{cache:"no-store"});
+    if(!response.ok)throw new Error("navigation network error");
+    await remember(request,response.clone());
+  }catch(_){
+    response=(await caches.match(request))||(fallback?await caches.match(fallback):undefined);
+    if(!response)return Response.error();
+  }
+  try{
+    const html=injectPrestigeGate(await response.text());
+    const headers=new Headers(response.headers);
+    headers.set("Content-Type","text/html; charset=utf-8");
+    headers.set("Cache-Control","no-store, no-cache, must-revalidate");
+    headers.delete("Content-Length");
+    return new Response(html,{status:response.status,statusText:response.statusText,headers});
+  }catch(_){
+    return response;
   }
 }
 
@@ -158,7 +189,7 @@ self.addEventListener("fetch",event=>{
 
   if(request.mode==="navigate"){
     event.waitUntil(self.registration.update().catch(()=>null));
-    event.respondWith(networkFirst(request,"/index.html"));
+    event.respondWith(patchedNavigation(request,"/index.html"));
     return;
   }
 
