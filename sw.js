@@ -1,11 +1,12 @@
-const STATIC_CACHE="copenhague-v343-static-v43";
-const RUNTIME_CACHE="copenhague-v343-runtime-v43";
+const STATIC_CACHE="copenhague-v345-static-v45";
+const RUNTIME_CACHE="copenhague-v345-runtime-v45";
 const STATIC_FILES=[
   "/",
   "/index.html",
   "/shared-sync.js",
   "/cloud-backup.js?v=3",
-  "/header-prestige.js?v=344",
+  "/startup-stable-v345.css?v=345",
+  "/header-prestige.js?v=345",
   "/ui-fixes-v7.js?v=30",
   "/day-style-v1.js?v=5",
   "/packing-list-v1.css?v=9",
@@ -58,7 +59,7 @@ async function networkFirst(request,fallback){
 function injectEarlyPrestige(html){
   if(!html)return html;
   html=html.replace(/<script\s+src=["']\/header-prestige\.js\?v=\d+["']\s*><\/script>/ig,"");
-  const early='<script src="/header-prestige.js?v=344"></script>';
+  const early='<link rel="stylesheet" href="/startup-stable-v345.css?v=345"><script src="/header-prestige.js?v=345"></script>';
   return html.replace(/<head([^>]*)>/i,`<head$1>${early}`);
 }
 
