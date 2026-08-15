@@ -45,14 +45,49 @@ html body #programme .day-section.day-section .day-banner.day-banner{
  box-shadow:none!important;
 }
 html body #programme .day-section.day-section .day-banner.day-banner *{color:inherit}
+
+/* Événement réservé ouvert : conserver uniquement le calendrier créé pour l'état replié. */
+html body #programme .visit-details[open] .visit-summary .mini-badge.booking.reserved,
+html body #programme .visit-details[open] .visit-summary .cph-reserved-original-hidden{
+ display:none!important;
+ visibility:hidden!important;
+ width:0!important;min-width:0!important;max-width:0!important;
+ height:0!important;min-height:0!important;max-height:0!important;
+ margin:0!important;padding:0!important;overflow:hidden!important;
+}
+html body #programme .visit-details[open] .visit-summary .cph-reserved-one{
+ display:inline-flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+}
+
+/* « À commander » : l'étoile et le libellé forment un bloc centré dans toutes les vues. */
+html body .recommend-box>b,
+html body .reservation-order>b{
+ display:flex!important;
+ width:100%!important;
+ align-items:center!important;
+ justify-content:center!important;
+ gap:4px!important;
+ text-align:center!important;
+}
 `;
 document.head.appendChild(s);
+function normalizeOrderHeadings(){
+ document.querySelectorAll(".recommend-box>b,.reservation-order>b").forEach(b=>{
+  const text=(b.textContent||"").replace(/^⭐\s*/,"").trim();
+  if(/^À commander$/i.test(text))b.textContent="⭐ À commander";
+ });
+}
 function pin(){
  if(s.parentNode!==document.head||s!==document.head.lastElementChild)document.head.appendChild(s);
+ normalizeOrderHeadings();
  document.documentElement.dataset.cphDayStyle="v5-direct";
 }
 const headObserver=new MutationObserver(pin);
 headObserver.observe(document.head,{childList:true});
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",pin,{once:true});else pin();
+const bodyObserver=new MutationObserver(()=>requestAnimationFrame(normalizeOrderHeadings));
+if(document.body)bodyObserver.observe(document.body,{childList:true,subtree:true});
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{pin();if(document.body)bodyObserver.observe(document.body,{childList:true,subtree:true})},{once:true});else pin();
 [150,500,1200,2500].forEach(ms=>setTimeout(pin,ms));
 })();
