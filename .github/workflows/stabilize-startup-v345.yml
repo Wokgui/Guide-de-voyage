@@ -1,0 +1,171 @@
+name: Stabilize guide startup v345
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  stabilize:
+    if: ${{ !contains(github.event.head_commit.message, 'Stabiliser le démarrage du guide v345') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build first-paint styles and patch startup
+        shell: python
+        run: |
+          import json, re
+          from pathlib import Path
+
+          BG = "#f3ede1"
+          VERSION = "345"
+
+          js_path = Path("header-prestige.js")
+          js = js_path.read_text(encoding="utf-8")
+
+          # 1) Sortir le gros style Prestige du JavaScript : il est ainsi connu du navigateur
+          # avant le premier rendu, au lieu d'être ajouté après coup.
+          m = re.search(r's\.textContent=`(.*?)`;document\.head\.appendChild\(s\)', js, re.S)
+          if not m:
+              raise SystemExit("Bloc CSS Prestige introuvable")
+          prestige = m.group(1).replace("#${SETTINGS_TILE_ID}", "#cphBottomSettingsTile")
+
+          startup_css = prestige + r'''
+
+          /* v345 — premier rendu strictement identique à l'état final. */
+          html,body{background:#f3ede1!important}
+
+          /* Les drapeaux sont peints dès le premier rendu. On n'attend plus une insertion JS
+             qui augmentait la hauteur du header après son affichage. */
+          header h1 .title-main::after{
+            content:"🇩🇰   🇸🇪";
+            box-sizing:border-box;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            width:min(76%,350px);
+            height:24px;
+            margin:8px auto 9px;
+            color:transparent;
+            text-shadow:0 0 0 #fff;
+            font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+            font-size:24px;
+            line-height:24px;
+            letter-spacing:0;
+            background:
+              linear-gradient(#d9ae62,#d9ae62) left center/34% 1px no-repeat,
+              linear-gradient(#d9ae62,#d9ae62) right center/34% 1px no-repeat;
+          }
+          .cph-balanced-flags{display:none!important}
+
+          /* Aucun état intermédiaire de l'interface n'est visible. Le calque reste identique
+             au splash Android jusqu'à ce que positions et dimensions soient stabilisées. */
+          html:not(.cph-app-ready){background:#f3ede1!important;overflow:hidden!important}
+          html:not(.cph-app-ready) body{visibility:hidden!important}
+          html:not(.cph-app-ready)::before{
+            content:"";
+            position:fixed;
+            inset:0;
+            z-index:2147483646;
+            display:block;
+            visibility:visible!important;
+            background:#f3ede1;
+            pointer-events:none;
+          }
+          html:not(.cph-app-ready)::after{
+            content:"";
+            position:fixed;
+            left:50%;
+            top:48%;
+            z-index:2147483647;
+            width:136px;
+            height:136px;
+            display:block;
+            visibility:visible!important;
+            transform:translate(-50%,-50%);
+            background:url('/icons/app-icon-512.png?v=4') center/contain no-repeat;
+            pointer-events:none;
+          }
+          html.cph-app-ready,html.cph-app-ready body{overflow-x:hidden}
+          @media(max-width:390px){
+            header h1 .title-main::after{font-size:22px;height:22px;line-height:22px}
+            html:not(.cph-app-ready)::after{width:128px;height:128px}
+          }
+          '''
+          Path("startup-stable-v345.css").write_text(startup_css, encoding="utf-8")
+
+          # 2) Ne plus insérer les drapeaux dans le DOM après l'affichage : le pseudo-élément
+          # ci-dessus a exactement la place finale dès le premier paint.
+          js, n = re.subn(r'function ensureFlags\(\)\{.*?\}\nfunction ensureSettingsTile',
+                          'function ensureFlags(){}\nfunction ensureSettingsTile', js, count=1, flags=re.S)
+          if n != 1:
+              raise SystemExit("ensureFlags non patché")
+
+          # 3) Révéler seulement quand le header et les premières cartes ont des dimensions
+          # stables. Le délai maxi évite tout blocage si une ressource externe tarde.
+          marker = 'function polish(){filters();mapRows();polishCards();reserved();programMeta();programMapButtons();ensureSettingsTile();ensureTrackingShortcuts()}function start(){'
+          if marker not in js:
+              raise SystemExit("Point d'insertion de stabilité introuvable")
+          ready_code = r'''function revealWhenStable(){
+            const begun=performance.now();let previous="",same=0;
+            const finish=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>document.documentElement.classList.add("cph-app-ready")));
+            function check(){
+              try{polish()}catch(_){}
+              const header=document.querySelector("header");
+              const cards=Array.from(document.querySelectorAll("#programme .visit-details")).slice(0,3);
+              const nodes=[header,...cards].filter(Boolean);
+              const sig=nodes.map(el=>{const r=el.getBoundingClientRect();return [Math.round(r.x),Math.round(r.y),Math.round(r.width),Math.round(r.height)].join(":")}).join("|")+"/"+Math.round(document.body.scrollHeight);
+              if(sig&&sig===previous)same++;else same=0;
+              previous=sig;
+              const elapsed=performance.now()-begun;
+              if((cards.length>0&&same>=3&&elapsed>=1650)||elapsed>=2200){finish();return}
+              setTimeout(check,120);
+            }
+            check();
+          }
+          '''
+          js = js.replace(marker, ready_code + marker, 1)
+          js = js.replace('function start(){addStyles();applyHeader();polish();',
+                          'function start(){addStyles();applyHeader();polish();revealWhenStable();', 1)
+          js_path.write_text(js, encoding="utf-8")
+
+          # 4) Le splash Android et le fond réel de l'application utilisent exactement
+          # la même teinte mesurée sur l'écran final.
+          manifest_path = Path("manifest.webmanifest")
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          manifest["start_url"] = "/?v=20260815-345"
+          manifest["background_color"] = BG
+          for icon in manifest.get("icons", []):
+              icon["src"] = re.sub(r'\?v=\d+$', '?v=4', icon["src"])
+          manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+          # 5) Service worker : charger la feuille v345 et le JS v345 avant le BODY,
+          # renouveler les caches pour ne plus servir l'ancien état.
+          sw_path = Path("sw.js")
+          sw = sw_path.read_text(encoding="utf-8")
+          sw = re.sub(r'const STATIC_CACHE="[^"]+";', 'const STATIC_CACHE="copenhague-v345-static-v45";', sw, count=1)
+          sw = re.sub(r'const RUNTIME_CACHE="[^"]+";', 'const RUNTIME_CACHE="copenhague-v345-runtime-v45";', sw, count=1)
+          sw = re.sub(r'/header-prestige\.js\?v=\d+', '/header-prestige.js?v=345', sw)
+          if '"/startup-stable-v345.css?v=345"' not in sw:
+              sw = sw.replace('"/header-prestige.js?v=345",', '"/startup-stable-v345.css?v=345",\n  "/header-prestige.js?v=345",', 1)
+          sw = re.sub(
+              r"const early='<script src=\"/header-prestige\.js\?v=345\"></script>';",
+              'const early=\'<link rel="stylesheet" href="/startup-stable-v345.css?v=345"><script src="/header-prestige.js?v=345"></script>\';',
+              sw,
+              count=1
+          )
+          sw_path.write_text(sw, encoding="utf-8")
+
+      - name: Commit stabilized startup
+        run: |
+          git config user.name "Wokgui"
+          git config user.email "149906755+Wokgui@users.noreply.github.com"
+          git add header-prestige.js startup-stable-v345.css manifest.webmanifest sw.js
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Stabiliser le démarrage du guide v345"
+          git push
