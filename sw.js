@@ -1,12 +1,12 @@
-const STATIC_CACHE="copenhague-v347-static-v47";
-const RUNTIME_CACHE="copenhague-v347-runtime-v47";
+const STATIC_CACHE="copenhague-v345-static-v45";
+const RUNTIME_CACHE="copenhague-v345-runtime-v45";
 const STATIC_FILES=[
   "/",
   "/index.html",
   "/shared-sync.js",
   "/cloud-backup.js?v=3",
-  "/startup-stable-v345.css?v=347",
-  "/header-prestige.js?v=347",
+  "/startup-stable-v345.css?v=345",
+  "/header-prestige.js?v=345",
   "/ui-fixes-v7.js?v=30",
   "/day-style-v1.js?v=5",
   "/packing-list-v1.css?v=9",
@@ -14,11 +14,9 @@ const STATIC_FILES=[
   "/section-history-v1.css?v=1",
   "/section-history-v1.js?v=1",
   "/manifest.webmanifest",
-  "/icons/splash-any-192-v347.png",
-  "/icons/splash-any-512-v347.png",
   "/icons/app-icon.svg",
-  "/icons/app-icon-192.png?v=4",
-  "/icons/app-icon-512.png?v=4",
+  "/icons/app-icon-192.png?v=2",
+  "/icons/app-icon-512.png?v=2",
   "/vendor/leaflet/leaflet.css",
   "/vendor/leaflet/leaflet.js",
   "/vendor/supabase/supabase.js",
@@ -61,20 +59,19 @@ async function networkFirst(request,fallback){
 function injectEarlyPrestige(html){
   if(!html)return html;
   html=html.replace(/<script\s+src=["']\/header-prestige\.js\?v=\d+["']\s*><\/script>/ig,"");
-  const early='<link rel="stylesheet" href="/startup-stable-v345.css?v=347"><script src="/header-prestige.js?v=347"></script>';
+  const early='<link rel="stylesheet" href="/startup-stable-v345.css?v=345"><script src="/header-prestige.js?v=345"></script>';
   return html.replace(/<head([^>]*)>/i,`<head$1>${early}`);
 }
 
 async function patchedNavigation(request,fallback){
-  let response=(await caches.match(request))||(fallback?await caches.match(fallback):undefined);
-  if(response){
-    fetch(request,{cache:"no-store"}).then(r=>{if(r&&r.ok)return remember(request,r)}).catch(()=>null);
-  }else{
-    try{
-      response=await fetch(request,{cache:"no-store"});
-      if(!response.ok)throw new Error("navigation network error");
-      await remember(request,response.clone());
-    }catch(_){return Response.error();}
+  let response;
+  try{
+    response=await fetch(request,{cache:"no-store"});
+    if(!response.ok)throw new Error("navigation network error");
+    await remember(request,response.clone());
+  }catch(_){
+    response=(await caches.match(request))||(fallback?await caches.match(fallback):undefined);
+    if(!response)return Response.error();
   }
   try{
     const html=injectEarlyPrestige(await response.text());
@@ -90,14 +87,8 @@ async function patchedNavigation(request,fallback){
 
 async function patchedHeader(request){
   try{
-    let response=await caches.match(request);
-    if(response){
-      fetch(request,{cache:"no-store"}).then(r=>{if(r&&r.ok)return remember(request,r)}).catch(()=>null);
-    }else{
-      response=await fetch(request,{cache:"no-store"});
-      if(!response.ok)return response;
-      await remember(request,response.clone());
-    }
+    const response=await fetch(request,{cache:"no-store"});
+    if(!response.ok)return response;
     let source=await response.text();
 
     /* La feuille de style principale est installée immédiatement dans le HEAD.
@@ -181,8 +172,8 @@ async function patchedHeader(request){
       });
     }
     function polishAll(){fix();reservedIconOnly();orderProgrammeMap();}
-    polishAll();
-    const observer=new MutationObserver(()=>{clearTimeout(window.__cphPair336Timer);window.__cphPair336Timer=setTimeout(polishAll,110)});
+    polishAll();setTimeout(polishAll,200);setTimeout(polishAll,700);setTimeout(polishAll,1500);
+    const observer=new MutationObserver(()=>{clearTimeout(window.__cphPair336Timer);window.__cphPair336Timer=setTimeout(polishAll,35)});
     observer.observe(document.body,{childList:true,subtree:true});
   }
 

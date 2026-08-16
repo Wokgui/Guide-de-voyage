@@ -23,5 +23,63 @@ header #saveIndicator,header #backupSettingsButton{display:none!important}header
 #programme .cph-program-map-clean{background:transparent!important;border:0!important;outline:0!important;box-shadow:none!important}
 @media(max-width:390px){header h1 .title-main{font-size:clamp(19px,5.55vw,23px)!important}.cph-balanced-flags span{font-size:22px!important}header h1 .title-sub{width:58%!important;min-width:205px!important;height:28px!important;font-size:10.2px!important}#carte .map-list-item-with-thumb{grid-template-columns:72px minmax(0,1fr) 40px!important;column-gap:10px!important}#carte .cph-walk-align{right:14px!important}}
 
-/* v347 : pas d'overlay ni de masquage du BODY. */
+
+/* v345 — premier rendu strictement identique à l'état final. */
 html,body{background:#f3ede1!important}
+
+/* Les drapeaux sont peints dès le premier rendu. On n'attend plus une insertion JS
+   qui augmentait la hauteur du header après son affichage. */
+header h1 .title-main::after{
+  content:"🇩🇰   🇸🇪";
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:min(76%,350px);
+  height:24px;
+  margin:8px auto 9px;
+  color:transparent;
+  text-shadow:0 0 0 #fff;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  font-size:24px;
+  line-height:24px;
+  letter-spacing:0;
+  background:
+    linear-gradient(#d9ae62,#d9ae62) left center/34% 1px no-repeat,
+    linear-gradient(#d9ae62,#d9ae62) right center/34% 1px no-repeat;
+}
+.cph-balanced-flags{display:none!important}
+
+/* Aucun état intermédiaire de l'interface n'est visible. Le calque reste identique
+   au splash Android jusqu'à ce que positions et dimensions soient stabilisées. */
+html:not(.cph-app-ready){background:#f3ede1!important;overflow:hidden!important}
+html:not(.cph-app-ready) body{visibility:hidden!important}
+html:not(.cph-app-ready)::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:2147483646;
+  display:block;
+  visibility:visible!important;
+  background:#f3ede1;
+  pointer-events:none;
+}
+html:not(.cph-app-ready)::after{
+  content:"";
+  position:fixed;
+  left:50%;
+  top:48%;
+  z-index:2147483647;
+  width:136px;
+  height:136px;
+  display:block;
+  visibility:visible!important;
+  transform:translate(-50%,-50%);
+  background:url('/icons/app-icon-512.png?v=4') center/contain no-repeat;
+  pointer-events:none;
+}
+html.cph-app-ready,html.cph-app-ready body{overflow-x:hidden}
+@media(max-width:390px){
+  header h1 .title-main::after{font-size:22px;height:22px;line-height:22px}
+  html:not(.cph-app-ready)::after{width:128px;height:128px}
+}
