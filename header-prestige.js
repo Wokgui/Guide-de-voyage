@@ -45,21 +45,14 @@ function goToTrackingSection(id){if(typeof switchTab==="function")switchTab("sui
 function ensureTrackingOrder(){const stats=document.querySelector("header .stats");if(stats){[".stat-todo",".stat-done",".stat-aside",".stat-progress"].forEach(selector=>{const el=stats.querySelector(selector);if(el)stats.appendChild(el)})}ensureTrackingSections()}
 function ensureTrackingShortcuts(){renderTrackingTodo();ensureTrackingOrder();ensureTrackingDefaultClosed();[[".stat-done","trackingVisitedSection","Afficher les points visités"],[".stat-todo","trackingTodoSection","Afficher les visites à faire"],[".stat-aside","trackingAsideSection","Afficher les points mis de côté"]].forEach(([selector,id,label])=>{const el=document.querySelector(selector);if(!el||el.dataset.trackingShortcutBound)return;el.dataset.trackingShortcutBound="1";el.style.cursor="pointer";el.setAttribute("role","button");el.setAttribute("tabindex","0");el.setAttribute("aria-label",label);const open=()=>goToTrackingSection(id);el.addEventListener("click",open);el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}})})}
 function revealWhenStable(){
-  const begun=performance.now();let previous="",same=0;
-  const finish=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>document.documentElement.classList.add("cph-app-ready")));
-  function check(){
-    try{polish()}catch(_){}
-    const header=document.querySelector("header");
-    const cards=Array.from(document.querySelectorAll("#programme .visit-details")).slice(0,3);
-    const nodes=[header,...cards].filter(Boolean);
-    const sig=nodes.map(el=>{const r=el.getBoundingClientRect();return [Math.round(r.x),Math.round(r.y),Math.round(r.width),Math.round(r.height)].join(":")}).join("|")+"/"+Math.round(document.body.scrollHeight);
-    if(sig&&sig===previous)same++;else same=0;
-    previous=sig;
-    const elapsed=performance.now()-begun;
-    if((cards.length>0&&same>=3&&elapsed>=1650)||elapsed>=2200){finish();return}
-    setTimeout(check,120);
-  }
-  check();
+  const started=performance.now(),minVisibleAt=started+2650,hardLimit=started+4700;
+  let lastSignature="",stableSince=0,finished=false;
+  const finish=()=>{if(finished)return;finished=true;requestAnimationFrame(()=>requestAnimationFrame(()=>document.documentElement.classList.add("cph-app-ready")))};
+  const fontsReady=()=>!document.fonts||document.fonts.status==="loaded";
+  const imagesReady=()=>Array.from(document.images).filter(img=>{const r=img.getBoundingClientRect();return r.bottom>-80&&r.top<window.innerHeight*1.6}).every(img=>img.complete&&(img.naturalWidth>0||!img.currentSrc));
+  const signature=()=>{const nodes=Array.from(document.querySelectorAll("header,.tabs,#programme,#programme .day-card,#programme .visit-details,#programme .visit-summary")).filter(el=>{const r=el.getBoundingClientRect();return r.bottom>-60&&r.top<window.innerHeight*1.65}).slice(0,18);return nodes.map(el=>{const r=el.getBoundingClientRect();return [Math.round(r.x*2)/2,Math.round(r.y*2)/2,Math.round(r.width*2)/2,Math.round(r.height*2)/2].join(":")}).join("|")+"/h:"+Math.round(document.body.scrollHeight)+"/w:"+Math.round(document.body.scrollWidth)};
+  function check(){if(finished)return;try{polish()}catch(_){}const now=performance.now(),sig=signature();if(sig&&sig===lastSignature){if(!stableSince)stableSince=now}else{stableSince=0;lastSignature=sig}const stableFor=stableSince?now-stableSince:0;if(now>=minVisibleAt&&stableFor>=900&&fontsReady()&&imagesReady()){finish();return}if(now>=hardLimit){finish();return}setTimeout(check,100)}
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>setTimeout(check,0)).catch(()=>check());else check();
 }
 function polish(){filters();mapRows();polishCards();reserved();programMeta();programMapButtons();ensureSettingsTile();ensureTrackingShortcuts()}function start(){addStyles();applyHeader();polish();revealWhenStable();[250,800,1600].forEach(ms=>setTimeout(polish,ms));new MutationObserver(()=>{clearTimeout(window.__cphP);window.__cphP=setTimeout(polish,35)}).observe(document.body,{childList:true,subtree:true})}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();

@@ -70,16 +70,19 @@ html:not(.cph-app-ready)::after{
   left:50%;
   top:48%;
   z-index:2147483647;
-  width:136px;
-  height:136px;
+  width:256px;
+  height:256px;
   display:block;
   visibility:visible!important;
   transform:translate(-50%,-50%);
-  background:url('/icons/app-icon-512.png?v=4') center/contain no-repeat;
+  background:url('/icons/splash-any-512-v346.png') center/contain no-repeat;
   pointer-events:none;
 }
 html.cph-app-ready,html.cph-app-ready body{overflow-x:hidden}
 @media(max-width:390px){
   header h1 .title-main::after{font-size:22px;height:22px;line-height:22px}
-  html:not(.cph-app-ready)::after{width:128px;height:128px}
+  html:not(.cph-app-ready)::after{width:244px;height:244px}
 }
+
+/* v346 */
+html:not(.cph-app-ready)::after{filter:none!important;box-shadow:none!important}

@@ -1,12 +1,12 @@
-const STATIC_CACHE="copenhague-v345-static-v45";
-const RUNTIME_CACHE="copenhague-v345-runtime-v45";
+const STATIC_CACHE="copenhague-v346-static-v46";
+const RUNTIME_CACHE="copenhague-v346-runtime-v46";
 const STATIC_FILES=[
   "/",
   "/index.html",
   "/shared-sync.js",
   "/cloud-backup.js?v=3",
-  "/startup-stable-v345.css?v=345",
-  "/header-prestige.js?v=345",
+  "/startup-stable-v345.css?v=346",
+  "/header-prestige.js?v=346",
   "/ui-fixes-v7.js?v=30",
   "/day-style-v1.js?v=5",
   "/packing-list-v1.css?v=9",
@@ -14,9 +14,11 @@ const STATIC_FILES=[
   "/section-history-v1.css?v=1",
   "/section-history-v1.js?v=1",
   "/manifest.webmanifest",
+  "/icons/splash-any-192-v346.png",
+  "/icons/splash-any-512-v346.png",
   "/icons/app-icon.svg",
-  "/icons/app-icon-192.png?v=2",
-  "/icons/app-icon-512.png?v=2",
+  "/icons/app-icon-192.png?v=4",
+  "/icons/app-icon-512.png?v=4",
   "/vendor/leaflet/leaflet.css",
   "/vendor/leaflet/leaflet.js",
   "/vendor/supabase/supabase.js",
@@ -59,7 +61,7 @@ async function networkFirst(request,fallback){
 function injectEarlyPrestige(html){
   if(!html)return html;
   html=html.replace(/<script\s+src=["']\/header-prestige\.js\?v=\d+["']\s*><\/script>/ig,"");
-  const early='<link rel="stylesheet" href="/startup-stable-v345.css?v=345"><script src="/header-prestige.js?v=345"></script>';
+  const early='<link rel="stylesheet" href="/startup-stable-v345.css?v=346"><script src="/header-prestige.js?v=346"></script>';
   return html.replace(/<head([^>]*)>/i,`<head$1>${early}`);
 }
 
