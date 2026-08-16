@@ -2,6 +2,11 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "redirects": [
     {
+      "source": "/start.html",
+      "destination": "/?v=20260816-351",
+      "permanent": false
+    },
+    {
       "source": "/cloud-backup.js",
       "has": [
         {"type": "query", "key": "v", "value": "3"}
@@ -34,6 +39,12 @@
         {"key": "Permissions-Policy", "value": "geolocation=(self), accelerometer=(self), gyroscope=(self), magnetometer=(self)"},
         {"key": "X-Content-Type-Options", "value": "nosniff"},
         {"key": "Referrer-Policy", "value": "strict-origin-when-cross-origin"}
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [
+        {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}
       ]
     },
     {
