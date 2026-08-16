@@ -61,5 +61,22 @@ function revealWhenStable(){
   }
   check();
 }
-function polish(){filters();mapRows();polishCards();reserved();programMeta();programMapButtons();ensureSettingsTile();ensureTrackingShortcuts()}function start(){addStyles();applyHeader();polish();revealWhenStable();[250,800,1600].forEach(ms=>setTimeout(polish,ms));new MutationObserver(()=>{clearTimeout(window.__cphP);window.__cphP=setTimeout(polish,35)}).observe(document.body,{childList:true,subtree:true})}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
+function revealWhenStable(){
+  const begun=performance.now();let previous="",same=0;
+  const finish=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>document.documentElement.classList.add("cph-app-ready")));
+  function check(){
+    try{polish()}catch(_){}
+    const header=document.querySelector("header");
+    const cards=Array.from(document.querySelectorAll("#programme .visit-details")).slice(0,3);
+    const nodes=[header,...cards].filter(Boolean);
+    const sig=nodes.map(el=>{const r=el.getBoundingClientRect();return [Math.round(r.x),Math.round(r.y),Math.round(r.width),Math.round(r.height)].join(":")}).join("|")+"/"+Math.round(document.body.scrollHeight);
+    if(sig&&sig===previous)same++;else same=0;
+    previous=sig;
+    const elapsed=performance.now()-begun;
+    if((cards.length>0&&same>=3&&elapsed>=1650)||elapsed>=2200){finish();return}
+    setTimeout(check,120);
+  }
+  check();
+}
+function polish(){filters();mapRows();polishCards();reserved();programMeta();programMapButtons();ensureSettingsTile();ensureTrackingShortcuts()}function start(){addStyles();applyHeader();polish();revealWhenStable();revealWhenStable();[250,800,1600].forEach(ms=>setTimeout(polish,ms));new MutationObserver(()=>{clearTimeout(window.__cphP);window.__cphP=setTimeout(polish,35)}).observe(document.body,{childList:true,subtree:true})}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
