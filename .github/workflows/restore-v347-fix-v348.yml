@@ -23,6 +23,7 @@ jobs:
           cp .github/scripts/restore_v348.py /tmp/restore_v348.py
           git read-tree --reset -u 79e1a10b4f9391360a721928e92771bf3cd71f1f
           git checkout origin/main -- .github/workflows
+          rm -f .github/workflows/fix-startup-v347.yml
           python /tmp/restore_v348.py
 
       - name: Verify
@@ -38,6 +39,7 @@ jobs:
           if grep -q 'cph-app-ready' startup-stable-v345.css; then exit 1; fi
           if grep -q '\[150,500,1200\]' ui-fixes-v7.js; then exit 1; fi
           if grep -q 'setTimeout(polishAll,110)' sw.js; then exit 1; fi
+          if test -e .github/workflows/fix-startup-v347.yml; then exit 1; fi
 
       - name: Commit
         run: |
