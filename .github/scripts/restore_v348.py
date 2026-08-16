@@ -120,6 +120,3 @@ if old_polish not in sw:
     raise SystemExit("scheduler du patch SW introuvable")
 sw = sw.replace(old_polish, new_polish, 1)
 p.write_text(sw, encoding="utf-8")
-
-# Remove the workflow that was silently rewriting every push back to v345.
-Path(".github/workflows/stabilize-startup-v345.yml").unlink(missing_ok=True)
