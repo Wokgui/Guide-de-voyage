@@ -19,10 +19,10 @@
       "purpose": "any"
     },
     {
-      "src": "/icons/app-icon-512.png?v=2",
+      "src": "/icons/app-icon-startup-small.svg?v=1",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ]
 }
