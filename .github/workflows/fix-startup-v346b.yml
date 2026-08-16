@@ -1,0 +1,105 @@
+name: Fix guide startup v346b
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: ${{ github.event.head_commit.message == 'Stabiliser le démarrage du guide v345 — relancer v346' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install --quiet pillow
+      - name: Patch startup
+        shell: python
+        run: |
+          import json, re
+          from pathlib import Path
+          from PIL import Image
+
+          BG="#f3ede1"
+
+          def mask(size, exponent=4.6):
+              ss=4; S=size*ss; c=(S-1)/2; a=c*.985
+              m=Image.new("L",(S,S),0); p=m.load()
+              for y in range(S):
+                  ny=abs((y-c)/a)
+                  for x in range(S):
+                      nx=abs((x-c)/a)
+                      if nx**exponent+ny**exponent<=1:p[x,y]=255
+              return m.resize((size,size),Image.Resampling.LANCZOS)
+
+          def splash(src,out,size):
+              im=Image.open(src).convert("RGBA")
+              inner=round(size*.515)
+              im=im.resize((inner,inner),Image.Resampling.LANCZOS)
+              a=Image.composite(im.getchannel("A"),Image.new("L",(inner,inner),0),mask(inner))
+              im.putalpha(a)
+              canvas=Image.new("RGBA",(size,size),(0,0,0,0))
+              pos=(size-inner)//2
+              canvas.alpha_composite(im,(pos,pos))
+              canvas.save(out,optimize=True)
+
+          splash("icons/app-icon-192.png","icons/splash-any-192-v346.png",192)
+          splash("icons/app-icon-512.png","icons/splash-any-512-v346.png",512)
+
+          mp=Path("manifest.webmanifest")
+          m=json.loads(mp.read_text(encoding="utf-8"))
+          m["start_url"]="/?v=20260816-346"
+          m["background_color"]=BG
+          m["icons"]=[
+            {"src":"/icons/splash-any-192-v346.png","sizes":"192x192","type":"image/png","purpose":"any"},
+            {"src":"/icons/splash-any-512-v346.png","sizes":"512x512","type":"image/png","purpose":"any"},
+            {"src":"/icons/app-icon-192.png?v=4","sizes":"192x192","type":"image/png","purpose":"maskable"},
+            {"src":"/icons/app-icon-512.png?v=4","sizes":"512x512","type":"image/png","purpose":"maskable"}
+          ]
+          mp.write_text(json.dumps(m,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+
+          cp=Path("startup-stable-v345.css")
+          css=cp.read_text(encoding="utf-8")
+          css=css.replace("background:url('/icons/app-icon-512.png?v=4') center/contain no-repeat;","background:url('/icons/splash-any-512-v346.png') center/contain no-repeat;")
+          css=re.sub(r"width:136px;\s*height:136px;","width:256px;\n  height:256px;",css,count=1)
+          css=re.sub(r"width:128px;height:128px","width:244px;height:244px",css,count=1)
+          if "/* v346 */" not in css: css += "\n/* v346 */\nhtml:not(.cph-app-ready)::after{filter:none!important;box-shadow:none!important}\n"
+          cp.write_text(css,encoding="utf-8")
+
+          hp=Path("header-prestige.js")
+          js=hp.read_text(encoding="utf-8")
+          start=js.find("function revealWhenStable(){")
+          end=js.find("function polish(){",start)
+          if start<0 or end<0: raise SystemExit("revealWhenStable introuvable")
+          reveal='''function revealWhenStable(){
+            const started=performance.now(),minVisibleAt=started+2650,hardLimit=started+4700;
+            let lastSignature="",stableSince=0,finished=false;
+            const finish=()=>{if(finished)return;finished=true;requestAnimationFrame(()=>requestAnimationFrame(()=>document.documentElement.classList.add("cph-app-ready")))};
+            const fontsReady=()=>!document.fonts||document.fonts.status==="loaded";
+            const imagesReady=()=>Array.from(document.images).filter(img=>{const r=img.getBoundingClientRect();return r.bottom>-80&&r.top<window.innerHeight*1.6}).every(img=>img.complete&&(img.naturalWidth>0||!img.currentSrc));
+            const signature=()=>{const nodes=Array.from(document.querySelectorAll("header,.tabs,#programme,#programme .day-card,#programme .visit-details,#programme .visit-summary")).filter(el=>{const r=el.getBoundingClientRect();return r.bottom>-60&&r.top<window.innerHeight*1.65}).slice(0,18);return nodes.map(el=>{const r=el.getBoundingClientRect();return [Math.round(r.x*2)/2,Math.round(r.y*2)/2,Math.round(r.width*2)/2,Math.round(r.height*2)/2].join(":")}).join("|")+"/h:"+Math.round(document.body.scrollHeight)+"/w:"+Math.round(document.body.scrollWidth)};
+            function check(){if(finished)return;try{polish()}catch(_){}const now=performance.now(),sig=signature();if(sig&&sig===lastSignature){if(!stableSince)stableSince=now}else{stableSince=0;lastSignature=sig}const stableFor=stableSince?now-stableSince:0;if(now>=minVisibleAt&&stableFor>=900&&fontsReady()&&imagesReady()){finish();return}if(now>=hardLimit){finish();return}setTimeout(check,100)}
+            if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>setTimeout(check,0)).catch(()=>check());else check();
+          }
+          '''
+          js=js[:start]+reveal+js[end:]
+          hp.write_text(js,encoding="utf-8")
+
+          sp=Path("sw.js")
+          sw=sp.read_text(encoding="utf-8")
+          sw=re.sub(r'const STATIC_CACHE="[^"]+";','const STATIC_CACHE="copenhague-v346-static-v46";',sw,count=1)
+          sw=re.sub(r'const RUNTIME_CACHE="[^"]+";','const RUNTIME_CACHE="copenhague-v346-runtime-v46";',sw,count=1)
+          sw=sw.replace('/startup-stable-v345.css?v=345','/startup-stable-v345.css?v=346').replace('/header-prestige.js?v=345','/header-prestige.js?v=346')
+          if '"/icons/splash-any-192-v346.png"' not in sw:
+              sw=sw.replace('"/manifest.webmanifest",','"/manifest.webmanifest",\n  "/icons/splash-any-192-v346.png",\n  "/icons/splash-any-512-v346.png",')
+          sw=sw.replace('"/icons/app-icon-192.png?v=2"','"/icons/app-icon-192.png?v=4"').replace('"/icons/app-icon-512.png?v=2"','"/icons/app-icon-512.png?v=4"')
+          sp.write_text(sw,encoding="utf-8")
+      - name: Commit
+        run: |
+          git config user.name "Wokgui"
+          git config user.email "149906755+Wokgui@users.noreply.github.com"
+          git rm -f .github/workflows/fix-startup-v346b.yml .github/workflows/fix-startup-v346.yml .github/workflows/stabilize-startup-v345.yml || true
+          git add header-prestige.js startup-stable-v345.css manifest.webmanifest sw.js icons/splash-any-192-v346.png icons/splash-any-512-v346.png
+          git commit -m "Corriger les trois étapes du démarrage du guide v346"
+          git push
