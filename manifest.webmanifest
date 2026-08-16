@@ -4,7 +4,7 @@
   "short_name": "Copenhague",
   "description": "Programme et suivi de voyage à Copenhague et Malmö.",
   "lang": "fr-FR",
-  "start_url": "/",
+  "start_url": "/start.html?v=2",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -19,9 +19,9 @@
       "purpose": "any"
     },
     {
-      "src": "/icons/app-icon-startup-small.svg?v=1",
+      "src": "https://guidedevoyage-9axs2olj7-voyages1.vercel.app/icons/splash-any-512-v346.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     }
   ]
