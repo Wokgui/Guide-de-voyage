@@ -32,9 +32,11 @@ jobs:
           python -m json.tool manifest.webmanifest >/dev/null
           grep -q '🇩🇰' startup-stable-v345.css
           grep -q '🇸🇪' startup-stable-v345.css
+          grep -q '__cphUiFixesStableV31' ui-fixes-v7.js
+          grep -q 'copenhague-v348-static-v48' sw.js
           if grep -q 'cph-app-ready' startup-stable-v345.css; then exit 1; fi
           if grep -q '\[150,500,1200\]' ui-fixes-v7.js; then exit 1; fi
-          if grep -q 'setTimeout(polishAll,200)' sw.js; then exit 1; fi
+          if grep -q 'setTimeout(polishAll,110)' sw.js; then exit 1; fi
           if test -e .github/workflows/stabilize-startup-v345.yml; then exit 1; fi
 
       - name: Commit
