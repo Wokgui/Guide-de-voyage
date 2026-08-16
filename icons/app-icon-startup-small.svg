@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Guide Copenhague">
+  <g transform="translate(96 96) scale(.625)">
+    <path d="M112 0h288c61.856 0 112 50.144 112 112v288c0 61.856-50.144 112-112 112H112C50.144 512 0 461.856 0 400V112C0 50.144 50.144 0 112 0z" fill="#49796b"/>
+    <circle cx="256" cy="232" r="164" fill="#fffdf8"/>
+    <path d="M256 91c-74 0-134 59-134 133 0 96 134 222 134 222s134-126 134-222c0-74-60-133-134-133z" fill="#75a9b4"/>
+    <circle cx="256" cy="222" r="66" fill="#fffdf8"/>
+    <path d="M226 182h60v80h-60z" fill="#d98e73"/>
+    <path d="M246 182h20v80h-20zM226 212h60v20h-60z" fill="#fffdf8"/>
+  </g>
+</svg>
