@@ -100,8 +100,8 @@ sw = sw.replace("copenhague-v347-runtime-v47", "copenhague-v348-runtime-v48")
 sw = sw.replace("/startup-stable-v345.css?v=347", "/startup-stable-v345.css?v=348")
 sw = sw.replace("/header-prestige.js?v=347", "/header-prestige.js?v=348")
 sw = sw.replace("/ui-fixes-v7.js?v=30", "/ui-fixes-v7.js?v=31")
-old_polish = """    polishAll();setTimeout(polishAll,200);setTimeout(polishAll,700);setTimeout(polishAll,1500);
-    const observer=new MutationObserver(()=>{clearTimeout(window.__cphPair336Timer);window.__cphPair336Timer=setTimeout(polishAll,35)});
+old_polish = """    polishAll();
+    const observer=new MutationObserver(()=>{clearTimeout(window.__cphPair336Timer);window.__cphPair336Timer=setTimeout(polishAll,110)});
     observer.observe(document.body,{childList:true,subtree:true});"""
 new_polish = """    polishAll();
     let pending=false;
