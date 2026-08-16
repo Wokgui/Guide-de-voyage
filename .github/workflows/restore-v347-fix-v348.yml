@@ -2,14 +2,16 @@ name: Restore v347 and fix v348
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+    paths:
+      - .github/workflows/restore-v347-fix-v348.yml
 
 permissions:
   contents: write
 
 jobs:
-  restore-and-fix:
-    if: ${{ github.event.head_commit.message == 'Stabiliser le démarrage du guide v345 — restaurer v347 et corriger v348' }}
+  restore_and_fix:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,8 +19,7 @@ jobs:
           fetch-depth: 0
 
       - name: Restore v347 tree
-        run: |
-          git read-tree --reset -u 79e1a10b4f9391360a721928e92771bf3cd71f1f
+        run: git read-tree --reset -u 79e1a10b4f9391360a721928e92771bf3cd71f1f
 
       - name: Apply responsiveness and layout fixes
         shell: python
@@ -26,11 +27,8 @@ jobs:
           import json, re
           from pathlib import Path
 
-          # -------- header-prestige.js --------
           p = Path('header-prestige.js')
           js = p.read_text(encoding='utf-8')
-
-          # Drapeaux statiques : aucune insertion DOM tardive, donc aucune poussée du header.
           js, n = re.subn(
               r'function ensureFlags\(\)\{.*?\}\nfunction ensureSettingsTile',
               'function ensureFlags(){}\nfunction ensureSettingsTile',
@@ -41,8 +39,6 @@ jobs:
           if n != 1:
               raise SystemExit('ensureFlags introuvable')
 
-          # Supprime le MutationObserver agressif. Les corrections lourdes passent uniquement
-          # quand le navigateur est disponible, sans bloquer les taps/clics.
           old = 'function polish(){filters();mapRows();polishCards();reserved();programMeta();programMapButtons();ensureSettingsTile();ensureTrackingShortcuts()}function start(){addStyles();applyHeader();polish();new MutationObserver(()=>{clearTimeout(window.__cphP);window.__cphP=setTimeout(polish,110)}).observe(document.body,{childList:true,subtree:true})}'
           new = '''function polish(){filters();mapRows();polishCards();reserved();programMeta();programMapButtons();ensureSettingsTile();ensureTrackingShortcuts()}
 function schedulePolish(){
@@ -53,18 +49,16 @@ function schedulePolish(){
 }
 function start(){addStyles();applyHeader();polish();const observer=new MutationObserver(mutations=>{if(mutations.some(m=>m.addedNodes&&m.addedNodes.length))schedulePolish()});observer.observe(document.body,{childList:true,subtree:true});window.addEventListener("resize",schedulePolish,{passive:true})}'''
           if old not in js:
-              raise SystemExit('fin de start() v347 introuvable')
+              raise SystemExit('fin de start v347 introuvable')
           js = js.replace(old, new, 1)
           p.write_text(js, encoding='utf-8')
 
-          # -------- startup-stable-v345.css --------
           p = Path('startup-stable-v345.css')
           css = p.read_text(encoding='utf-8')
-          # On garde la v347 sans overlay, mais on rétablit les drapeaux dans le CSS du premier paint.
-          marker = '/* v347 : pas d\'overlay ni de masquage du BODY. */\nhtml,body{background:#f3ede1!important}'
+          marker = "/* v347 : pas d'overlay ni de masquage du BODY. */\nhtml,body{background:#f3ede1!important}"
           if marker not in css:
               raise SystemExit('marqueur CSS v347 introuvable')
-          stable = r'''/* v348 : affichage immédiat, sans overlay, avec géométrie du header déjà finale. */
+          stable = '''/* v348 : affichage immédiat, sans overlay, avec géométrie du header déjà finale. */
 html,body{background:#f3ede1!important}
 header h1 .title-main::after{
   content:"🇩🇰   🇸🇪";
@@ -81,9 +75,7 @@ header h1 .title-main::after{
   font-size:24px;
   line-height:24px;
   letter-spacing:0;
-  background:
-    linear-gradient(#d9ae62,#d9ae62) left center/34% 1px no-repeat,
-    linear-gradient(#d9ae62,#d9ae62) right center/34% 1px no-repeat;
+  background:linear-gradient(#d9ae62,#d9ae62) left center/34% 1px no-repeat,linear-gradient(#d9ae62,#d9ae62) right center/34% 1px no-repeat;
 }
 .cph-balanced-flags{display:none!important}
 button,a,summary,label,.tab,[role="button"]{touch-action:manipulation}
@@ -92,7 +84,6 @@ button,a,summary,label,.tab,[role="button"]{touch-action:manipulation}
           css = css.replace(marker, stable, 1)
           p.write_text(css, encoding='utf-8')
 
-          # -------- ui-fixes-v7.js -> V31, même géométrie mais sans recalculs agressifs --------
           p = Path('ui-fixes-v7.js')
           ui = p.read_text(encoding='utf-8')
           ui = ui.replace('"__cphUiFixesStableV30"].forEach', '"__cphUiFixesStableV30","__cphUiFixesStableV31"].forEach', 1)
@@ -114,13 +105,11 @@ function start(){observer=new MutationObserver(mutations=>{if(mutations.some(m=>
           ui = ui.replace(old_schedule, new_schedule, 1)
           p.write_text(ui, encoding='utf-8')
 
-          # -------- manifest --------
           p = Path('manifest.webmanifest')
           manifest = json.loads(p.read_text(encoding='utf-8'))
           manifest['start_url'] = '/?v=20260816-348'
           p.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
-          # -------- service worker --------
           p = Path('sw.js')
           sw = p.read_text(encoding='utf-8')
           sw = sw.replace('copenhague-v347-static-v47', 'copenhague-v348-static-v48')
@@ -128,7 +117,6 @@ function start(){observer=new MutationObserver(mutations=>{if(mutations.some(m=>
           sw = sw.replace('/startup-stable-v345.css?v=347', '/startup-stable-v345.css?v=348')
           sw = sw.replace('/header-prestige.js?v=347', '/header-prestige.js?v=348')
           sw = sw.replace('/ui-fixes-v7.js?v=30', '/ui-fixes-v7.js?v=31')
-
           old_polish = '''    polishAll();setTimeout(polishAll,200);setTimeout(polishAll,700);setTimeout(polishAll,1500);
     const observer=new MutationObserver(()=>{clearTimeout(window.__cphPair336Timer);window.__cphPair336Timer=setTimeout(polishAll,35)});
     observer.observe(document.body,{childList:true,subtree:true});'''
@@ -150,7 +138,6 @@ function start(){observer=new MutationObserver(mutations=>{if(mutations.some(m=>
           sw = sw.replace(old_polish, new_polish, 1)
           p.write_text(sw, encoding='utf-8')
 
-          # Le workflow v345 était encore actif et réécrivait automatiquement les fichiers.
           Path('.github/workflows/stabilize-startup-v345.yml').unlink(missing_ok=True)
           Path('.github/workflows/restore-v347-fix-v348.yml').unlink(missing_ok=True)
 
@@ -162,10 +149,10 @@ function start(){observer=new MutationObserver(mutations=>{if(mutations.some(m=>
           python -m json.tool manifest.webmanifest >/dev/null
           grep -q '🇩🇰' startup-stable-v345.css
           grep -q '🇸🇪' startup-stable-v345.css
-          ! grep -q 'cph-app-ready' startup-stable-v345.css
-          ! grep -q '\[150,500,1200\]' ui-fixes-v7.js
-          ! grep -q 'setTimeout(polishAll,200)' sw.js
-          ! test -e .github/workflows/stabilize-startup-v345.yml
+          if grep -q 'cph-app-ready' startup-stable-v345.css; then exit 1; fi
+          if grep -q '\[150,500,1200\]' ui-fixes-v7.js; then exit 1; fi
+          if grep -q 'setTimeout(polishAll,200)' sw.js; then exit 1; fi
+          if test -e .github/workflows/stabilize-startup-v345.yml; then exit 1; fi
 
       - name: Commit final v348
         run: |
