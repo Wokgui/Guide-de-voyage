@@ -1,9 +1,9 @@
 (function(){
 "use strict";
-["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12","__cphUiFixesStableV13","__cphUiFixesStableV14","__cphUiFixesStableV15","__cphUiFixesStableV16","__cphUiFixesStableV17","__cphUiFixesStableV18","__cphUiFixesStableV19","__cphUiFixesStableV20","__cphUiFixesStableV21","__cphUiFixesStableV22","__cphUiFixesStableV23","__cphUiFixesStableV24","__cphUiFixesStableV25","__cphUiFixesStableV26","__cphUiFixesStableV27","__cphUiFixesStableV28","__cphUiFixesStableV29","__cphUiFixesStableV30"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
-const GLOBAL_KEY="__cphUiFixesStableV30";
-const STYLE_ID="cph-ui-fixes-v30";
-["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11","cph-ui-fixes-v12","cph-ui-fixes-v13","cph-ui-fixes-v14","cph-ui-fixes-v15","cph-ui-fixes-v16","cph-ui-fixes-v17","cph-ui-fixes-v18","cph-ui-fixes-v19","cph-ui-fixes-v20","cph-ui-fixes-v21","cph-ui-fixes-v22","cph-ui-fixes-v23","cph-ui-fixes-v24","cph-ui-fixes-v25","cph-ui-fixes-v26","cph-ui-fixes-v27","cph-ui-fixes-v28","cph-ui-fixes-v29",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
+["__cphUiFixesStableV10","__cphUiFixesStableV11","__cphUiFixesStableV12","__cphUiFixesStableV13","__cphUiFixesStableV14","__cphUiFixesStableV15","__cphUiFixesStableV16","__cphUiFixesStableV17","__cphUiFixesStableV18","__cphUiFixesStableV19","__cphUiFixesStableV20","__cphUiFixesStableV21","__cphUiFixesStableV22","__cphUiFixesStableV23","__cphUiFixesStableV24","__cphUiFixesStableV25","__cphUiFixesStableV26","__cphUiFixesStableV27","__cphUiFixesStableV28","__cphUiFixesStableV29","__cphUiFixesStableV30","__cphUiFixesStableV31"].forEach(k=>{if(window[k]&&typeof window[k].stop==="function")window[k].stop()});
+const GLOBAL_KEY="__cphUiFixesStableV31";
+const STYLE_ID="cph-ui-fixes-v31";
+["cph-ui-fixes-v7","cph-ui-fixes-v8","cph-ui-fixes-v9","cph-ui-fixes-v10","cph-ui-fixes-v11","cph-ui-fixes-v12","cph-ui-fixes-v13","cph-ui-fixes-v14","cph-ui-fixes-v15","cph-ui-fixes-v16","cph-ui-fixes-v17","cph-ui-fixes-v18","cph-ui-fixes-v19","cph-ui-fixes-v20","cph-ui-fixes-v21","cph-ui-fixes-v22","cph-ui-fixes-v23","cph-ui-fixes-v24","cph-ui-fixes-v25","cph-ui-fixes-v26","cph-ui-fixes-v27","cph-ui-fixes-v28","cph-ui-fixes-v29","cph-ui-fixes-v30",STYLE_ID].forEach(id=>document.getElementById(id)?.remove());
 let observer=null,scheduled=false;
 const norm=e=>(e&&e.textContent||"").replace(/\s+/g," ").trim();
 function important(el,name,value){if(el)el.style.setProperty(name,value,"important")}
@@ -181,8 +181,7 @@ function wrapMetaLabel(container){
 function normalizeSummaryMeta(){
  const scope=document.querySelector("#programme");
  if(!scope)return;
- const ref=scope.querySelector(".mini-badge.nature .cph-nature-label");
- if(ref)scope.style.setProperty("--cph-summary-meta-text-size",getComputedStyle(ref).fontSize);
+ scope.style.setProperty("--cph-summary-meta-text-size","12px","important");
  scope.querySelectorAll(".visit-summary").forEach(summary=>{
   const location=summary.querySelector(".summary-point-map");
   if(location){
@@ -327,8 +326,14 @@ function polish(){
  try{addStyles();prepareNatureBadges();normalizeSummaryMeta();normalizeReservations();fixHistoryActions();mapGoButtons();document.documentElement.dataset.cphUiFixes="v28";}
  finally{if(observer&&document.body)observer.observe(document.body,{childList:true,subtree:true});}
 }
-function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>setTimeout(polish,30));}
-function start(){observer=new MutationObserver(schedule);polish();[150,500,1200].forEach(ms=>setTimeout(schedule,ms));window.addEventListener("resize",schedule,{passive:true});}
+function schedule(){
+ if(scheduled)return;
+ scheduled=true;
+ const run=()=>{scheduled=false;polish()};
+ if("requestIdleCallback" in window)requestIdleCallback(run,{timeout:320});
+ else setTimeout(run,100);
+}
+function start(){observer=new MutationObserver(mutations=>{if(mutations.some(m=>m.addedNodes&&m.addedNodes.length))schedule()});polish();window.addEventListener("resize",schedule,{passive:true});}
 window[GLOBAL_KEY]={stop(){observer?.disconnect();observer=null;scheduled=false;}};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();

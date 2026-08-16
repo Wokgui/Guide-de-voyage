@@ -44,39 +44,12 @@ function ensureTrackingDefaultClosed(){const details=trackingVisitsDetails();if(
 function goToTrackingSection(id){if(typeof switchTab==="function")switchTab("suivi");else{const tab=document.querySelector('.tab[data-tab="suivi"]');if(tab)tab.click()}renderTrackingTodo();let sections=ensureTrackingSections();if(!sections||!sections.details)return;const details=sections.details;details.dataset.cphFocusedSection=id;sections=ensureTrackingSections()||sections;details.open=true;const header=document.querySelector("body>header")||document.querySelector("header");setTimeout(()=>{const headerBottom=header?Math.max(0,Math.round(header.getBoundingClientRect().bottom)):0;const y=Math.max(0,window.scrollY+details.getBoundingClientRect().top-headerBottom-4);window.scrollTo({top:y,behavior:"smooth"})},80)}
 function ensureTrackingOrder(){const stats=document.querySelector("header .stats");if(stats){[".stat-todo",".stat-done",".stat-aside",".stat-progress"].forEach(selector=>{const el=stats.querySelector(selector);if(el)stats.appendChild(el)})}ensureTrackingSections()}
 function ensureTrackingShortcuts(){renderTrackingTodo();ensureTrackingOrder();ensureTrackingDefaultClosed();[[".stat-done","trackingVisitedSection","Afficher les points visités"],[".stat-todo","trackingTodoSection","Afficher les visites à faire"],[".stat-aside","trackingAsideSection","Afficher les points mis de côté"]].forEach(([selector,id,label])=>{const el=document.querySelector(selector);if(!el||el.dataset.trackingShortcutBound)return;el.dataset.trackingShortcutBound="1";el.style.cursor="pointer";el.setAttribute("role","button");el.setAttribute("tabindex","0");el.setAttribute("aria-label",label);const open=()=>goToTrackingSection(id);el.addEventListener("click",open);el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}})})}
-function revealWhenStable(){
-  const begun=performance.now();let previous="",same=0;
-  const finish=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>document.documentElement.classList.add("cph-app-ready")));
-  function check(){
-    try{polish()}catch(_){}
-    const header=document.querySelector("header");
-    const cards=Array.from(document.querySelectorAll("#programme .visit-details")).slice(0,3);
-    const nodes=[header,...cards].filter(Boolean);
-    const sig=nodes.map(el=>{const r=el.getBoundingClientRect();return [Math.round(r.x),Math.round(r.y),Math.round(r.width),Math.round(r.height)].join(":")}).join("|")+"/"+Math.round(document.body.scrollHeight);
-    if(sig&&sig===previous)same++;else same=0;
-    previous=sig;
-    const elapsed=performance.now()-begun;
-    if((cards.length>0&&same>=3&&elapsed>=1650)||elapsed>=2200){finish();return}
-    setTimeout(check,120);
-  }
-  check();
+function polish(){filters();mapRows();polishCards();reserved();programMeta();programMapButtons();ensureSettingsTile();ensureTrackingShortcuts()}
+function schedulePolish(){
+  if(window.__cphP)return;
+  const run=()=>{window.__cphP=0;polish()};
+  if("requestIdleCallback" in window)window.__cphP=requestIdleCallback(run,{timeout:360});
+  else window.__cphP=setTimeout(run,120);
 }
-function revealWhenStable(){
-  const begun=performance.now();let previous="",same=0;
-  const finish=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>document.documentElement.classList.add("cph-app-ready")));
-  function check(){
-    try{polish()}catch(_){}
-    const header=document.querySelector("header");
-    const cards=Array.from(document.querySelectorAll("#programme .visit-details")).slice(0,3);
-    const nodes=[header,...cards].filter(Boolean);
-    const sig=nodes.map(el=>{const r=el.getBoundingClientRect();return [Math.round(r.x),Math.round(r.y),Math.round(r.width),Math.round(r.height)].join(":")}).join("|")+"/"+Math.round(document.body.scrollHeight);
-    if(sig&&sig===previous)same++;else same=0;
-    previous=sig;
-    const elapsed=performance.now()-begun;
-    if((cards.length>0&&same>=3&&elapsed>=1650)||elapsed>=2200){finish();return}
-    setTimeout(check,120);
-  }
-  check();
-}
-function polish(){filters();mapRows();polishCards();reserved();programMeta();programMapButtons();ensureSettingsTile();ensureTrackingShortcuts()}function start(){addStyles();applyHeader();polish();revealWhenStable();revealWhenStable();[250,800,1600].forEach(ms=>setTimeout(polish,ms));new MutationObserver(()=>{clearTimeout(window.__cphP);window.__cphP=setTimeout(polish,35)}).observe(document.body,{childList:true,subtree:true})}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
+function start(){addStyles();applyHeader();polish();const observer=new MutationObserver(mutations=>{if(mutations.some(m=>m.addedNodes&&m.addedNodes.length))schedulePolish()});observer.observe(document.body,{childList:true,subtree:true});window.addEventListener("resize",schedulePolish,{passive:true})}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();

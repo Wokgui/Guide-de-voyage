@@ -1,22 +1,24 @@
-const STATIC_CACHE="copenhague-v345-static-v45";
-const RUNTIME_CACHE="copenhague-v345-runtime-v45";
+const STATIC_CACHE="copenhague-v348-static-v48";
+const RUNTIME_CACHE="copenhague-v348-runtime-v48";
 const STATIC_FILES=[
   "/",
   "/index.html",
   "/shared-sync.js",
   "/cloud-backup.js?v=3",
-  "/startup-stable-v345.css?v=345",
-  "/header-prestige.js?v=345",
-  "/ui-fixes-v7.js?v=30",
+  "/startup-stable-v345.css?v=348",
+  "/header-prestige.js?v=348",
+  "/ui-fixes-v7.js?v=31",
   "/day-style-v1.js?v=5",
   "/packing-list-v1.css?v=9",
   "/packing-list-v1.js?v=5",
   "/section-history-v1.css?v=1",
   "/section-history-v1.js?v=1",
   "/manifest.webmanifest",
+  "/icons/splash-any-192-v347.png",
+  "/icons/splash-any-512-v347.png",
   "/icons/app-icon.svg",
-  "/icons/app-icon-192.png?v=2",
-  "/icons/app-icon-512.png?v=2",
+  "/icons/app-icon-192.png?v=4",
+  "/icons/app-icon-512.png?v=4",
   "/vendor/leaflet/leaflet.css",
   "/vendor/leaflet/leaflet.js",
   "/vendor/supabase/supabase.js",
@@ -59,19 +61,20 @@ async function networkFirst(request,fallback){
 function injectEarlyPrestige(html){
   if(!html)return html;
   html=html.replace(/<script\s+src=["']\/header-prestige\.js\?v=\d+["']\s*><\/script>/ig,"");
-  const early='<link rel="stylesheet" href="/startup-stable-v345.css?v=345"><script src="/header-prestige.js?v=345"></script>';
+  const early='<link rel="stylesheet" href="/startup-stable-v345.css?v=348"><script src="/header-prestige.js?v=348"></script>';
   return html.replace(/<head([^>]*)>/i,`<head$1>${early}`);
 }
 
 async function patchedNavigation(request,fallback){
-  let response;
-  try{
-    response=await fetch(request,{cache:"no-store"});
-    if(!response.ok)throw new Error("navigation network error");
-    await remember(request,response.clone());
-  }catch(_){
-    response=(await caches.match(request))||(fallback?await caches.match(fallback):undefined);
-    if(!response)return Response.error();
+  let response=(await caches.match(request))||(fallback?await caches.match(fallback):undefined);
+  if(response){
+    fetch(request,{cache:"no-store"}).then(r=>{if(r&&r.ok)return remember(request,r)}).catch(()=>null);
+  }else{
+    try{
+      response=await fetch(request,{cache:"no-store"});
+      if(!response.ok)throw new Error("navigation network error");
+      await remember(request,response.clone());
+    }catch(_){return Response.error();}
   }
   try{
     const html=injectEarlyPrestige(await response.text());
@@ -87,8 +90,14 @@ async function patchedNavigation(request,fallback){
 
 async function patchedHeader(request){
   try{
-    const response=await fetch(request,{cache:"no-store"});
-    if(!response.ok)return response;
+    let response=await caches.match(request);
+    if(response){
+      fetch(request,{cache:"no-store"}).then(r=>{if(r&&r.ok)return remember(request,r)}).catch(()=>null);
+    }else{
+      response=await fetch(request,{cache:"no-store"});
+      if(!response.ok)return response;
+      await remember(request,response.clone());
+    }
     let source=await response.text();
 
     /* La feuille de style principale est installée immédiatement dans le HEAD.
@@ -172,8 +181,18 @@ async function patchedHeader(request){
       });
     }
     function polishAll(){fix();reservedIconOnly();orderProgrammeMap();}
-    polishAll();setTimeout(polishAll,200);setTimeout(polishAll,700);setTimeout(polishAll,1500);
-    const observer=new MutationObserver(()=>{clearTimeout(window.__cphPair336Timer);window.__cphPair336Timer=setTimeout(polishAll,35)});
+    polishAll();
+    let pending=false;
+    const schedulePolish=()=>{
+      if(pending)return;
+      pending=true;
+      const run=()=>{pending=false;polishAll()};
+      if("requestIdleCallback" in window)requestIdleCallback(run,{timeout:360});
+      else setTimeout(run,120);
+    };
+    const observer=new MutationObserver(mutations=>{
+      if(mutations.some(m=>m.addedNodes&&m.addedNodes.length))schedulePolish();
+    });
     observer.observe(document.body,{childList:true,subtree:true});
   }
 
@@ -181,7 +200,7 @@ async function patchedHeader(request){
   else document.addEventListener("DOMContentLoaded",boot,{once:true});
 })();
 `;
-    const extras=`\n;(function(){function loadFixes(){if(document.querySelector('script[data-cph-ui-fixes]'))return;const s=document.createElement("script");s.src="/ui-fixes-v7.js?v=30";s.async=false;s.dataset.cphUiFixes="1";document.head.appendChild(s)}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",loadFixes,{once:true});else loadFixes()})();\n`;
+    const extras=`\n;(function(){function loadFixes(){if(document.querySelector('script[data-cph-ui-fixes]'))return;const s=document.createElement("script");s.src="/ui-fixes-v7.js?v=31";s.async=false;s.dataset.cphUiFixes="1";document.head.appendChild(s)}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",loadFixes,{once:true});else loadFixes()})();\n`;
     return new Response(source+patch+extras,{status:200,statusText:"OK",headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"no-store, no-cache, must-revalidate"}});
   }catch(_){
     return (await caches.match(request))||Response.error();
