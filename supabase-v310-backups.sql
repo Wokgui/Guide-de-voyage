@@ -41,7 +41,7 @@ alter table public.copenhagen_shared_snapshots enable row level security;
 revoke all on table public.copenhagen_shared_snapshots from public;
 revoke all on table public.copenhagen_shared_snapshots from anon;
 revoke all on table public.copenhagen_shared_snapshots from authenticated;
-grant select, insert on table public.copenhagen_shared_snapshots to anon;
+grant select, insert on table public.copenhagen_shared_snapshots to authenticated;
 
 drop policy if exists "copenhagen_snapshots_select" on public.copenhagen_shared_snapshots;
 drop policy if exists "copenhagen_snapshots_insert" on public.copenhagen_shared_snapshots;
@@ -49,14 +49,20 @@ drop policy if exists "copenhagen_snapshots_insert" on public.copenhagen_shared_
 create policy "copenhagen_snapshots_select"
 on public.copenhagen_shared_snapshots
 for select
-to anon
-using (trip_id = 'e110549f-c366-4116-ba14-aedbfbb1946c'::uuid);
+to authenticated
+using (
+  trip_id = 'e110549f-c366-4116-ba14-aedbfbb1946c'::uuid
+  and public.wokgui_is_app_owner('guide-de-voyage')
+);
 
 create policy "copenhagen_snapshots_insert"
 on public.copenhagen_shared_snapshots
 for insert
-to anon
-with check (trip_id = 'e110549f-c366-4116-ba14-aedbfbb1946c'::uuid);
+to authenticated
+with check (
+  trip_id = 'e110549f-c366-4116-ba14-aedbfbb1946c'::uuid
+  and public.wokgui_is_app_owner('guide-de-voyage')
+);
 
 create table if not exists private.copenhagen_admin_secrets (
   trip_id uuid primary key,
@@ -75,6 +81,9 @@ alter table private.copenhagen_admin_secrets enable row level security;
 revoke all on table private.copenhagen_admin_secrets from public;
 revoke all on table private.copenhagen_admin_secrets from anon;
 revoke all on table private.copenhagen_admin_secrets from authenticated;
+
+-- Le code de restauration doit être configuré séparément depuis un environnement de confiance.
+-- Ne jamais committer le code en clair, son hash, une clé service_role ou une session utilisateur.
 
 create or replace function private.copenhagen_prune_snapshots()
 returns trigger
@@ -171,8 +180,6 @@ $$;
 revoke all on function private.copenhagen_authorize_restore(uuid, text) from public;
 revoke all on function private.copenhagen_authorize_restore(uuid, text) from anon;
 revoke all on function private.copenhagen_authorize_restore(uuid, text) from authenticated;
-grant usage on schema private to anon;
-grant execute on function private.copenhagen_authorize_restore(uuid, text) to anon;
 
 create or replace function public.copenhagen_create_snapshot(
   p_trip_id uuid,
@@ -182,7 +189,7 @@ create or replace function public.copenhagen_create_snapshot(
 )
 returns jsonb
 language plpgsql
-security invoker
+security definer
 set search_path = ''
 as $$
 declare
@@ -194,6 +201,10 @@ declare
   normalized_reason text := coalesce(p_reason, 'auto');
   normalized_label text := nullif(btrim(coalesce(p_label, '')), '');
 begin
+  if not public.wokgui_is_app_owner('guide-de-voyage') then
+    return jsonb_build_object('ok', false, 'error', 'auth_required');
+  end if;
+
   if p_trip_id <> 'e110549f-c366-4116-ba14-aedbfbb1946c'::uuid
      or p_device_id is null
      or normalized_reason not in ('auto', 'manual', 'initial')
@@ -290,8 +301,9 @@ end;
 $$;
 
 revoke all on function public.copenhagen_create_snapshot(uuid, uuid, text, text) from public;
+revoke all on function public.copenhagen_create_snapshot(uuid, uuid, text, text) from anon;
 revoke all on function public.copenhagen_create_snapshot(uuid, uuid, text, text) from authenticated;
-grant execute on function public.copenhagen_create_snapshot(uuid, uuid, text, text) to anon;
+grant execute on function public.copenhagen_create_snapshot(uuid, uuid, text, text) to authenticated;
 
 create or replace function public.copenhagen_restore_snapshot(
   p_trip_id uuid,
@@ -301,7 +313,7 @@ create or replace function public.copenhagen_restore_snapshot(
 )
 returns jsonb
 language plpgsql
-security invoker
+security definer
 set search_path = ''
 as $$
 declare
@@ -315,6 +327,10 @@ declare
   restore_at timestamptz;
   restored_count integer;
 begin
+  if not public.wokgui_is_app_owner('guide-de-voyage') then
+    return jsonb_build_object('ok', false, 'error', 'auth_required');
+  end if;
+
   if p_trip_id <> 'e110549f-c366-4116-ba14-aedbfbb1946c'::uuid
      or p_snapshot_id is null
      or p_device_id is null then
@@ -445,9 +461,9 @@ end;
 $$;
 
 revoke all on function public.copenhagen_restore_snapshot(uuid, uuid, text, uuid) from public;
+revoke all on function public.copenhagen_restore_snapshot(uuid, uuid, text, uuid) from anon;
 revoke all on function public.copenhagen_restore_snapshot(uuid, uuid, text, uuid) from authenticated;
-grant execute on function public.copenhagen_restore_snapshot(uuid, uuid, text, uuid) to anon;
+grant execute on function public.copenhagen_restore_snapshot(uuid, uuid, text, uuid) to authenticated;
 
 notify pgrst, 'reload schema';
-
 commit;
