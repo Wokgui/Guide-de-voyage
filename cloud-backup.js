@@ -9,6 +9,18 @@
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: true, detectSessionInUrl: true, autoRefreshToken: true }
     });
+
+    window.WokguiSupabaseAuthClients = window.WokguiSupabaseAuthClients || {};
+    window.WokguiSupabaseAuthClients[options.appId] = client;
+    const publishAuthState = (session) => {
+      window.dispatchEvent(new CustomEvent('wokgui-supabase-auth-change', {
+        detail: { appId: options.appId, authenticated: !!session?.user }
+      }));
+    };
+    window.dispatchEvent(new CustomEvent('wokgui-supabase-auth-ready', {
+      detail: { appId: options.appId }
+    }));
+
     let user = null;
     let busy = false;
     let applying = false;
@@ -214,9 +226,20 @@
     $('.cloud-backup-logout').addEventListener('click', () => client.auth.signOut());
     $('.cloud-backup-history').addEventListener('click', (event) => { const revision = event.target.dataset.revision; if (revision) restoreRevision(Number(revision)); });
     window.addEventListener(options.eventName, scheduleUpload);
-    client.auth.onAuthStateChange((_event, session) => setTimeout(() => setSession(session), 0));
-    client.auth.getSession().then(({ data }) => setSession(data.session));
+    client.auth.onAuthStateChange((_event, session) => {
+      publishAuthState(session);
+      setTimeout(() => setSession(session), 0);
+    });
+    client.auth.getSession().then(({ data }) => {
+      publishAuthState(data.session);
+      return setSession(data.session);
+    });
   }
 
-  window.AutoBackupCloud = { create };
+  window.AutoBackupCloud = {
+    create,
+    getClient(appId) {
+      return window.WokguiSupabaseAuthClients?.[appId] || null;
+    }
+  };
 })();
