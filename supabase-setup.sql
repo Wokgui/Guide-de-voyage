@@ -1,5 +1,45 @@
 begin;
 
+create schema if not exists private;
+revoke all on schema private from public;
+revoke all on schema private from anon;
+revoke all on schema private from authenticated;
+
+create table if not exists private.app_owners (
+  app_id text primary key,
+  user_id uuid not null references auth.users(id) on delete restrict,
+  created_at timestamptz not null default clock_timestamp()
+);
+
+alter table private.app_owners enable row level security;
+revoke all on table private.app_owners from public;
+revoke all on table private.app_owners from anon;
+revoke all on table private.app_owners from authenticated;
+
+create or replace function public.wokgui_is_app_owner(p_app_id text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from private.app_owners owner_row
+    where owner_row.app_id = p_app_id
+      and owner_row.user_id = auth.uid()
+  );
+$$;
+
+revoke all on function public.wokgui_is_app_owner(text) from public;
+revoke all on function public.wokgui_is_app_owner(text) from anon;
+revoke all on function public.wokgui_is_app_owner(text) from authenticated;
+grant execute on function public.wokgui_is_app_owner(text) to authenticated;
+
+-- À faire une seule fois depuis une migration privée ou le SQL Editor avec un rôle de confiance :
+-- associer 'guide-de-voyage' à l'UUID auth de son propriétaire dans private.app_owners.
+-- Ne jamais mettre cet UUID dans le JavaScript client ni publier de clé service_role.
+
 create table if not exists public.copenhagen_shared_state (
   trip_id uuid not null,
   path text not null,
@@ -44,11 +84,14 @@ create trigger copenhagen_shared_state_accept_newer_trigger
 before insert or update on public.copenhagen_shared_state
 for each row execute function public.copenhagen_shared_state_accept_newer();
 
+revoke all on table public.copenhagen_shared_state from public;
 revoke all on table public.copenhagen_shared_state from anon;
 revoke all on table public.copenhagen_shared_state from authenticated;
-grant usage on schema public to anon;
-grant select, insert, update on table public.copenhagen_shared_state to anon;
+grant select, insert, update on table public.copenhagen_shared_state to authenticated;
 
+drop policy if exists "copenhagen_public_read" on public.copenhagen_shared_state;
+drop policy if exists "copenhagen_public_insert" on public.copenhagen_shared_state;
+drop policy if exists "copenhagen_public_update" on public.copenhagen_shared_state;
 drop policy if exists "copenhagen_trip_select" on public.copenhagen_shared_state;
 drop policy if exists "copenhagen_trip_insert" on public.copenhagen_shared_state;
 drop policy if exists "copenhagen_trip_update" on public.copenhagen_shared_state;
@@ -56,21 +99,33 @@ drop policy if exists "copenhagen_trip_update" on public.copenhagen_shared_state
 create policy "copenhagen_trip_select"
 on public.copenhagen_shared_state
 for select
-to anon
-using (trip_id = 'e110549f-c366-4116-ba14-aedbfbb1946c'::uuid);
+to authenticated
+using (
+  trip_id = 'e110549f-c366-4116-ba14-aedbfbb1946c'::uuid
+  and public.wokgui_is_app_owner('guide-de-voyage')
+);
 
 create policy "copenhagen_trip_insert"
 on public.copenhagen_shared_state
 for insert
-to anon
-with check (trip_id = 'e110549f-c366-4116-ba14-aedbfbb1946c'::uuid);
+to authenticated
+with check (
+  trip_id = 'e110549f-c366-4116-ba14-aedbfbb1946c'::uuid
+  and public.wokgui_is_app_owner('guide-de-voyage')
+);
 
 create policy "copenhagen_trip_update"
 on public.copenhagen_shared_state
 for update
-to anon
-using (trip_id = 'e110549f-c366-4116-ba14-aedbfbb1946c'::uuid)
-with check (trip_id = 'e110549f-c366-4116-ba14-aedbfbb1946c'::uuid);
+to authenticated
+using (
+  trip_id = 'e110549f-c366-4116-ba14-aedbfbb1946c'::uuid
+  and public.wokgui_is_app_owner('guide-de-voyage')
+)
+with check (
+  trip_id = 'e110549f-c366-4116-ba14-aedbfbb1946c'::uuid
+  and public.wokgui_is_app_owner('guide-de-voyage')
+);
 
 do $$
 begin
@@ -86,4 +141,5 @@ begin
 end
 $$;
 
+notify pgrst, 'reload schema';
 commit;
