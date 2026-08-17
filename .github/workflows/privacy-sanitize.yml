@@ -1,0 +1,83 @@
+name: Privacy sanitize
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/privacy-sanitize.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sanitize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove private stay defaults from public HTML
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+
+          private_ids = [
+              'stayAddress','stayWifi','stayWifiPassword','stayCheckin','stayCheckout',
+              'stayHost','stayAccess','stayBooking','stayGuests','stayAmount','stayRules',
+              'stayCancellation','flightBookingRef','flightOutNumber','flightOutDeparture',
+              'flightOutFrom','flightOutArrival','flightOutBags','flightBackNumber',
+              'flightBackDeparture','flightBackTerminal','flightLeaveHome','flightBackBags',
+              'stayNotes','flightOutZurichArrival','flightOutConnection',
+              'flightOutZurichDeparture','flightOutClass','flightBackZurichArrival',
+              'flightBackConnection','flightBackZurichDeparture','flightBackArrival',
+              'flightBackClass'
+          ]
+
+          for field_id in private_ids:
+              escaped = re.escape(field_id)
+              text = re.sub(
+                  rf'(<input\b[^>]*\bid="{escaped}"[^>]*\bvalue=")[^"]*(")',
+                  r'\1\2', text
+              )
+              text = re.sub(
+                  rf'(<textarea\b[^>]*\bid="{escaped}"[^>]*>).*?(</textarea>)',
+                  r'\1\2', text, flags=re.S
+              )
+
+          # Remove the two static airport/accommodation links. They are rebuilt from
+          # the authenticated stayAddress value by the existing application code.
+          text = re.sub(
+              r'href="https://www\.google\.com/maps/dir/\?api=1&amp;origin=Copenhagen\+Airport&amp;destination=[^"]+"(?=[^>]*>Aéroport → Airbnb</a>)',
+              'href="#"', text
+          )
+          text = re.sub(
+              r'href="https://www\.google\.com/maps/dir/\?api=1&amp;origin=[^"]+&amp;destination=Copenhagen\+Airport&amp;travelmode=transit"(?=[^>]*>Airbnb → aéroport</a>)',
+              'href="#"', text
+          )
+
+          # Remove legacy tests that contain the accommodation street literally.
+          text = re.sub(
+              r'\n\s*if\(/[^/\n]+/i\.test\(p\.walkUrl\|\|""\)\)p\.walkUrl=makeDirections\(address,p\.address\|\|p\.name,"walking"\);',
+              '', text
+          )
+          text = re.sub(
+              r'\n\s*if\(/[^/\n]+/i\.test\(p\.transitUrl\|\|""\)\)p\.transitUrl=makeDirections\(address,p\.address\|\|p\.name,"transit"\);',
+              '', text
+          )
+
+          path.write_text(text, encoding='utf-8')
+          PY
+      - name: Commit sanitized HTML
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'privacy: sanitize private stay data'
+            git push
+          fi
