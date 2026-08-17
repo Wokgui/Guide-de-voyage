@@ -63,24 +63,17 @@ jobs:
               def contains_private(value):
                   if not isinstance(value, str) or not value:
                       return False
-                  probes = [p for p in (private_address, private_street) if p]
-                  probes += [quote(p, safe=''), quote_plus(p, safe='') for p in []]
-                  for p in list(probes):
-                      if p and p.lower() in value.lower():
-                          return True
-                      q = quote(p, safe='') if p else ''
-                      qp = quote_plus(p, safe='') if p else ''
-                      if q and q.lower() in value.lower():
-                          return True
-                      if qp and qp.lower() in value.lower():
-                          return True
+                  for p in (private_address, private_street):
+                      if not p:
+                          continue
+                      for probe in (p, quote(p, safe=''), quote_plus(p, safe='')):
+                          if probe and probe.lower() in value.lower():
+                              return True
                   return False
 
-              hotel_counter = 0
               for p in data:
                   is_lodging = bool(private_address and str(p.get('address') or '').strip().lower() == private_address.lower())
                   if is_lodging:
-                      hotel_counter += 1
                       old_id = str(p.get('id') or '')
                       if old_id:
                           legacy_ids.append(old_id)
@@ -106,7 +99,6 @@ jobs:
                       val = p.get(key)
                       if isinstance(val, str) and contains_private(val):
                           if key in ('walkUrl','transitUrl'):
-                              # Sans origine explicite, Google Maps utilise la position courante.
                               val = re.sub(r'([?&])origin=[^&]+&?', r'\1', val)
                               val = val.replace('?&','?').replace('&&','&').rstrip('?&')
                               if contains_private(val):
@@ -117,7 +109,6 @@ jobs:
 
                   val = p.get('uberUrl')
                   if isinstance(val, str) and contains_private(val):
-                      # Les courses vers les visites partent de la position actuelle.
                       val = re.sub(r'pickup%5Bformatted_address%5D=[^&]+&pickup%5Bnickname%5D=[^&]+&', 'pickup=my_location&', val, flags=re.I)
                       if contains_private(val):
                           val = ''
@@ -126,24 +117,20 @@ jobs:
               replacement = 'const DATA=' + json.dumps(data, ensure_ascii=False, separators=(',',':')) + ';\nconst DAY_CONFIG='
               text = text[:data_match.start()] + replacement + text[data_match.end():]
 
-          # Le point de référence public reste volontairement approximatif.
           text = re.sub(
               r"const HOME_POINT=\{.*?\};\s*function routeBetween",
               "const HOME_POINT={name:'Hébergement',address:'Copenhagen',lat:55.6837,lng:12.5715};\nfunction routeBetween",
               text, flags=re.S
           )
 
-          # Plus aucune logique ne doit dépendre de l’ancienne rue en clair.
           text = re.sub(
               r'\n\s*DATA\.forEach\(p=>\{\s*if\(/[^/\n]+/i\.test\(p\.prevAddress\|\|""\)\)p\.prevAddress=address;\s*\}\);',
               '', text, flags=re.S
           )
 
           if private_address:
-              # Les nouveaux points personnels utilisent l'adresse privée chargée après authentification.
-              for q in (private_address.replace('\\','\\\\').replace("'","\\'"),):
-                  text = text.replace("makeDirections('" + q + "'", "makeDirections(currentStayAddress()||'Copenhagen'")
-              # Dernier filet de sécurité : supprimer toute occurrence résiduelle, y compris encodée.
+              escaped_js = private_address.replace('\\','\\\\').replace("'","\\'")
+              text = text.replace("makeDirections('" + escaped_js + "'", "makeDirections(currentStayAddress()||'Copenhagen'")
               variants = []
               for value in (private_address, private_street):
                   if value:
@@ -151,12 +138,10 @@ jobs:
               for value in sorted(set(variants), key=len, reverse=True):
                   text = re.sub(re.escape(value), 'Hébergement', text, flags=re.I)
 
-          # Les anciens identifiants du logement peuvent eux aussi contenir la rue.
           for old_id in legacy_ids:
               new_id = 'p52-accommodation-depart' if re.search(r'52|depart', old_id, re.I) else 'p01-accommodation'
               text = text.replace(old_id, new_id)
 
-          # Liens statiques aéroport/logement : reconstruits depuis la valeur privée authentifiée.
           text = re.sub(
               r'href="https://www\.google\.com/maps/dir/\?api=1&amp;origin=Copenhagen\+Airport&amp;destination=[^"]+"(?=[^>]*>Aéroport → Airbnb</a>)',
               'href="#"', text
