@@ -1,8 +1,7 @@
 (function(){
   "use strict";
 
-  const SUPABASE_URL="https://oxdrhwveuctrorrkuurw.supabase.co";
-  const SUPABASE_KEY="sb_publishable_o75FsFwywIFQOCyMYNYD8A_k034qpQv";
+  const APP_ID="guide-de-voyage";
   const TABLE="copenhagen_shared_state";
   const SNAPSHOT_TABLE="copenhagen_shared_snapshots";
   const TRIP_ID="e110549f-c366-4116-ba14-aedbfbb1946c";
@@ -79,7 +78,7 @@
       saveIndicatorTime.textContent="en attente";
     }else if(kind==="error"){
       saveIndicatorLabel.textContent="Non sauvegardé";
-      saveIndicatorTime.textContent="nouvel essai";
+      saveIndicatorTime.textContent="connexion requise";
     }else{
       saveIndicatorLabel.textContent="Sauvegardé";
       saveIndicatorTime.textContent=localTimeLabel(value);
@@ -126,6 +125,10 @@
   let snapshotInFlight=false;
   let snapshotList=[];
   let pendingRestoreSnapshot=null;
+  let sharedClient=null;
+  let authenticatedUser=null;
+  let backupsAvailable=false;
+  let initializing=false;
 
   if(lastCloudSavedAt)setTopSaveStatus("saved",lastCloudSavedAt);
 
@@ -253,7 +256,7 @@
       const changes=diffShared(lastObserved,next);
       enqueueChanges(changes);
       if(changes.length){
-        setTopSaveStatus(navigator.onLine?"saving":"offline");
+        setTopSaveStatus(sharedClient&&navigator.onLine?"saving":navigator.onLine?"error":"offline");
         window.dispatchEvent(new Event("guide-backup-change"));
       }
       lastObserved=next;
@@ -371,16 +374,40 @@
     },60);
   }
 
-  if(!window.supabase||typeof window.supabase.createClient!=="function"){
-    setStatus("error","Synchronisation indisponible");
-    return;
+  function authClient(){
+    if(window.AutoBackupCloud&&typeof window.AutoBackupCloud.getClient==="function"){
+      return window.AutoBackupCloud.getClient(APP_ID);
+    }
+    return window.WokguiSupabaseAuthClients&&window.WokguiSupabaseAuthClients[APP_ID]
+      ?window.WokguiSupabaseAuthClients[APP_ID]
+      :null;
   }
 
-  const sharedClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
-    auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},
-    realtime:{params:{eventsPerSecond:10}}
-  });
-  const backupsAvailable=typeof sharedClient.rpc==="function";
+  async function refreshAuthenticatedClient(){
+    const client=authClient();
+    if(!client||!client.auth||typeof client.auth.getSession!=="function"){
+      sharedClient=null;
+      authenticatedUser=null;
+      backupsAvailable=false;
+      if(window.copenhagenSharedSync)window.copenhagenSharedSync.client=null;
+      return false;
+    }
+    const {data,error}=await client.auth.getSession();
+    if(error)throw error;
+    const session=data&&data.session;
+    if(!session||!session.user){
+      sharedClient=null;
+      authenticatedUser=null;
+      backupsAvailable=false;
+      if(window.copenhagenSharedSync)window.copenhagenSharedSync.client=null;
+      return false;
+    }
+    sharedClient=client;
+    authenticatedUser=session.user;
+    backupsAvailable=typeof sharedClient.rpc==="function";
+    if(window.copenhagenSharedSync)window.copenhagenSharedSync.client=sharedClient;
+    return true;
+  }
 
   function setBackupMessage(message,kind=""){
     if(!backupSettingsMessage)return;
@@ -454,6 +481,10 @@
   async function downloadSnapshot(snapshot){
     if(!snapshot||!navigator.onLine){
       setBackupMessage("Le téléchargement nécessite une connexion Internet.","error");
+      return;
+    }
+    if(!sharedClient){
+      setBackupMessage("Connectez-vous à la sauvegarde pour accéder aux versions.","error");
       return;
     }
     setBackupMessage("Préparation du fichier…");
@@ -530,7 +561,7 @@
 
   async function loadSnapshots(){
     if(!backupsAvailable){
-      setBackupMessage("Les sauvegardes sont momentanément indisponibles.","error");
+      setBackupMessage(sharedClient?"Les sauvegardes sont momentanément indisponibles.":"Connectez-vous à la sauvegarde pour accéder aux versions.","error");
       return [];
     }
     if(!navigator.onLine){
@@ -588,7 +619,7 @@
   async function waitUntilFlushed(timeout=12000){
     const started=Date.now();
     while(queueSize()||flushInFlight){
-      if(!navigator.onLine)return false;
+      if(!navigator.onLine||!sharedClient)return false;
       if(!flushInFlight)await flushQueue();
       if(!queueSize()&&!flushInFlight)return true;
       if(Date.now()-started>timeout)return false;
@@ -622,7 +653,7 @@
     if(!backupsAvailable)return;
     clearTimeout(snapshotTimer);
     snapshotTimer=setTimeout(()=>{
-      if(navigator.onLine&&!queueSize()&&!flushInFlight){
+      if(sharedClient&&navigator.onLine&&!queueSize()&&!flushInFlight){
         void createSnapshot("auto").catch(error=>{
           console.warn("Sauvegarde automatique différée",error&&error.message?error.message:error);
         });
@@ -636,10 +667,12 @@
     if(code==="unavailable")return "Le code administrateur n’est pas configuré.";
     if(code==="snapshot_not_found")return "Cette sauvegarde n’existe plus.";
     if(code==="invalid_snapshot")return "Cette sauvegarde est invalide.";
+    if(code==="auth_required")return "Connectez-vous à la sauvegarde avant de restaurer une version.";
     return "La restauration n’a pas abouti.";
   }
 
   async function restoreSnapshot(snapshot,adminCode){
+    if(!sharedClient)throw new Error("auth_required");
     if(!backupsAvailable||!navigator.onLine)throw new Error("offline");
     const flushed=await waitUntilFlushed();
     if(!flushed)throw new Error("pending_changes");
@@ -676,6 +709,7 @@
     backupNowButton.disabled=true;
     setBackupMessage("Sauvegarde en cours…");
     try{
+      if(!sharedClient)throw new Error("auth_required");
       if(!navigator.onLine)throw new Error("offline");
       const flushed=await waitUntilFlushed();
       if(!flushed)throw new Error("pending_changes");
@@ -684,7 +718,7 @@
       setBackupMessage(result.created?"Nouvelle sauvegarde créée.":"L’état était déjà sauvegardé.","success");
     }catch(error){
       console.warn("Sauvegarde manuelle impossible",error&&error.message?error.message:error);
-      setBackupMessage(error&&error.message==="offline"?"Hors ligne : sauvegarde impossible.":"Impossible de créer la sauvegarde.","error");
+      setBackupMessage(error&&error.message==="offline"?"Hors ligne : sauvegarde impossible.":error&&error.message==="auth_required"?"Connectez-vous à la sauvegarde avant de créer une version.":"Impossible de créer la sauvegarde.","error");
     }finally{
       backupNowButton.disabled=false;
     }
@@ -721,6 +755,11 @@
   }
 
   function updateReadyStatus(){
+    if(!sharedClient){
+      setStatus("connecting","Connexion à la sauvegarde nécessaire pour synchroniser");
+      if(queueSize())setTopSaveStatus(navigator.onLine?"error":"offline");
+      return;
+    }
     if(queueSize()){
       setStatus(navigator.onLine?"sending":"offline",navigator.onLine
         ?"Synchronisation en cours…"
@@ -742,6 +781,7 @@
   }
 
   function scheduleRetry(){
+    if(!sharedClient)return;
     clearTimeout(retryTimer);
     retryTimer=setTimeout(()=>void flushQueue(),retryDelay);
     retryDelay=Math.min(retryDelay*2,30000);
@@ -752,7 +792,7 @@
       updateReadyStatus();
       return;
     }
-    if(!navigator.onLine){
+    if(!sharedClient||!navigator.onLine){
       updateReadyStatus();
       return;
     }
@@ -793,7 +833,7 @@
   }
 
   async function fetchRemote(force=true){
-    if(pollInFlight||!navigator.onLine)return [];
+    if(!sharedClient||pollInFlight||!navigator.onLine)return [];
     pollInFlight=true;
     try{
       const {data,error}=await sharedClient
@@ -825,6 +865,7 @@
 
   function subscribeRealtime(){
     return new Promise(resolve=>{
+      if(!sharedClient){resolve();return;}
       let settled=false;
       const finish=()=>{if(!settled){settled=true;resolve();}};
       if(channel)void sharedClient.removeChannel(channel);
@@ -859,7 +900,7 @@
   }
 
   async function pollRemote(){
-    if(!navigator.onLine)return;
+    if(!sharedClient||!navigator.onLine)return;
     if(pollInFlight){
       scheduleRealtimeRefresh();
       return;
@@ -882,8 +923,15 @@
   }
 
   async function initialize(){
+    if(initializing)return;
+    initializing=true;
     setStatus("connecting","Connexion de la synchronisation…");
     try{
+      const authenticated=await refreshAuthenticatedClient();
+      if(!authenticated){
+        updateReadyStatus();
+        return;
+      }
       await subscribeRealtime();
       const rows=await fetchRemote(true);
       if(rows.length){
@@ -901,8 +949,53 @@
       setStatus("error","Connexion interrompue — nouvelle tentative automatique");
       setTopSaveStatus(navigator.onLine?"error":"offline");
       clearTimeout(initializationRetryTimer);
-      initializationRetryTimer=setTimeout(()=>void initialize(),Math.min(retryDelay,30000));
-      retryDelay=Math.min(retryDelay*2,30000);
+      if(sharedClient){
+        initializationRetryTimer=setTimeout(()=>void initialize(),Math.min(retryDelay,30000));
+        retryDelay=Math.min(retryDelay*2,30000);
+      }
+    }finally{
+      initializing=false;
+    }
+  }
+
+  async function handleAuthBridgeChange(){
+    const previousClient=sharedClient;
+    try{
+      const authenticated=await refreshAuthenticatedClient();
+      if(!authenticated){
+        clearTimeout(initializationRetryTimer);
+        clearTimeout(retryTimer);
+        if(channel&&previousClient&&typeof previousClient.removeChannel==="function"){
+          try{await previousClient.removeChannel(channel);}catch(_){/* no-op */}
+        }
+        channel=null;
+        realtimeReady=false;
+        remoteInitialized=false;
+        updateReadyStatus();
+        return;
+      }
+      retryDelay=2500;
+      clearTimeout(initializationRetryTimer);
+      clearTimeout(retryTimer);
+      if(channel&&previousClient===sharedClient){
+        updateReadyStatus();
+        void flushQueue();
+        void pollRemote();
+        return;
+      }
+      if(channel&&previousClient&&previousClient!==sharedClient&&typeof previousClient.removeChannel==="function"){
+        try{await previousClient.removeChannel(channel);}catch(_){/* no-op */}
+        channel=null;
+        realtimeReady=false;
+      }
+      remoteInitialized=false;
+      await initialize();
+    }catch(error){
+      console.warn("Session de synchronisation indisponible",error&&error.message?error.message:error);
+      sharedClient=null;
+      authenticatedUser=null;
+      backupsAvailable=false;
+      updateReadyStatus();
     }
   }
 
@@ -914,6 +1007,7 @@
   window.addEventListener("offline",updateReadyStatus);
   document.addEventListener("visibilitychange",()=>{
     if(document.visibilityState==="visible"){
+      void handleAuthBridgeChange();
       void flushQueue();
       void pollRemote();
     }
@@ -939,7 +1033,7 @@
       applyingRemote=false;
     }
     enqueueSnapshot(lastObserved);
-    setTopSaveStatus(navigator.onLine?"saving":"offline");
+    setTopSaveStatus(sharedClient&&navigator.onLine?"saving":navigator.onLine?"error":"offline");
     renderRemoteChanges();
     await flushQueue();
   }
@@ -951,6 +1045,7 @@
     deviceId,
     tripId:TRIP_ID,
     client:sharedClient,
+    user:()=>authenticatedUser,
     exportState:()=>sharedProjection(state),
     importState:importAccountBackup,
     backups:{
@@ -961,5 +1056,13 @@
     }
   };
 
-  void initialize();
+  const authEventMatches=event=>!event||!event.detail||!event.detail.appId||event.detail.appId===APP_ID;
+  window.addEventListener("wokgui-supabase-auth-ready",event=>{
+    if(authEventMatches(event))void handleAuthBridgeChange();
+  });
+  window.addEventListener("wokgui-supabase-auth-change",event=>{
+    if(authEventMatches(event))void handleAuthBridgeChange();
+  });
+
+  void handleAuthBridgeChange();
 })();
