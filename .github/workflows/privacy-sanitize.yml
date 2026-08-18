@@ -2,9 +2,8 @@ name: Privacy sanitize
 
 on:
   push:
-    branches: [zip-restore-staging]
+    branches: [main]
     paths:
-      - 'index.html'
       - '.github/workflows/privacy-sanitize.yml'
   workflow_dispatch:
 
@@ -161,6 +160,6 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if ! git diff --cached --quiet; then
-            git commit -m 'privacy: sanitize restored ZIP version'
+            git commit -m 'privacy: remove accommodation address from public routes'
             git push
           fi
