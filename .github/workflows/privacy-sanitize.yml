@@ -1,0 +1,165 @@
+name: Privacy sanitize
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/privacy-sanitize.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sanitize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove private stay data from public HTML
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, re
+          from urllib.parse import quote, quote_plus
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+
+          private_ids = [
+              'stayAddress','stayWifi','stayWifiPassword','stayCheckin','stayCheckout',
+              'stayHost','stayAccess','stayBooking','stayGuests','stayAmount','stayRules',
+              'stayCancellation','flightBookingRef','flightOutNumber','flightOutDeparture',
+              'flightOutFrom','flightOutArrival','flightOutBags','flightBackNumber',
+              'flightBackDeparture','flightBackTerminal','flightLeaveHome','flightBackBags',
+              'stayNotes','flightOutZurichArrival','flightOutConnection',
+              'flightOutZurichDeparture','flightOutClass','flightBackZurichArrival',
+              'flightBackConnection','flightBackZurichDeparture','flightBackArrival',
+              'flightBackClass'
+          ]
+
+          for field_id in private_ids:
+              escaped = re.escape(field_id)
+              text = re.sub(
+                  rf'(<input\b[^>]*\bid="{escaped}"[^>]*\bvalue=")[^"]*(")',
+                  r'\1\2', text
+              )
+              text = re.sub(
+                  rf'(<textarea\b[^>]*\bid="{escaped}"[^>]*>).*?(</textarea>)',
+                  r'\1\2', text, flags=re.S
+              )
+
+          data_match = re.search(r'const DATA=(\[.*?\]);\s*const DAY_CONFIG=', text, re.S)
+          private_address = ''
+          private_street = ''
+          legacy_ids = []
+          if data_match:
+              data = json.loads(data_match.group(1))
+              lodging = next((p for p in data if p.get('type') == 'transport' and re.search(r'hôtel|hotel|airbnb|appartement|logement', str(p.get('name','')), re.I)), None)
+              if lodging:
+                  private_address = str(lodging.get('address') or '').strip()
+                  private_street = private_address.split(',')[0].strip() if private_address else ''
+
+              def contains_private(value):
+                  if not isinstance(value, str) or not value:
+                      return False
+                  for p in (private_address, private_street):
+                      if not p:
+                          continue
+                      for probe in (p, quote(p, safe=''), quote_plus(p, safe='')):
+                          if probe and probe.lower() in value.lower():
+                              return True
+                  return False
+
+              for p in data:
+                  is_lodging = bool(private_address and str(p.get('address') or '').strip().lower() == private_address.lower())
+                  if is_lodging:
+                      old_id = str(p.get('id') or '')
+                      if old_id:
+                          legacy_ids.append(old_id)
+                      leaving = bool(re.search(r'départ|depart', str(p.get('name','')), re.I))
+                      p['id'] = 'p52-accommodation-depart' if leaving else 'p01-accommodation'
+                      p['name'] = 'Hôtel – départ' if leaving else 'Hôtel'
+                      p['address'] = ''
+                      p['maps'] = ''
+                      p['directions'] = ''
+                      p['walkUrl'] = ''
+                      p['transitUrl'] = ''
+                      p['uberUrl'] = ''
+                      p['prevAddress'] = '' if contains_private(p.get('prevAddress')) else p.get('prevAddress','')
+                      p['lat'] = 55.6837
+                      p['lng'] = 12.5715
+
+                  if contains_private(p.get('prevName')):
+                      p['prevName'] = 'Hôtel'
+                  if contains_private(p.get('prevAddress')):
+                      p['prevAddress'] = ''
+
+                  for key in ('walkUrl','transitUrl','maps','directions'):
+                      val = p.get(key)
+                      if isinstance(val, str) and contains_private(val):
+                          if key in ('walkUrl','transitUrl'):
+                              val = re.sub(r'([?&])origin=[^&]+&?', r'\1', val)
+                              val = val.replace('?&','?').replace('&&','&').rstrip('?&')
+                              if contains_private(val):
+                                  val = ''
+                          else:
+                              val = ''
+                          p[key] = val
+
+                  val = p.get('uberUrl')
+                  if isinstance(val, str) and contains_private(val):
+                      val = re.sub(r'pickup%5Bformatted_address%5D=[^&]+&pickup%5Bnickname%5D=[^&]+&', 'pickup=my_location&', val, flags=re.I)
+                      if contains_private(val):
+                          val = ''
+                      p['uberUrl'] = val
+
+              replacement = 'const DATA=' + json.dumps(data, ensure_ascii=False, separators=(',',':')) + ';\nconst DAY_CONFIG='
+              text = text[:data_match.start()] + replacement + text[data_match.end():]
+
+          text = re.sub(
+              r"const HOME_POINT=\{.*?\};\s*function routeBetween",
+              "const HOME_POINT={name:'Hébergement',address:'Copenhagen',lat:55.6837,lng:12.5715};\nfunction routeBetween",
+              text, flags=re.S
+          )
+
+          text = re.sub(
+              r'\n\s*DATA\.forEach\(p=>\{\s*if\(/[^/\n]+/i\.test\(p\.prevAddress\|\|""\)\)p\.prevAddress=address;\s*\}\);',
+              '', text, flags=re.S
+          )
+
+          if private_address:
+              escaped_js = private_address.replace('\\','\\\\').replace("'","\\'")
+              text = text.replace("makeDirections('" + escaped_js + "'", "makeDirections(currentStayAddress()||'Copenhagen'")
+              variants = []
+              for value in (private_address, private_street):
+                  if value:
+                      variants.extend([value, quote(value, safe=''), quote_plus(value, safe='')])
+              for value in sorted(set(variants), key=len, reverse=True):
+                  text = re.sub(re.escape(value), 'Hébergement', text, flags=re.I)
+
+          for old_id in legacy_ids:
+              new_id = 'p52-accommodation-depart' if re.search(r'52|depart', old_id, re.I) else 'p01-accommodation'
+              text = text.replace(old_id, new_id)
+
+          text = re.sub(
+              r'href="https://www\.google\.com/maps/dir/\?api=1&amp;origin=Copenhagen\+Airport&amp;destination=[^"]+"(?=[^>]*>Aéroport → Airbnb</a>)',
+              'href="#"', text
+          )
+          text = re.sub(
+              r'href="https://www\.google\.com/maps/dir/\?api=1&amp;origin=[^"]+&amp;destination=Copenhagen\+Airport&amp;travelmode=transit"(?=[^>]*>Airbnb → aéroport</a>)',
+              'href="#"', text
+          )
+
+          path.write_text(text, encoding='utf-8')
+          PY
+      - name: Commit sanitized HTML
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'privacy: remove accommodation address from public routes'
+            git push
+          fi
