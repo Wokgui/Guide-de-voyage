@@ -328,7 +328,8 @@ function polish(){
  finally{if(observer&&document.body)observer.observe(document.body,{childList:true,subtree:true});}
 }
 function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>setTimeout(polish,30));}
-function start(){observer=new MutationObserver(schedule);polish();[150,500,1200].forEach(ms=>setTimeout(schedule,ms));window.addEventListener("resize",schedule,{passive:true});}
+function relevantMutation(records){return records.some(r=>{const t=r.target&&r.target.nodeType===1?r.target:r.target&&r.target.parentElement;if(!t)return false;if(t.closest&&t.closest("#map,.leaflet-container,.leaflet-pane,.leaflet-control-container"))return false;return !!(t.closest&&t.closest("#programme,#carte .map-list,#dayButtons,.history-actions"))})}
+function start(){observer=new MutationObserver(records=>{if(relevantMutation(records))schedule()});polish();[150,500,1200].forEach(ms=>setTimeout(schedule,ms));window.addEventListener("resize",schedule,{passive:true});}
 window[GLOBAL_KEY]={stop(){observer?.disconnect();observer=null;scheduled=false;}};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();

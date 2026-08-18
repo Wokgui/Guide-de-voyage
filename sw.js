@@ -1,12 +1,12 @@
-const STATIC_CACHE="copenhague-v343-static-v39";
-const RUNTIME_CACHE="copenhague-v343-runtime-v39";
+const STATIC_CACHE="copenhague-v343-static-v42";
+const RUNTIME_CACHE="copenhague-v343-runtime-v42";
 const STATIC_FILES=[
   "/",
   "/index.html",
   "/shared-sync.js",
   "/cloud-backup.js?v=3",
   "/header-prestige.js?v=343",
-  "/ui-fixes-v7.js?v=30",
+  "/ui-fixes-v7.js?v=31",
   "/day-style-v1.js?v=5",
   "/packing-list-v1.css?v=9",
   "/packing-list-v1.js?v=5",
@@ -133,11 +133,11 @@ async function patchedHeader(request){
   }
   function polishAll(){fix();reservedIconOnly();orderProgrammeMap();}
   polishAll();setTimeout(polishAll,200);setTimeout(polishAll,700);setTimeout(polishAll,1500);
-  const observer=new MutationObserver(()=>{clearTimeout(window.__cphPair336Timer);window.__cphPair336Timer=setTimeout(polishAll,35)});
+  const observer=new MutationObserver(records=>{const relevant=records.some(r=>{const t=r.target&&r.target.nodeType===1?r.target:r.target&&r.target.parentElement;if(!t)return false;if(t.closest&&t.closest("#map,.leaflet-container,.leaflet-pane,.leaflet-control-container"))return false;return !!(t.closest&&t.closest("#programme,#carte .map-list,.map-list"))});if(!relevant)return;clearTimeout(window.__cphPair336Timer);window.__cphPair336Timer=setTimeout(polishAll,70)});
   observer.observe(document.body,{childList:true,subtree:true});
 })();
 `;
-    const extras=`\n;(function(){const s=document.createElement("script");s.src="/ui-fixes-v7.js?v=30";s.async=false;document.head.appendChild(s)})();\n`;
+    const extras=`\n;(function(){const s=document.createElement("script");s.src="/ui-fixes-v7.js?v=31";s.async=false;document.head.appendChild(s)})();\n`;
     return new Response(source+patch+extras,{status:200,statusText:"OK",headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"no-store, no-cache, must-revalidate"}});
   }catch(_){
     return (await caches.match(request))||Response.error();
