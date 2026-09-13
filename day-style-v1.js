@@ -100,8 +100,7 @@ const originals={
  renderTrackingLists:typeof window.renderTrackingLists==="function"?window.renderTrackingLists:null,
  renderMap:typeof window.renderMap==="function"?window.renderMap:null,
  adaptiveAll:typeof window.adaptiveAll==="function"?window.adaptiveAll:null,
- updateStats:typeof window.updateStats==="function"?window.updateStats:null,
- restoreRememberedDetails:typeof window.restoreRememberedDetails==="function"?window.restoreRememberedDetails:null
+ updateStats:typeof window.updateStats==="function"?window.updateStats:null
 };
 if(!originals.renderAll||!originals.switchTab||!originals.renderProgramme)return;
 
@@ -134,7 +133,7 @@ function markDataPanelsDirty(except){["programme","carte","suivi"].forEach(name=
 function panelRoot(name){return document.getElementById(name)||document;}
 
 const perfApi={
- version:"1.0.0",
+ version:"1.1.0",
  logging:new URLSearchParams(location.search).has("perf")||localStorage.getItem("cphGuidePerfLogs")==="1",
  dirty,counters,samples,
  report(){return {version:this.version,active:activeTab(),dirty:{...dirty},longTasks:counters.longTasks,renderAll:stat("renderAll"),programme:stat("programme"),carte:stat("carte"),suivi:stat("suivi"),sejour:stat("sejour"),switchTab:stat("switchTab"),polish:stat("polish")};},
@@ -171,6 +170,14 @@ function runPolishers(name){
  });
 }
 
+function withAdaptiveSnapshot(callback){
+ if(!originals.adaptiveAll)return callback(null);
+ const current=window.adaptiveAll;
+ const adapt=originals.adaptiveAll();
+ window.adaptiveAll=()=>adapt;
+ try{return callback(adapt);}finally{window.adaptiveAll=current;}
+}
+
 function renderPanel(name,reason){
  const t0=now();
  renderDepth++;
@@ -178,18 +185,14 @@ function renderPanel(name,reason){
   if(name==="programme"){
    originals.renderProgramme();
   }else if(name==="suivi"){
-   if(originals.renderReservations)originals.renderReservations();
-   if(originals.renderTrackingLists)originals.renderTrackingLists();
-   if(originals.adaptiveAll&&originals.updateStats)originals.updateStats(originals.adaptiveAll());
+   withAdaptiveSnapshot(adapt=>{
+    if(originals.renderReservations)originals.renderReservations();
+    if(originals.renderTrackingLists)originals.renderTrackingLists();
+    if(adapt&&originals.updateStats)originals.updateStats(adapt);
+   });
   }else if(name==="carte"){
    if(originals.renderMap)originals.renderMap();
    if(originals.adaptiveAll&&originals.updateStats)originals.updateStats(originals.adaptiveAll());
-  }else if(originals.adaptiveAll&&originals.updateStats){
-   originals.updateStats(originals.adaptiveAll());
-  }
-  if(originals.restoreRememberedDetails){
-   const root=panelRoot(name);
-   if(root&&root!==document)originals.restoreRememberedDetails(root);
   }
   dirty[name]=false;
  }finally{renderDepth--;}
