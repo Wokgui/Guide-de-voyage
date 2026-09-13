@@ -688,7 +688,7 @@ textarea:focus-visible{
 }
 
 /* Final authority over legacy rules that may still be present during the
-   one-time service-worker upgrade to v346. */
+   one-time service-worker upgrade to v347. */
 html body.suivi-active header .stats{
   display:grid!important;
   grid-template-columns:repeat(4,minmax(0,1fr))!important;
