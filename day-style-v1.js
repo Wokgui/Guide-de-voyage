@@ -100,7 +100,8 @@ const originals={
  renderTrackingLists:typeof window.renderTrackingLists==="function"?window.renderTrackingLists:null,
  renderMap:typeof window.renderMap==="function"?window.renderMap:null,
  adaptiveAll:typeof window.adaptiveAll==="function"?window.adaptiveAll:null,
- updateStats:typeof window.updateStats==="function"?window.updateStats:null
+ updateStats:typeof window.updateStats==="function"?window.updateStats:null,
+ scheduleGuideRenderedNotice:typeof window.scheduleGuideRenderedNotice==="function"?window.scheduleGuideRenderedNotice:null
 };
 if(!originals.renderAll||!originals.switchTab||!originals.renderProgramme)return;
 
@@ -135,7 +136,7 @@ function markDataPanelsDirty(except){["programme","carte","suivi"].forEach(name=
 function panelRoot(name){return document.getElementById(name)||document;}
 
 const perfApi={
- version:"1.2.0",
+ version:"1.3.0",
  logging:new URLSearchParams(location.search).has("perf")||localStorage.getItem("cphGuidePerfLogs")==="1",
  dirty,counters,samples,
  report(){return {version:this.version,active:activeTab(),dirty:{...dirty},longTasks:counters.longTasks,renderAll:stat("renderAll"),programme:stat("programme"),carte:stat("carte"),suivi:stat("suivi"),sejour:stat("sejour"),switchTab:stat("switchTab"),polish:stat("polish")};},
@@ -190,16 +191,23 @@ function renderPanel(name,reason){
  renderDepth++;
  try{
   if(name==="programme"){
-   originals.renderProgramme();
+   withAdaptiveSnapshot(adapt=>{
+    originals.renderProgramme(adapt||undefined);
+    if(adapt&&originals.updateStats)originals.updateStats(adapt);
+   });
   }else if(name==="suivi"){
    withAdaptiveSnapshot(adapt=>{
-    if(originals.renderReservations)originals.renderReservations();
-    if(originals.renderTrackingLists)originals.renderTrackingLists();
+    if(originals.renderReservations)originals.renderReservations(adapt||undefined);
+    if(originals.renderTrackingLists)originals.renderTrackingLists(adapt||undefined);
     if(adapt&&originals.updateStats)originals.updateStats(adapt);
    });
   }else if(name==="carte"){
-   if(originals.renderMap)originals.renderMap();
-   if(originals.adaptiveAll&&originals.updateStats)originals.updateStats(originals.adaptiveAll());
+   withAdaptiveSnapshot(adapt=>{
+    if(originals.renderMap)originals.renderMap();
+    if(adapt&&originals.updateStats)originals.updateStats(adapt);
+   });
+  }else if(name==="sejour"){
+   withAdaptiveSnapshot(adapt=>{if(adapt&&originals.updateStats)originals.updateStats(adapt);});
   }
   dirty[name]=false;
  }finally{renderDepth--;}
@@ -218,11 +226,27 @@ function selectiveRenderAll(){
  renderPanel(name,"renderAll");
  remember("renderAll",now()-t0);
 }
+
+function applyTabState(name){
+ document.querySelectorAll(".panel").forEach(x=>x.classList.toggle("active",x.id===name));
+ document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.tab===name));
+ if(document.body?.classList){
+  document.body.classList.toggle("suivi-active",name==="suivi");
+  document.body.classList.toggle("sejour-active",name==="sejour");
+ }
+}
+
 function selectiveSwitchTab(name){
  const t0=now();
  const before=activeTab();
- originals.switchTab(name);
- if(dirty[name])renderPanel(name,"open");else runPolishers(name);
+ if(name==="carte"){
+  originals.switchTab(name);
+  dirty.carte=false;
+ }else{
+  applyTabState(name);
+  if(dirty[name])renderPanel(name,"open");else runPolishers(name);
+  if(originals.scheduleGuideRenderedNotice)originals.scheduleGuideRenderedNotice();
+ }
  remember("switchTab",now()-t0);
  const elapsed=samples.switchTab.at(-1)||0;
  if(perfApi.logging&&before!==name&&elapsed>24)console.info(`[guide-perf] tab ${before} → ${name}: ${elapsed.toFixed(1)} ms`);
