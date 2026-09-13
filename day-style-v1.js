@@ -1,10 +1,10 @@
 (function(){
 "use strict";
-if(window.__cphDayStyleV5)return;
-window.__cphDayStyleV5=true;
-["cph-day-style-v1","cph-day-style-v2","cph-day-style-v3","cph-day-style-v4","cph-day-style-v5"].forEach(id=>document.getElementById(id)?.remove());
+if(window.__cphDayStyleV6)return;
+window.__cphDayStyleV6=true;
+["cph-day-style-v1","cph-day-style-v2","cph-day-style-v3","cph-day-style-v4","cph-day-style-v5","cph-day-style-v6"].forEach(id=>document.getElementById(id)?.remove());
 const s=document.createElement("style");
-s.id="cph-day-style-v5";
+s.id="cph-day-style-v6";
 s.textContent=`
 /* Style 2 valide : cadre colore uniforme et en-tete teinte colle aux trois bords. */
 html body #programme .day-section.day-section{
@@ -73,21 +73,164 @@ html body .reservation-order>b{
 }
 `;
 document.head.appendChild(s);
-function normalizeOrderHeadings(){
- document.querySelectorAll(".recommend-box>b,.reservation-order>b").forEach(b=>{
+function normalizeOrderHeadings(root=document){
+ root.querySelectorAll?.(".recommend-box>b,.reservation-order>b").forEach(b=>{
   const text=(b.textContent||"").replace(/^⭐\s*/,"").trim();
   if(/^À commander$/i.test(text))b.textContent="⭐ À commander";
  });
 }
-function pin(){
- if(s.parentNode!==document.head||s!==document.head.lastElementChild)document.head.appendChild(s);
- normalizeOrderHeadings();
- document.documentElement.dataset.cphDayStyle="v5-direct";
+function pin(root=document){
+ if(s.parentNode!==document.head)document.head.appendChild(s);
+ normalizeOrderHeadings(root);
+ document.documentElement.dataset.cphDayStyle="v6-demand";
 }
-const headObserver=new MutationObserver(pin);
-headObserver.observe(document.head,{childList:true});
-const bodyObserver=new MutationObserver(()=>requestAnimationFrame(normalizeOrderHeadings));
-if(document.body)bodyObserver.observe(document.body,{childList:true,subtree:true});
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{pin();if(document.body)bodyObserver.observe(document.body,{childList:true,subtree:true})},{once:true});else pin();
-[150,500,1200,2500].forEach(ms=>setTimeout(pin,ms));
+window.__cphDayStyleRefresh=pin;
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>pin(),{once:true});else pin();
+})();
+
+(function(){
+"use strict";
+if(window.__cphGuidePerfRuntimeV1)return;
+
+const originals={
+ renderAll:typeof window.renderAll==="function"?window.renderAll:null,
+ switchTab:typeof window.switchTab==="function"?window.switchTab:null,
+ renderProgramme:typeof window.renderProgramme==="function"?window.renderProgramme:null,
+ renderReservations:typeof window.renderReservations==="function"?window.renderReservations:null,
+ renderTrackingLists:typeof window.renderTrackingLists==="function"?window.renderTrackingLists:null,
+ renderMap:typeof window.renderMap==="function"?window.renderMap:null,
+ adaptiveAll:typeof window.adaptiveAll==="function"?window.adaptiveAll:null,
+ updateStats:typeof window.updateStats==="function"?window.updateStats:null
+};
+if(!originals.renderAll||!originals.switchTab||!originals.renderProgramme)return;
+
+const dirty={programme:false,carte:false,suivi:false,sejour:false};
+const samples={renderAll:[],programme:[],carte:[],suivi:[],sejour:[],switchTab:[],polish:[]};
+const counters={renderAll:0,programme:0,carte:0,suivi:0,sejour:0,switchTab:0,polish:0,longTasks:0};
+const MAX_SAMPLES=600;
+let renderDepth=0;
+let polishQueued=false;
+
+function now(){return typeof performance!=="undefined"&&typeof performance.now==="function"?performance.now():Date.now();}
+function activeTab(){return document.querySelector(".panel.active")?.id||document.querySelector(".tab.active")?.dataset?.tab||"programme";}
+function remember(name,ms){
+ counters[name]=(counters[name]||0)+1;
+ const list=samples[name]||(samples[name]=[]);
+ list.push(Math.round(ms*100)/100);
+ if(list.length>MAX_SAMPLES)list.splice(0,list.length-MAX_SAMPLES);
+}
+function percentile(values,p){
+ if(!values.length)return 0;
+ const sorted=[...values].sort((a,b)=>a-b);
+ return sorted[Math.min(sorted.length-1,Math.max(0,Math.ceil((p/100)*sorted.length)-1))];
+}
+function stat(name){
+ const list=samples[name]||[];
+ const sum=list.reduce((a,b)=>a+b,0);
+ return {count:counters[name]||0,last:list.at(-1)||0,avg:list.length?Math.round((sum/list.length)*100)/100:0,p50:percentile(list,50),p95:percentile(list,95),max:list.length?Math.max(...list):0};
+}
+function markDataPanelsDirty(except){["programme","carte","suivi"].forEach(name=>{dirty[name]=name!==except});}
+function panelRoot(name){return document.getElementById(name)||document;}
+
+const perfApi={
+ version:"1.1.0",
+ logging:new URLSearchParams(location.search).has("perf")||localStorage.getItem("cphGuidePerfLogs")==="1",
+ dirty,counters,samples,
+ report(){return {version:this.version,active:activeTab(),dirty:{...dirty},longTasks:counters.longTasks,renderAll:stat("renderAll"),programme:stat("programme"),carte:stat("carte"),suivi:stat("suivi"),sejour:stat("sejour"),switchTab:stat("switchTab"),polish:stat("polish")};},
+ reset(){Object.keys(samples).forEach(k=>samples[k].length=0);Object.keys(counters).forEach(k=>counters[k]=0);},
+ markDirty(){["programme","carte","suivi"].forEach(k=>dirty[k]=true);},
+ refresh(){this.markDirty();return renderPanel(activeTab(),"manual");},
+ async stress(cycles=300){
+  const count=Math.max(1,Math.min(1000,Number(cycles)||300));
+  const original=activeTab();
+  const sequence=["programme","suivi","sejour"];
+  const t0=now();
+  for(let i=0;i<count;i++){
+   const target=sequence[i%sequence.length];
+   this.markDirty();
+   window.switchTab(target);
+   if((i+1)%25===0)await new Promise(requestAnimationFrame);
+  }
+  window.switchTab(original);
+  return {cycles:count,totalMs:Math.round((now()-t0)*100)/100,...this.report()};
+ }
+};
+
+function runPolishers(name){
+ if(polishQueued)return;
+ polishQueued=true;
+ requestAnimationFrame(()=>{
+  polishQueued=false;
+  const t0=now();
+  try{
+   const root=panelRoot(name);
+   if(typeof window.__cphDayStyleRefresh==="function")window.__cphDayStyleRefresh(root);
+  }catch(err){console.warn("[guide-perf] polish",err);}
+  remember("polish",now()-t0);
+ });
+}
+
+function withAdaptiveSnapshot(callback){
+ if(!originals.adaptiveAll)return callback(null);
+ const current=window.adaptiveAll;
+ const adapt=originals.adaptiveAll();
+ window.adaptiveAll=()=>adapt;
+ try{return callback(adapt);}finally{window.adaptiveAll=current;}
+}
+
+function renderPanel(name,reason){
+ const t0=now();
+ renderDepth++;
+ try{
+  if(name==="programme"){
+   originals.renderProgramme();
+  }else if(name==="suivi"){
+   withAdaptiveSnapshot(adapt=>{
+    if(originals.renderReservations)originals.renderReservations();
+    if(originals.renderTrackingLists)originals.renderTrackingLists();
+    if(adapt&&originals.updateStats)originals.updateStats(adapt);
+   });
+  }else if(name==="carte"){
+   if(originals.renderMap)originals.renderMap();
+   if(originals.adaptiveAll&&originals.updateStats)originals.updateStats(originals.adaptiveAll());
+  }
+  dirty[name]=false;
+ }finally{renderDepth--;}
+ const elapsed=now()-t0;
+ remember(name,elapsed);
+ runPolishers(name);
+ if(perfApi.logging&&elapsed>24)console.info(`[guide-perf] ${reason||"render"} ${name}: ${elapsed.toFixed(1)} ms`);
+ return elapsed;
+}
+
+function selectiveRenderAll(){
+ if(renderDepth)return originals.renderAll();
+ const t0=now();
+ const name=activeTab();
+ markDataPanelsDirty(name);
+ renderPanel(name,"renderAll");
+ remember("renderAll",now()-t0);
+}
+function selectiveSwitchTab(name){
+ const t0=now();
+ const before=activeTab();
+ originals.switchTab(name);
+ if(dirty[name])renderPanel(name,"open");else runPolishers(name);
+ remember("switchTab",now()-t0);
+ const elapsed=samples.switchTab.at(-1)||0;
+ if(perfApi.logging&&before!==name&&elapsed>24)console.info(`[guide-perf] tab ${before} → ${name}: ${elapsed.toFixed(1)} ms`);
+}
+
+window.renderAll=selectiveRenderAll;
+window.switchTab=selectiveSwitchTab;
+try{
+ if("PerformanceObserver" in window){
+  const longTaskObserver=new PerformanceObserver(list=>{counters.longTasks+=list.getEntries().length;});
+  longTaskObserver.observe({type:"longtask",buffered:true});
+ }
+}catch(_){}
+window.__cphGuidePerfRuntimeV1=perfApi;
+window.__guidePerf=perfApi;
+document.documentElement.dataset.guidePerfRuntime="v1";
+if(perfApi.logging)console.info("[guide-perf] runtime v1 actif",perfApi.report());
 })();
