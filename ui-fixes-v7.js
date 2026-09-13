@@ -113,7 +113,7 @@ html body #programme .visit-details:not([open]) .summary-title-tools .summary-vi
 }
 html body #programme .visit-details:not([open]) .summary-title-tools .summary-walk-duration .cph-summary-meta-icon{
  font-size:17px!important;
- transform:scale(.78)!important;
+ transform:none!important;
  transform-origin:center!important;
 }
 html body #programme .visit-details:not([open]) .summary-title-tools .summary-point-map.cph-summary-meta{
@@ -198,6 +198,11 @@ function normalizeSummaryMeta(){
   const walk=summary.querySelector(".summary-walk-duration");
   if(walk){
    walk.classList.add("cph-summary-meta");
+   const existingWalkIcon=walk.querySelector(":scope > .summary-meta-icon");
+   if(existingWalkIcon){
+    existingWalkIcon.classList.add("cph-summary-meta-icon");
+    wrapMetaLabel(walk);
+   }
    if(!walk.querySelector(":scope > .cph-summary-meta-icon")){
     const raw=norm(walk);
     const match=raw.match(/^(\S+)\s*(.*)$/);
