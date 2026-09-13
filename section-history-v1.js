@@ -124,3 +124,34 @@
   installNotes();
   updateButtons();
 })();
+
+/* v352 — garde d’hydratation : la synchronisation peut réémettre plusieurs fois
+   exactement le même état au démarrage. Ces appels ne doivent pas reconstruire
+   toute l’interface ni relancer les images. */
+(()=>{
+  if(window.__cphStartupRenderGuardV1||typeof window.renderAll!=='function')return;
+  const originalRenderAll=window.renderAll;
+  const stats={skipped:0,rendered:0,remainingDuplicateSkips:4};
+  const stable=value=>{
+    if(value===null||typeof value!=='object')return JSON.stringify(value);
+    if(Array.isArray(value))return `[${value.map(stable).join(',')}]`;
+    return `{${Object.keys(value).sort().map(key=>`${JSON.stringify(key)}:${stable(value[key])}`).join(',')}}`;
+  };
+  const fingerprint=()=>{
+    try{return typeof state==='undefined'?null:stable(state)}catch{return null}
+  };
+  let lastFingerprint=fingerprint();
+  window.renderAll=function(){
+    const current=fingerprint();
+    if(stats.remainingDuplicateSkips>0&&current!==null&&current===lastFingerprint){
+      stats.remainingDuplicateSkips--;
+      stats.skipped++;
+      return 0;
+    }
+    const result=originalRenderAll.apply(this,arguments);
+    lastFingerprint=fingerprint();
+    stats.rendered++;
+    return result;
+  };
+  window.__cphStartupRenderGuardV1={stats,force(){lastFingerprint=null;return window.renderAll()}};
+})();
