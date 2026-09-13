@@ -6,8 +6,13 @@ on:
       - perf/runtime-344
   pull_request:
     paths:
+      - cloud-backup-loader.js
       - day-style-v1.js
+      - index.html
+      - sw.js
+      - ui-fixes-v7.js
       - tests/perf-runtime.test.mjs
+      - tests/visit-card-layout.test.mjs
       - .github/workflows/perf-runtime-check.yml
 
 permissions:
@@ -22,5 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Syntaxe et stress 300 cycles
-        run: node tests/perf-runtime.test.mjs
+      - name: Syntaxe, stabilité UI et stress 300 cycles
+        run: |
+          node tests/perf-runtime.test.mjs
+          node tests/visit-card-layout.test.mjs
