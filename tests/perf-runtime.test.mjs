@@ -101,6 +101,9 @@ sandbox.switchTab('carte');
 assert.equal(calls.map,1,'Carte doit se rafraîchir uniquement lorsqu’elle devient active et sale');
 assert.equal(sandbox.__guidePerf.dirty.carte,false);
 
+// Le stress part de Programme pour ne jamais ouvrir la carte et donc ne jamais déclencher
+// de géolocalisation dans un vrai navigateur pendant ce test automatique.
+sandbox.switchTab('programme');
 sandbox.__guidePerf.reset();
 const stress=await sandbox.__guidePerf.stress(300);
 assert.equal(stress.cycles,300);
@@ -108,7 +111,7 @@ assert.equal(stress.switchTab.count,301,'300 cycles + retour à l’onglet initi
 assert.equal(stress.longTasks,0,'le harnais Node ne doit générer aucun long task');
 assert.ok(stress.programme.count>=99&&stress.programme.count<=101,'Programme doit être rendu environ un cycle sur trois');
 assert.ok(stress.suivi.count>=99&&stress.suivi.count<=101,'Suivi doit être rendu environ un cycle sur trois');
-assert.equal(stress.carte.count,0,'Le stress automatique évite volontairement la carte/géolocalisation');
+assert.equal(stress.carte.count,0,'Le stress automatique ne doit pas ouvrir la carte/géolocalisation');
 assert.equal(calls.legacyRenderAll,0,'Le rendu global historique ne doit plus être utilisé par le runtime sélectif');
 
 console.log(JSON.stringify({ok:true,stress,finalCalls:calls},null,2));
