@@ -17,7 +17,7 @@
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Copenhague" name="apple-mobile-web-app-title"/>
-<title>Copenhague &amp; Malmö — v343</title>
+<title>Copenhague &amp; Malmö — v345</title>
 <link href="/manifest.webmanifest" rel="manifest"/>
 <link href="/icons/app-icon.svg" rel="icon" type="image/svg+xml"/>
 <link href="/icons/app-icon-192.png?v=2" rel="apple-touch-icon"/>
@@ -5215,6 +5215,7 @@ body.backup-settings-open{overflow:hidden}
   .backup-entry-actions button{width:100%}
 }
 </style>
+<link href="/ux-stability-v1.css?v=1" rel="stylesheet"/>
 </head>
 <body>
 <header>
@@ -5224,7 +5225,7 @@ body.backup-settings-open{overflow:hidden}
 </button>
 <span class="save-state-copy"><b id="saveIndicatorLabel">Sauvegardé</b><small id="saveIndicatorTime">—</small></span>
 </div>
-<h1><span class="title-main">Copenhague &amp; Malmö <span class="title-flags" aria-label="Danemark et Suède">🇩🇰 🇸🇪</span></span><span class="title-sub">Guide personnalisé</span></h1>
+<h1><span class="title-main">Copenhague &amp; Malmö</span><span class="cph-balanced-flags" aria-label="Danemark et Suède"><span>🇩🇰</span><span>🇸🇪</span></span><span class="title-sub">GUIDE PERSONNALISÉ</span></h1>
 <div class="tabs">
 <button class="tab active" data-tab="programme"><span class="tab-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span><span>Programme</span></button>
 <button class="tab" data-tab="carte"><span class="tab-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/></svg></span><span>Carte</span></button>
@@ -5233,8 +5234,8 @@ body.backup-settings-open{overflow:hidden}
 </div>
 <div class="progress-wrap" role="progressbar" aria-label="Progression des visites" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progressBar"></div><span id="progressBarLabel">0%</span></div>
 <div class="stats">
-<div class="stat stat-done"><b id="doneCount">0</b><span><i>✓</i> Visités</span></div>
 <div class="stat stat-todo"><b id="todoCount">0</b><span><i>○</i> À faire</span></div>
+<div class="stat stat-done"><b id="doneCount">0</b><span><i>✓</i> Visités</span></div>
 <div class="stat stat-aside"><b id="asideCount">0</b><span><i>♧</i> De côté</span></div>
 <div class="stat stat-progress"><b id="percent">0%</b><span>Progression <i class="progress-ring">◔</i></span></div>
 </div>
@@ -5281,6 +5282,7 @@ body.backup-settings-open{overflow:hidden}
 </section>
 <section class="panel" id="carte">
 <div id="map"></div>
+<div class="map-location-status" id="mapLocationStatus" role="status" aria-live="polite" hidden>Position indisponible — la carte reste entièrement utilisable.</div>
 <div class="toolbar map-toolbar compact-map-toolbar" style="margin-top:13px">
 <input autocomplete="off" class="map-search" id="mapSearch" placeholder="Rechercher un lieu, une adresse…" type="search" aria-label="Rechercher sur la carte"/>
 <select id="mapDay"><option value="Tous">Tous les jours</option></select>
@@ -5293,9 +5295,9 @@ body.backup-settings-open{overflow:hidden}
 <option value="transport">🚆 Transports et arrêts</option>
 </select>
 <div class="map-status-options compact-status-options">
-<label class="remaining-filter"><input id="mapShowRemaining" type="checkbox"/> À visiter</label>
-<label class="small-status-filter"><input id="mapShowVisited" type="checkbox"/> Les visités</label>
-<label class="small-status-filter"><input id="mapShowAside" type="checkbox"/> Les mis de côté</label>
+<label class="remaining-filter cph-map-filter-label"><input id="mapShowRemaining" type="checkbox"/> À visiter</label>
+<label class="small-status-filter cph-map-filter-label"><input id="mapShowVisited" type="checkbox"/> Les visités</label>
+<label class="small-status-filter cph-map-filter-label"><input id="mapShowAside" type="checkbox"/> Les mis de côté</label>
 </div>
 </div>
 <div class="map-list" id="mapList"></div>
@@ -5365,11 +5367,15 @@ body.backup-settings-open{overflow:hidden}
 <details class="stay-card stay-collapsible suivi-collapsible tracking-collapsible">
 <summary class="stay-collapsible-summary">Visites</summary>
 <div class="suivi-collapsible-content">
-<div class="list-status">
+<div class="list-status" id="trackingTodoSection">
+<h2 class="tracking-section-title">Visites à faire</h2>
+<div id="trackingTodoList"></div>
+</div>
+<div class="list-status" id="trackingVisitedSection">
 <h2 class="tracking-section-title">Points visités par jour</h2>
 <div id="visitedList"></div>
 </div>
-<div class="list-status">
+<div class="list-status" id="trackingAsideSection">
 <h2 class="tracking-section-title">Mis de côté</h2>
 <div id="asideList"></div>
 </div>
@@ -5459,6 +5465,7 @@ body.backup-settings-open{overflow:hidden}
 <button class="secondary" id="exportBtn">Exporter le suivi</button>
 <label class="button secondary" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;">Importer un suivi<input accept=".json" hidden="" id="importFile" type="file"/></label>
 <button class="danger" id="resetBtn">Tout réinitialiser</button>
+<button class="secondary" id="cphBottomSettingsTile" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19h12a4 4 0 0 0 .6-7.95A6.5 6.5 0 0 0 6.2 9.2 4.9 4.9 0 0 0 6 19z"/><path d="M12 11v6m0 0-2.5-2.5M12 17l2.5-2.5"/></svg><span>Sauvegarde</span></button>
 </div>
 </main>
 <script src="/vendor/leaflet/leaflet.js">
@@ -6067,9 +6074,11 @@ function adaptiveAll(){const a={};DAYS.slice(1).forEach(d=>a[d]=adaptiveDay(d));
 
 function updateStats(adapt){
  const vals=planData().map(p=>itemState(p.id).status);
- const done=vals.filter(x=>x==="visited").length,todo=vals.filter(x=>x==="todo").length;
  const aside=new Set();Object.values(adapt).forEach(a=>a.aside.forEach(x=>aside.add(x)));
- const pct=Math.round(done/planData().length*100);
+ const points=planData();
+ const done=vals.filter(x=>x==="visited").length;
+ const todo=points.filter(p=>itemState(p.id).status==="todo"&&!aside.has(p.id)).length;
+ const pct=points.length?Math.round(done/points.length*100):0;
  doneCount.textContent=done;todoCount.textContent=todo;asideCount.textContent=aside.size;percent.textContent=pct+"%";progressBar.style.width=pct+"%";
  const progressLabel=document.getElementById("progressBarLabel");
  if(progressLabel)progressLabel.textContent=pct+"%";
@@ -6324,19 +6333,27 @@ const PHOTO_CREDIT_CACHE={};
 const PHOTO_PROMISE_CACHE={};
 const PHOTO_CACHE_KEY="cph-photo-sources-v1";
 const PHOTO_CACHE_MAX_AGE=30*24*60*60*1000;
+const PHOTO_FAILURE_RETRY_MS=60*1000;
+const PHOTO_FAILURE_AT={};
 let PHOTO_PERSISTED_CACHE={};
 try{PHOTO_PERSISTED_CACHE=JSON.parse(localStorage.getItem(PHOTO_CACHE_KEY)||"{}")||{}}catch(_){PHOTO_PERSISTED_CACHE={}}
 function persistPhotoSource(id,src,credit=""){
- if(typeof src==="string"&&src.startsWith("data:"))return;
- PHOTO_PERSISTED_CACHE[id]={src:src||null,credit,at:Date.now()};
+ if(!src||typeof src!=="string"||src.startsWith("data:"))return;
+ PHOTO_PERSISTED_CACHE[id]={src,credit,at:Date.now()};
  try{localStorage.setItem(PHOTO_CACHE_KEY,JSON.stringify(PHOTO_PERSISTED_CACHE))}catch(_){}
 }
 async function resolveExternalPhotoSrc(p){
  const remember=(src,credit="")=>{
-  PHOTO_SRC_CACHE[p.id]=src||null;
-  PHOTO_CREDIT_CACHE[p.id]=credit;
-  persistPhotoSource(p.id,src,credit);
-  return src||null;
+  if(src){
+   PHOTO_SRC_CACHE[p.id]=src;
+   PHOTO_CREDIT_CACHE[p.id]=credit;
+   delete PHOTO_FAILURE_AT[p.id];
+   persistPhotoSource(p.id,src,credit);
+   return src;
+  }
+  delete PHOTO_SRC_CACHE[p.id];
+  PHOTO_FAILURE_AT[p.id]=Date.now();
+  return null;
  };
  const supplied=String(p.imageUrl||"").trim();
  if(supplied)return remember(supplied,"Photo du lieu");
@@ -6382,10 +6399,10 @@ async function resolveExternalPhotoSrc(p){
 
 async function getExternalPhotoSrc(p){
  if(Object.prototype.hasOwnProperty.call(PHOTO_SRC_CACHE,p.id))return PHOTO_SRC_CACHE[p.id];
+ if(Date.now()-Number(PHOTO_FAILURE_AT[p.id]||0)<PHOTO_FAILURE_RETRY_MS)return null;
  const persisted=PHOTO_PERSISTED_CACHE[p.id];
- const persistedMaxAge=persisted?.src?PHOTO_CACHE_MAX_AGE:24*60*60*1000;
- if(persisted&&Date.now()-Number(persisted.at||0)<persistedMaxAge){
-  PHOTO_SRC_CACHE[p.id]=persisted.src||null;
+ if(persisted?.src&&Date.now()-Number(persisted.at||0)<PHOTO_CACHE_MAX_AGE){
+  PHOTO_SRC_CACHE[p.id]=persisted.src;
   PHOTO_CREDIT_CACHE[p.id]=persisted.credit||"";
   return PHOTO_SRC_CACHE[p.id];
  }
@@ -6650,6 +6667,74 @@ function setVectorThumbnail(wrap,p){
  wrap.dataset.realPhoto="0";
 }
 
+function knownPhotoSource(p){
+ if(Object.prototype.hasOwnProperty.call(PHOTO_SRC_CACHE,p.id)&&PHOTO_SRC_CACHE[p.id])return PHOTO_SRC_CACHE[p.id];
+ const supplied=String(p.imageUrl||"").trim();
+ if(supplied)return supplied;
+ const special=specialLargePhotoData(p);
+ if(special)return special;
+ if(PHOTO_DIRECT[p.name])return PHOTO_DIRECT[p.name];
+ const persisted=PHOTO_PERSISTED_CACHE[p.id];
+ if(persisted?.src&&Date.now()-Number(persisted.at||0)<PHOTO_CACHE_MAX_AGE)return persisted.src;
+ return null;
+}
+
+function preparePhotoSurface(wrap){
+ if(!wrap)return;
+ wrap.classList.remove("empty");
+ wrap.classList.add("photo-loading");
+ wrap.style.display="";
+ wrap.setAttribute("aria-busy","true");
+ if(!wrap.querySelector(":scope > img"))wrap.replaceChildren();
+}
+
+function revealThumbnail(wrap,p,src){
+ if(!wrap||!wrap.isConnected)return Promise.resolve(false);
+ return new Promise(resolve=>{
+  const img=new Image();
+  img.alt=p.name;
+  img.decoding="async";
+  img.loading="eager";
+  img.referrerPolicy="no-referrer";
+  img.onload=()=>{
+   if(!wrap.isConnected||THUMBNAIL_PENDING.get(wrap)!==p){resolve(false);return;}
+   img.className="photo-ready";
+   wrap.replaceChildren(img);
+   wrap.classList.remove("photo-loading");
+   wrap.removeAttribute("aria-busy");
+   wrap.dataset.realPhoto="1";
+   wrap.dataset.vector="0";
+   wrap.dataset.loaded="1";
+   wrap.dataset.loading="0";
+   resolve(true);
+  };
+  img.onerror=()=>resolve(false);
+  img.src=src;
+ });
+}
+
+function showNeutralPhotoFallback(wrap,p,expanded=false){
+ if(!wrap||!wrap.isConnected)return;
+ wrap.classList.remove("photo-loading");
+ wrap.removeAttribute("aria-busy");
+ wrap.dataset.realPhoto="0";
+ wrap.dataset.vector="0";
+ wrap.dataset.loaded="1";
+ wrap.dataset.loading="0";
+ if(!expanded){wrap.replaceChildren();return;}
+ const fallback=document.createElement("div");
+ fallback.className="photo-neutral-placeholder";
+ fallback.innerHTML=`<b>${esc(p.name)}</b><small>Photo momentanément indisponible</small><button type="button">Réessayer</button>`;
+ fallback.querySelector("button").onclick=()=>{
+  delete PHOTO_SRC_CACHE[p.id];
+  delete PHOTO_FAILURE_AT[p.id];
+  delete wrap.dataset.loaded;
+  delete wrap.dataset.loading;
+  loadExternalPhoto(p,wrap.closest(".card"));
+ };
+ wrap.replaceChildren(fallback);
+}
+
 const THUMBNAIL_PENDING=new WeakMap();
 const THUMBNAIL_OBSERVER="IntersectionObserver" in window?new IntersectionObserver(entries=>{
  entries.forEach(entry=>{
@@ -6662,70 +6747,53 @@ const THUMBNAIL_OBSERVER="IntersectionObserver" in window?new IntersectionObserv
 
 async function hydratePointThumbnail(wrap,p){
  if(!wrap||wrap.dataset.loaded==="1"||wrap.dataset.loading==="1")return;
- if(!wrap.querySelector(":scope > img"))setVectorThumbnail(wrap,p);
+ preparePhotoSurface(wrap);
  wrap.dataset.loading="1";
  const src=await getExternalPhotoSrc(p);
  if(!src){
-  wrap.dataset.loaded="1";wrap.dataset.loading="0";return;
+  showNeutralPhotoFallback(wrap,p,false);return;
  }
- const visibleImg=wrap.querySelector(":scope > img");
- const preload=new Image();
- preload.referrerPolicy="no-referrer";
- preload.onload=()=>{
-  if(!wrap.isConnected||THUMBNAIL_PENDING.get(wrap)!==p)return;
-  const img=visibleImg&&visibleImg.isConnected?visibleImg:wrap.querySelector(":scope > img");
-  if(!img)return;
-  img.src=src;img.alt=p.name;delete img.dataset.fallbackIllustration;
-  wrap.style.display="";wrap.dataset.realPhoto="1";wrap.dataset.vector="0";
- };
- preload.onerror=()=>{};
- preload.src=src;
- wrap.dataset.loaded="1";wrap.dataset.loading="0";
+ const cancelled=THUMBNAIL_PENDING.get(wrap)!==p||!wrap.isConnected;
+ if(!cancelled&&!(await revealThumbnail(wrap,p,src)))showNeutralPhotoFallback(wrap,p,false);
 }
 
 function loadPointThumbnail(p,root,selector){
  const wrap=root.querySelector(selector);
  if(!wrap||wrap.dataset.loaded==="1"||wrap.dataset.loading==="1")return;
  THUMBNAIL_PENDING.set(wrap,p);
+ preparePhotoSurface(wrap);
+ const known=knownPhotoSource(p);
+ if(known){hydratePointThumbnail(wrap,p);return;}
  if(THUMBNAIL_OBSERVER)THUMBNAIL_OBSERVER.observe(wrap);
  else setTimeout(()=>hydratePointThumbnail(wrap,p),0);
 }
 async function loadExternalPhoto(p,card){
+ if(!card)return;
  const wrap=card.querySelector(`[data-photo-id="${p.id}"]`);
  const credit=card.querySelector(`[data-credit-id="${p.id}"]`);
  if(wrap)wrap.dataset.photoPlace=p.name;
  if(!wrap||wrap.dataset.loaded==="1"||wrap.dataset.loading==="1")return;
+ preparePhotoSurface(wrap);
  wrap.dataset.loading="1";
- const showFallback=()=>{
-  wrap.style.display="";
-  wrap.innerHTML="";
-  const fallback=document.createElement("img");
-  fallback.className="visit-photo";
-  fallback.loading="lazy";
-  fallback.alt=`Illustration de remplacement pour ${p.name}`;
-  fallback.src=fallbackIllustrationSrc(p);
-  fallback.style.objectFit="cover";
-  fallback.dataset.fallbackIllustration="1";
-  wrap.appendChild(fallback);
-  wrap.dataset.realPhoto="0";
-  wrap.dataset.vector="1";
-  if(credit){credit.textContent="Illustration de remplacement — aucune photo disponible";credit.style.display="";}
- };
  const src=await getExternalPhotoSrc(p);
- if(!src){showFallback();wrap.dataset.loaded="1";wrap.dataset.loading="0";return;}
+ if(!src){showNeutralPhotoFallback(wrap,p,true);if(credit){credit.textContent="";credit.style.display="none";}return;}
  const img=document.createElement("img");
- img.className="visit-photo";img.loading="lazy";img.alt=p.name;img.referrerPolicy="no-referrer";
+ img.className="visit-photo photo-ready";img.loading="eager";img.decoding="async";img.alt=p.name;img.referrerPolicy="no-referrer";
  img.style.objectFit="cover";img.style.objectPosition="center center";
- img.onload=()=>{wrap.style.display="";wrap.dataset.realPhoto="1";wrap.dataset.vector="0";};
- img.onerror=showFallback;
+ img.onload=()=>{
+  if(!wrap.isConnected)return;
+  wrap.replaceChildren(img);
+  wrap.classList.remove("photo-loading");
+  wrap.removeAttribute("aria-busy");
+  wrap.dataset.realPhoto="1";wrap.dataset.vector="0";wrap.dataset.loaded="1";wrap.dataset.loading="0";
+ };
+ img.onerror=()=>showNeutralPhotoFallback(wrap,p,true);
  img.src=src;
- wrap.innerHTML="";wrap.appendChild(img);wrap.dataset.loaded="1";
  if(credit){
   const label=PHOTO_CREDIT_CACHE[p.id]||"";
   credit.textContent=label;
   credit.style.display=label?"":"none";
  }
- wrap.dataset.loading="0";
 }
 
 
@@ -6874,8 +6942,8 @@ function pointSmallIcon(p){
  return `<span class="nature-emoji" aria-hidden="true">${iconMarkup}</span>`;
 }
 
-function renderProgramme(){
- const adapt=adaptiveAll();updateStats(adapt);list.innerHTML="";
+function renderProgramme(adapt=adaptiveAll()){
+ list.innerHTML="";
  const days=selectedDay==="Tous"?DAYS.slice(1):[selectedDay];let shown=0;
  days.forEach(day=>{
   const visibleDayItems=dayItems(day).filter(p=>{
@@ -6914,11 +6982,11 @@ function renderProgramme(){
       <div class="summary-top-time">${esc(state.timeOverrides[p.id]||(sc?minToHm(sc.start):p.plannedStart))}</div>
      </div>
      <div class="summary-title-tools ${rs==="yes"?"has-reservation":"no-reservation"}">
-      <div class="summary-line"><span class="mini-badge nature">${natureIcon} ${esc(pointNature)}</span>${rs==="yes"?'<span class="mini-badge booking reserved">📅 Réservé</span>':""}</div>
+      <div class="summary-line"><span class="mini-badge nature summary-nature"><span class="summary-nature-icon">${natureIcon}</span><span class="summary-nature-label">${esc(pointNature)}</span></span>${rs==="yes"?'<span class="reservation-compact" role="img" aria-label="Réservé" title="Réservé"><svg aria-hidden="true" viewBox="0 0 18 18"><rect x="1" y="2.5" width="16" height="14.5" rx="3.2" fill="#d98218"/><path d="M1 7h16" stroke="#fff" stroke-width="1.45"/><path d="M5 1.5v3.4M13 1.5v3.4" stroke="#d98218" stroke-width="2" stroke-linecap="round"/><text x="9" y="14.2" text-anchor="middle" font-family="Arial, sans-serif" font-size="7.2" font-weight="700" fill="#fff">31</text></svg></span>':""}</div>
       <div class="summary-line">
-        <span class="summary-visit-duration"><span class="visit-duration-icon" aria-hidden="true">◷</span>${state.durationOverrides[p.id]||p.durationMins} min</span>
-        <button class="map-title-button summary-point-map" type="button" aria-label="Ouvrir la carte de ${esc(p.name)}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/></svg></button>
-        <span class="summary-walk-duration">🚶 ${route.mins} min</span>
+        <span class="summary-visit-duration summary-meta-item"><span class="visit-duration-icon summary-meta-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.2 2"/></svg></span><span class="summary-meta-label">${state.durationOverrides[p.id]||p.durationMins} min</span></span>
+        <button class="map-title-button summary-point-map summary-meta-item" type="button" aria-label="Ouvrir la carte de ${esc(p.name)}"><svg class="summary-meta-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/></svg></button>
+        <span class="summary-walk-duration summary-meta-item"><span class="summary-meta-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="13" cy="4.5" r="2"/><path d="m10 9 3-2 2.5 2.5 2.5 1M13 7l-2 5 3 2 1 5M11 12l-3 6"/></svg></span><span class="summary-meta-label">${route.mins} min</span></span>
       </div>
      </div>
      <button class="button go-now-summary" type="button" onclick="event.stopPropagation()">J’y vais</button>
@@ -7095,22 +7163,29 @@ function trackingChronologicalSort(a,b){
  if(timeDiff!==0)return timeDiff;
  return String(a.name||"").localeCompare(String(b.name||""),"fr");
 }
-function renderTrackingLists(){
- const adapt=adaptiveAll();
+function renderTrackingLists(adapt=adaptiveAll()){
  const asideIds=new Set();Object.values(adapt).forEach(a=>a.aside.forEach(id=>asideIds.add(id)));
  const visiblePoints=DATA.filter(p=>!state.deletedIds.includes(p.id));
+ const scheduledDays=new Set(DAYS.slice(1));
+ const todoItems=visiblePoints.filter(p=>itemState(p.id).status==="todo"&&!asideIds.has(p.id)&&scheduledDays.has(effectiveDay(p))).sort(trackingChronologicalSort);
  const visitedItems=visiblePoints.filter(p=>itemState(p.id).status==="visited").sort(trackingChronologicalSort);
  const asideItems=visiblePoints.filter(p=>asideIds.has(p.id)).sort(trackingChronologicalSort);
  const make=(p,kind)=>`<div class="status-card status-card-with-thumb" data-tracking-point-id="${p.id}">
   <div class="tracking-thumb" data-tracking-thumb-id="${p.id}" aria-hidden="true"></div>
-  <div class="tracking-card-content"><div class="tracking-title-row"><span class="section-place-icon">${pointSmallIcon(p)}</span><b>${esc(p.name)}</b></div><span class="small">${esc(effectiveDay(p))} • ${esc(state.timeOverrides[p.id]||p.plannedStart||"")}</span><div class="map-actions"><button class="button maps tracking-map" data-id="${p.id}">Carte</button>${kind==="aside"?`<button class="button secondary tracking-restore" data-id="${p.id}">Remettre au programme</button><button class="button tracking-delete" data-id="${p.id}">Supprimer</button>`:kind==="impossible"?`<button class="button tracking-delete" data-id="${p.id}">Supprimer</button>`:`<button class="button secondary tracking-retry" data-id="${p.id}">Marquer à refaire</button>`}</div></div>
+  <div class="tracking-card-content"><div class="tracking-title-row"><span class="section-place-icon">${pointSmallIcon(p)}</span><b>${esc(p.name)}</b></div><span class="small">${esc(effectiveDay(p))} • ${esc(state.timeOverrides[p.id]||p.plannedStart||"")}</span><div class="map-actions"><button class="button maps tracking-map" data-id="${p.id}">Carte</button>${kind==="todo"?"":kind==="aside"?`<button class="button secondary tracking-restore" data-id="${p.id}">Remettre au programme</button><button class="button tracking-delete" data-id="${p.id}">Supprimer</button>`:kind==="impossible"?`<button class="button tracking-delete" data-id="${p.id}">Supprimer</button>`:`<button class="button secondary tracking-retry" data-id="${p.id}">Marquer à refaire</button>`}</div></div>
  </div>`;
  const orderedDays=[...DAYS.slice(1),"Alternatives"];
+ const todoGroups=orderedDays.map(day=>{
+  const points=todoItems.filter(p=>effectiveDay(p)===day).sort(trackingChronologicalSort);
+  if(!points.length)return "";
+  return `<details class="tracking-day-details"><summary class="tracking-day-summary"><span>${esc(dayLabel(day))}</span><span class="tracking-day-count">${points.length} visite${points.length>1?"s":""} à faire</span></summary><div class="tracking-day-content">${points.map(p=>make(p,"todo")).join("")}</div></details>`;
+ }).join("");
  const visitedGroups=orderedDays.map(day=>{
   const points=visitedItems.filter(p=>effectiveDay(p)===day).sort(trackingChronologicalSort);
   if(!points.length)return "";
   return `<details class="tracking-day-details"><summary class="tracking-day-summary"><span>${esc(dayLabel(day))}</span><span class="tracking-day-count">${points.length} visite${points.length>1?"s":""}</span></summary><div class="tracking-day-content">${points.map(p=>make(p,"visited")).join("")}</div></details>`;
  }).join("");
+ trackingTodoList.innerHTML=todoGroups||'<div class="empty">Aucune visite à faire.</div>';
  visitedList.innerHTML=visitedGroups||'<div class="empty">Aucun point visité.</div>';
  asideList.innerHTML=asideItems.length?asideItems.map(p=>make(p,"aside")).join(""):'<div class="empty">Aucun point de côté.</div>';
  document.querySelectorAll("[data-tracking-point-id]").forEach(card=>{
@@ -7168,9 +7243,8 @@ function compactBookingLabel(p){
  return "Réservation facultative";
 }
 
-function renderReservations(){
+function renderReservations(adapt=adaptiveAll()){
  reservationList.innerHTML="";
- const adapt=adaptiveAll();
  const reservables=planData().filter(p=>p.bookingNeed!=="none");
  reservables.forEach(p=>{
   const day=effectiveDay(p);
@@ -7323,7 +7397,7 @@ function renderMap(preserveViewport=false){
   markerById[p.id]=m;
   m.bindPopup(`<b>${esc(p.name)}</b><br>${esc(effectiveOpeningHours(p))}<br>${esc(p.price)}<br><a class="map-popup-route" target="_blank" rel="noopener" href="${googleMapsDirectionsUrl(p)}" aria-label="Ouvrir l’itinéraire vers ${esc(p.name)} dans Google Maps">🧭 Itinéraire Google Maps</a>`);
   bounds.push([p.lat,p.lng]);
-  mapList.insertAdjacentHTML("beforeend",`<div class="map-list-item map-list-item-with-thumb" data-point-id="${p.id}" role="button" tabindex="0"><div class="map-list-thumb" data-map-thumb-id="${p.id}"></div><div class="map-list-content"><div class="map-place-line"><span class="map-place-icon">${pointSmallIcon(p)}</span> <b>${esc(p.name)}</b></div><div class="map-visit-time">${esc(effectiveDay(p))} ${esc(state.timeOverrides[p.id]||p.plannedStart||"")}</div><div class="map-point-tools"><span class="map-nature-badge">${esc(natureLabel(p))}</span><a class="map-walk-icon" aria-label="Itinéraire à pied" target="_blank" href="${googleMapsDirectionsUrl(p)}" onclick="event.stopPropagation()">🚶</a></div></div></div>`);
+   mapList.insertAdjacentHTML("beforeend",`<div class="map-list-item map-list-item-with-thumb" data-point-id="${p.id}" role="button" tabindex="0"><div class="map-list-thumb" data-map-thumb-id="${p.id}"></div><div class="map-list-content"><div class="map-place-line"><span class="map-place-icon">${pointSmallIcon(p)}</span> <b>${esc(p.name)}</b></div><div class="map-visit-time">${esc(effectiveDay(p))} ${esc(state.timeOverrides[p.id]||p.plannedStart||"")}</div><div class="map-point-tools"><span class="map-nature-badge">${esc(natureLabel(p))}</span><a class="map-walk-icon cph-map-go-now" aria-label="Ouvrir l’itinéraire à pied" target="_blank" rel="noopener" href="${googleMapsDirectionsUrl(p)}" onclick="event.stopPropagation()">J’y vais</a></div></div></div>`);
   const item=mapList.lastElementChild;if(item)loadPointThumbnail(p,item,`[data-map-thumb-id="${p.id}"]`);
  });
 
@@ -7367,14 +7441,25 @@ function switchTab(name){
  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.tab===name));
  document.body.classList.toggle("suivi-active",name==="suivi");
  document.body.classList.toggle("sejour-active",name==="sejour");
+ const adapt=adaptiveAll();
+ updateStats(adapt);
+ if(name==="programme")renderProgramme(adapt);
+ if(name==="suivi"){
+  renderReservations(adapt);
+  renderTrackingLists(adapt);
+  restoreRememberedDetails(document.getElementById("suivi"));
+ }
  if(name==="carte"){
+  const hadMap=!!map;
   initMap();
+  if(hadMap)renderMap(true);
   if(typeof window.startLiveMapTracking==="function")window.startLiveMapTracking();
   const refreshMapSize=()=>{if(map&&typeof map.invalidateSize==="function")map.invalidateSize(true)};
   requestAnimationFrame(refreshMapSize);
   setTimeout(refreshMapSize,80);
   setTimeout(refreshMapSize,220);
  }
+ scheduleGuideRenderedNotice();
 }
 const DETAILS_MEMORY_KEY="cphGuideDetailsOpenV202";
 let detailsMemory={};
@@ -7418,17 +7503,32 @@ document.addEventListener("toggle",event=>{
  detailsMemory[key]=el.open;
  try{localStorage.setItem(DETAILS_MEMORY_KEY,JSON.stringify(detailsMemory))}catch(_){}
 },true);
-const detailsObserver=new MutationObserver(records=>{
- records.forEach(record=>record.addedNodes.forEach(node=>{
-  if(node.nodeType!==1)return;
-  if(node.matches?.("details"))restoreRememberedDetails(node.parentElement||document);
-  else restoreRememberedDetails(node);
- }));
-});
-detailsObserver.observe(document.body,{childList:true,subtree:true});
 restoreRememberedDetails(document);
 
-function renderAll(){const adapt=adaptiveAll();updateStats(adapt);renderProgramme();renderReservations();renderTrackingLists();restoreRememberedDetails(document);if(map){renderMap();requestAnimationFrame(()=>map&&map.invalidateSize(true))}}
+let guideRenderNoticePending=false;
+function scheduleGuideRenderedNotice(){
+ if(guideRenderNoticePending)return;
+ guideRenderNoticePending=true;
+ requestAnimationFrame(()=>{
+  guideRenderNoticePending=false;
+  document.dispatchEvent(new CustomEvent("guide:rendered"));
+ });
+}
+function renderAll(){
+ const adapt=adaptiveAll();
+ updateStats(adapt);
+ const active=document.querySelector(".panel.active")?.id||"programme";
+ if(active==="programme")renderProgramme(adapt);
+ else if(active==="suivi"){
+  renderReservations(adapt);
+  renderTrackingLists(adapt);
+ }else if(active==="carte"&&map){
+  renderMap(true);
+  requestAnimationFrame(()=>map&&map.invalidateSize(false));
+ }
+ restoreRememberedDetails(document.querySelector(".panel.active")||document);
+ scheduleGuideRenderedNotice();
+}
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 dkkInput.oninput=()=>{eurInput.value=dkkInput.value?(Number(dkkInput.value)/7.4756).toFixed(2):""};
 eurInput.oninput=()=>{dkkInput.value=eurInput.value?(Number(eurInput.value)*7.4756).toFixed(2):""};
@@ -7638,32 +7738,7 @@ document.addEventListener("click",function(e){
 }
 </style>
 
-<script id="v236-ajustement-titres-longs">
-(function(){
-  function adjustPlaceTitles(root){
-    (root || document).querySelectorAll('#programme .visit-summary .summary-title').forEach(function(title){
-      var name = title.querySelector('.summary-title-name');
-      if(!name) return;
-      title.classList.remove('title-too-long');
-      if(name.scrollWidth > name.clientWidth + 1){
-        title.classList.add('title-too-long');
-      }
-    });
-  }
-
-  function scheduleAdjust(){
-    requestAnimationFrame(function(){
-      adjustPlaceTitles(document);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', scheduleAdjust);
-  window.addEventListener('resize', scheduleAdjust);
-
-  var observer = new MutationObserver(scheduleAdjust);
-  observer.observe(document.documentElement, {childList:true, subtree:true});
-})();
-</script>
+<!-- v236-ajustement-titres-longs: ancien correctif dynamique supprimé (remplacé par le rendu stable v345). -->
 
 
 <style id="v239-noms-complets-deux-lignes">
@@ -7793,53 +7868,7 @@ document.addEventListener("click",function(e){
 }
 </style>
 
-<script id="v239-ajustement-exact-deux-lignes">
-(function(){
-  function fitName(name){
-    if(!name) return;
-
-    var title = name.closest('.summary-title');
-    if(title) title.classList.remove('title-too-long');
-
-    name.style.removeProperty('font-size');
-
-    var base = parseFloat(getComputedStyle(name).fontSize) || 15;
-    var size = base;
-    var minimum = 10.5;
-
-    function exceedsTwoLines(){
-      var cs = getComputedStyle(name);
-      var lineHeight = parseFloat(cs.lineHeight) || (parseFloat(cs.fontSize) * 1.08);
-      return name.scrollHeight > (lineHeight * 2 + 1);
-    }
-
-    while(exceedsTwoLines() && size > minimum){
-      size -= 0.5;
-      name.style.setProperty('font-size', size + 'px', 'important');
-    }
-  }
-
-  function fitAll(){
-    document.querySelectorAll('#programme .visit-summary .summary-title-name').forEach(fitName);
-  }
-
-  function schedule(){
-    requestAnimationFrame(function(){
-      requestAnimationFrame(fitAll);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', schedule);
-  window.addEventListener('load', schedule);
-  window.addEventListener('resize', schedule);
-
-  new MutationObserver(schedule).observe(document.documentElement,{
-    childList:true,
-    subtree:true,
-    characterData:true
-  });
-})();
-</script>
+<!-- v239-ajustement-exact-deux-lignes: ancien correctif dynamique supprimé (remplacé par le rendu stable v345). -->
 
 <style id="v243-centrage-dynamique-tuiles">
 /* Chaque ligne Type / Réservé est centrée d’après l’espace réel laissé
@@ -7849,65 +7878,7 @@ document.addEventListener("click",function(e){
 }
 </style>
 
-<script id="v243-centrage-dynamique-tuiles-script">
-(function(){
-  var scheduled = false;
-
-  function centerTypeTiles(){
-    scheduled = false;
-
-    document.querySelectorAll('#programme .visit-summary').forEach(function(summary){
-      var stars = summary.querySelector('.title-stars');
-      var typeLine = summary.querySelector('.summary-title-tools .summary-line:first-child');
-      var durationLine = summary.querySelector('.summary-title-tools .summary-line:nth-child(2)');
-      if(!stars || !typeLine || !durationLine) return;
-
-      typeLine.style.removeProperty('--v243-type-shift');
-
-      var visibleDurations = durationLine.querySelectorAll(
-        '.summary-visit-duration, .summary-walk-duration'
-      );
-      var visibleDurationTop = Infinity;
-      visibleDurations.forEach(function(item){
-        var rect = item.getBoundingClientRect();
-        if(rect.width > 0 && rect.height > 0){
-          visibleDurationTop = Math.min(visibleDurationTop, rect.top);
-        }
-      });
-      if(!Number.isFinite(visibleDurationTop)) return;
-
-      var starsRect = stars.getBoundingClientRect();
-      var typeRect = typeLine.getBoundingClientRect();
-      var availableHeight = visibleDurationTop - starsRect.bottom;
-      if(availableHeight <= typeRect.height) return;
-
-      var targetCenter = starsRect.bottom + availableHeight / 2;
-      var currentCenter = typeRect.top + typeRect.height / 2;
-      var shift = targetCenter - currentCenter;
-
-      typeLine.style.setProperty('--v243-type-shift', shift.toFixed(2) + 'px');
-    });
-  }
-
-  function scheduleCentering(){
-    if(scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(function(){
-      requestAnimationFrame(centerTypeTiles);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', scheduleCentering);
-  window.addEventListener('load', scheduleCentering);
-  window.addEventListener('resize', scheduleCentering);
-
-  new MutationObserver(scheduleCentering).observe(document.documentElement,{
-    childList:true,
-    subtree:true,
-    characterData:true
-  });
-})();
-</script>
+<!-- v243-centrage-dynamique-tuiles-script: ancien correctif dynamique supprimé (remplacé par le rendu stable v345). -->
 
 <style id="v244-jyvais-centre-reserve-une-ligne">
 /* Le bouton partage exactement le même axe horizontal que l'heure. */
@@ -7960,93 +7931,7 @@ document.addEventListener("click",function(e){
 }
 </style>
 
-<script id="v245-placement-reserve">
-(function(){
-  var scheduled = false;
-
-  function recenterTypeLine(summary, typeLine){
-    var stars = summary.querySelector('.title-stars');
-    var durationLine = summary.querySelector('.summary-title-tools .summary-line:nth-child(2)');
-    if(!stars || !durationLine) return;
-
-    typeLine.style.removeProperty('--v243-type-shift');
-
-    var visibleDurations = durationLine.querySelectorAll(
-      '.summary-visit-duration, .summary-walk-duration'
-    );
-    var visibleDurationTop = Infinity;
-    visibleDurations.forEach(function(item){
-      var rect = item.getBoundingClientRect();
-      if(rect.width > 0 && rect.height > 0){
-        visibleDurationTop = Math.min(visibleDurationTop, rect.top);
-      }
-    });
-    if(!Number.isFinite(visibleDurationTop)) return;
-
-    var starsRect = stars.getBoundingClientRect();
-    var typeRect = typeLine.getBoundingClientRect();
-    var availableHeight = visibleDurationTop - starsRect.bottom;
-    if(availableHeight <= typeRect.height) return;
-
-    var targetCenter = starsRect.bottom + availableHeight / 2;
-    var currentCenter = typeRect.top + typeRect.height / 2;
-    typeLine.style.setProperty(
-      '--v243-type-shift',
-      (targetCenter - currentCenter).toFixed(2) + 'px'
-    );
-  }
-
-  function placeReservedBadges(){
-    scheduled = false;
-
-    var summaries = document.querySelectorAll('#programme .visit-summary');
-    summaries.forEach(function(summary){
-      var typeLine = summary.querySelector('.summary-title-tools .summary-line:first-child');
-      if(typeLine) typeLine.classList.remove('reservation-below');
-    });
-
-    summaries.forEach(function(summary){
-      var typeLine = summary.querySelector('.summary-title-tools .summary-line:first-child');
-      var reserved = typeLine && typeLine.querySelector('.mini-badge.booking.reserved');
-      var button = summary.querySelector('.go-now-summary');
-      if(!typeLine || !reserved || !button) return;
-
-      var reservedRect = reserved.getBoundingClientRect();
-      var buttonRect = button.getBoundingClientRect();
-      var horizontalConflict =
-        reservedRect.right >= buttonRect.left - 6 &&
-        reservedRect.left <= buttonRect.right + 6;
-      var verticalConflict =
-        reservedRect.bottom >= buttonRect.top - 4 &&
-        reservedRect.top <= buttonRect.bottom + 4;
-
-      if(horizontalConflict && verticalConflict){
-        typeLine.classList.add('reservation-below');
-      }
-
-      recenterTypeLine(summary, typeLine);
-    });
-  }
-
-  function schedulePlacement(){
-    if(scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(function(){
-      requestAnimationFrame(placeReservedBadges);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', schedulePlacement);
-  window.addEventListener('load', schedulePlacement);
-  window.addEventListener('resize', schedulePlacement);
-
-  new MutationObserver(schedulePlacement).observe(document.documentElement,{
-    childList:true,
-    subtree:true,
-    characterData:true
-  });
-})();
-</script>
+<!-- v245-placement-reserve: ancien correctif dynamique supprimé (remplacé par le rendu stable v345). -->
 
 <style id="v247-cartes-depliees-centrees-et-heure-origine">
 /* Uniquement dans une carte dépliée : les badges et les deux durées
@@ -8152,57 +8037,7 @@ document.addEventListener("click",function(e){
 }
 </style>
 
-<script id="v248-centrage-jusqua-fleche-script">
-(function(){
-  var scheduled=false;
-
-  function alignOpenRows(){
-    scheduled=false;
-
-    document.querySelectorAll('#programme .visit-details').forEach(function(details){
-      var tools=details.querySelector('.summary-title-tools');
-      if(!tools) return;
-
-      tools.style.removeProperty('--v248-open-axis-width');
-      if(!details.open) return;
-
-      var main=details.querySelector('.summary-main');
-      var chevron=details.querySelector('.chevron');
-      if(!main || !chevron) return;
-
-      var mainRect=main.getBoundingClientRect();
-      var chevronRect=chevron.getBoundingClientRect();
-      var rightLimit=chevronRect.left + chevronRect.width / 2;
-      var availableWidth=rightLimit - mainRect.left;
-
-      if(availableWidth>0){
-        tools.style.setProperty(
-          '--v248-open-axis-width',
-          availableWidth.toFixed(2) + 'px'
-        );
-      }
-    });
-  }
-
-  function scheduleAlignment(){
-    if(scheduled) return;
-    scheduled=true;
-    requestAnimationFrame(function(){
-      requestAnimationFrame(alignOpenRows);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded',scheduleAlignment);
-  document.addEventListener('toggle',scheduleAlignment,true);
-  window.addEventListener('load',scheduleAlignment);
-  window.addEventListener('resize',scheduleAlignment);
-
-  new MutationObserver(scheduleAlignment).observe(document.documentElement,{
-    childList:true,
-    subtree:true
-  });
-})();
-</script>
+<!-- v248-centrage-jusqua-fleche-script: ancien correctif dynamique supprimé (remplacé par le rendu stable v345). -->
 
 <style id="v249-tuiles-montees-centrees-verticalement">
 /* La ligne Type / Réservé suit exclusivement le centrage dynamique exact. */
@@ -8219,87 +8054,7 @@ document.addEventListener("click",function(e){
 }
 </style>
 
-<script id="v251-centrage-visuel-exact-tuiles-script">
-(function(){
-  var scheduled=false;
-
-  function visibleTextTop(element){
-    if(!element) return Infinity;
-
-    var top=Infinity;
-    Array.prototype.forEach.call(element.childNodes,function(node){
-      if(node.nodeType!==Node.TEXT_NODE || !node.textContent.trim()) return;
-      var range=document.createRange();
-      range.selectNodeContents(node);
-      var rect=range.getBoundingClientRect();
-      if(rect.width>0 && rect.height>0) top=Math.min(top,rect.top);
-    });
-    return top;
-  }
-
-  function centerVisibleTiles(){
-    scheduled=false;
-
-    document.querySelectorAll('#programme .visit-summary').forEach(function(summary){
-      var stars=summary.querySelector('.title-stars');
-      var typeLine=summary.querySelector('.summary-title-tools .summary-line:first-child');
-      var visitDuration=summary.querySelector('.summary-visit-duration');
-      var walkDuration=summary.querySelector(
-        '.summary-title-tools .summary-line:nth-child(2) .summary-walk-duration'
-      );
-      if(!stars || !typeLine || !visitDuration || !walkDuration) return;
-
-      typeLine.style.setProperty('--v251-type-shift','0px');
-
-      var durationTextTop=Math.min(
-        visibleTextTop(visitDuration),
-        visibleTextTop(walkDuration)
-      );
-      if(!Number.isFinite(durationTextTop)) return;
-
-      var starsRect=stars.getBoundingClientRect();
-      var badges=typeLine.querySelectorAll('.mini-badge');
-      var badgeTop=Infinity;
-      var badgeBottom=-Infinity;
-
-      badges.forEach(function(badge){
-        var rect=badge.getBoundingClientRect();
-        if(rect.width>0 && rect.height>0){
-          badgeTop=Math.min(badgeTop,rect.top);
-          badgeBottom=Math.max(badgeBottom,rect.bottom);
-        }
-      });
-      if(!Number.isFinite(badgeTop) || !Number.isFinite(badgeBottom)) return;
-
-      var targetCenter=(starsRect.bottom+durationTextTop)/2;
-      var badgeCenter=(badgeTop+badgeBottom)/2;
-      typeLine.style.setProperty(
-        '--v251-type-shift',
-        (targetCenter-badgeCenter).toFixed(2)+'px'
-      );
-    });
-  }
-
-  function scheduleCentering(){
-    if(scheduled) return;
-    scheduled=true;
-    requestAnimationFrame(function(){
-      requestAnimationFrame(centerVisibleTiles);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded',scheduleCentering);
-  document.addEventListener('toggle',scheduleCentering,true);
-  window.addEventListener('load',scheduleCentering);
-  window.addEventListener('resize',scheduleCentering);
-
-  new MutationObserver(scheduleCentering).observe(document.documentElement,{
-    childList:true,
-    subtree:true,
-    characterData:true
-  });
-})();
-</script>
+<!-- v251-centrage-visuel-exact-tuiles-script: ancien correctif dynamique supprimé (remplacé par le rendu stable v345). -->
 
 <style id="v252-jyvais-axe-heure-tuiles-reduites">
 /* Le bouton reprend exactement le centre horizontal réellement mesuré de l'heure. */
@@ -8329,50 +8084,7 @@ document.addEventListener("click",function(e){
 }
 </style>
 
-<script id="v252-jyvais-axe-heure-script">
-(function(){
-  var scheduled=false;
-
-  function alignButtonsWithTimes(){
-    scheduled=false;
-
-    document.querySelectorAll('#programme .visit-summary').forEach(function(summary){
-      var main=summary.querySelector('.summary-main');
-      var time=summary.querySelector('.summary-top-time');
-      var button=summary.querySelector('.go-now-summary');
-      if(!main || !time || !button) return;
-
-      var mainRect=main.getBoundingClientRect();
-      var timeRect=time.getBoundingClientRect();
-      if(!mainRect.width || !timeRect.width) return;
-
-      button.style.setProperty(
-        '--v252-action-left',
-        (timeRect.left + timeRect.width / 2 - mainRect.left).toFixed(2)+'px'
-      );
-    });
-  }
-
-  function scheduleAlignment(){
-    if(scheduled) return;
-    scheduled=true;
-    requestAnimationFrame(function(){
-      requestAnimationFrame(alignButtonsWithTimes);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded',scheduleAlignment);
-  document.addEventListener('toggle',scheduleAlignment,true);
-  window.addEventListener('load',scheduleAlignment);
-  window.addEventListener('resize',scheduleAlignment);
-
-  new MutationObserver(scheduleAlignment).observe(document.documentElement,{
-    childList:true,
-    subtree:true,
-    characterData:true
-  });
-})();
-</script>
+<!-- v252-jyvais-axe-heure-script: ancien correctif dynamique supprimé (remplacé par le rendu stable v345). -->
 
 <style id="v253-icones-lieu-adaptatives-jyvais-centre">
 /* L'icône de nature utilise la plus grande taille qui tient dans sa propre carte. */
@@ -8394,98 +8106,7 @@ document.addEventListener("click",function(e){
 }
 </style>
 
-<script id="v253-adaptation-icones-lieu-jyvais">
-(function(){
-  var scheduled=false;
-  var iconSizes=[16,15,14,13,12];
-
-  function visibleVerticalOverlap(a,b){
-    return a.bottom>b.top-4 && a.top<b.bottom+4;
-  }
-
-  function fitNatureIcon(summary){
-    var typeLine=summary.querySelector('.summary-title-tools .summary-line:first-child');
-    var badge=typeLine && typeLine.querySelector('.mini-badge.nature');
-    var icon=badge && badge.querySelector('.nature-svg');
-    var button=summary.querySelector('.go-now-summary');
-    if(!typeLine || !badge || !icon) return;
-
-    for(var i=0;i<iconSizes.length;i++){
-      badge.style.setProperty('--v253-nature-icon-size',iconSizes[i]+'px');
-
-      var lineRect=typeLine.getBoundingClientRect();
-      var badgeRect=badge.getBoundingClientRect();
-      var buttonRect=button ? button.getBoundingClientRect() : null;
-      var reserved=typeLine.querySelector('.mini-badge.booking.reserved');
-      var reservedRect=reserved ? reserved.getBoundingClientRect() : null;
-      var rightmost=Math.max(
-        badgeRect.right,
-        reservedRect ? reservedRect.right : badgeRect.right
-      );
-      var fitsLine=rightmost<=lineRect.right+0.5;
-      var clearsButton=!buttonRect ||
-        !visibleVerticalOverlap(
-          {
-            top:Math.min(badgeRect.top,reservedRect ? reservedRect.top : badgeRect.top),
-            bottom:Math.max(badgeRect.bottom,reservedRect ? reservedRect.bottom : badgeRect.bottom)
-          },
-          buttonRect
-        ) ||
-        rightmost<=buttonRect.left-6;
-
-      if(fitsLine && clearsButton) return;
-    }
-  }
-
-  function alignSummary(summary){
-    var main=summary.querySelector('.summary-main');
-    var time=summary.querySelector('.summary-top-time');
-    var button=summary.querySelector('.go-now-summary');
-    if(!main || !time || !button) return;
-
-    var mainRect=main.getBoundingClientRect();
-    var timeRect=time.getBoundingClientRect();
-    var summaryRect=summary.getBoundingClientRect();
-    if(!mainRect.width || !timeRect.width || !summaryRect.height) return;
-
-    button.style.setProperty(
-      '--v253-action-left',
-      (timeRect.left+timeRect.width/2-mainRect.left).toFixed(2)+'px'
-    );
-    button.style.setProperty(
-      '--v253-action-top',
-      (summaryRect.top+summaryRect.height/2-mainRect.top).toFixed(2)+'px'
-    );
-  }
-
-  function updateCards(){
-    scheduled=false;
-    document.querySelectorAll('#programme .visit-summary').forEach(function(summary){
-      alignSummary(summary);
-      fitNatureIcon(summary);
-    });
-  }
-
-  function scheduleUpdate(){
-    if(scheduled) return;
-    scheduled=true;
-    requestAnimationFrame(function(){
-      requestAnimationFrame(updateCards);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded',scheduleUpdate);
-  document.addEventListener('toggle',scheduleUpdate,true);
-  window.addEventListener('load',scheduleUpdate);
-  window.addEventListener('resize',scheduleUpdate);
-
-  new MutationObserver(scheduleUpdate).observe(document.documentElement,{
-    childList:true,
-    subtree:true,
-    characterData:true
-  });
-})();
-</script>
+<!-- v253-adaptation-icones-lieu-jyvais: ancien correctif dynamique supprimé (remplacé par le rendu stable v345). -->
 
 <style id="v254-images-courses-pharmacie-harmonisees">
 /* Les deux illustrations Pratique conservent le même encadré et le remplissent. */
@@ -8517,47 +8138,7 @@ document.addEventListener("click",function(e){
 }
 </style>
 
-<script id="v255-jyvais-axe-verrouille-script">
-(function(){
-  var scheduled=false;
-
-  function alignGoButtons(){
-    scheduled=false;
-    document.querySelectorAll('#programme .visit-summary').forEach(function(summary){
-      var main=summary.querySelector('.summary-main');
-      var time=summary.querySelector('.summary-top-time');
-      var button=summary.querySelector('.go-now-summary');
-      if(!main || !time || !button) return;
-
-      var mainRect=main.getBoundingClientRect();
-      var timeRect=time.getBoundingClientRect();
-      if(!mainRect.width || !timeRect.width) return;
-
-      button.style.setProperty(
-        '--v255-action-left',
-        (timeRect.left + timeRect.width / 2 - mainRect.left).toFixed(2) + 'px'
-      );
-    });
-  }
-
-  function scheduleAlignment(){
-    if(scheduled) return;
-    scheduled=true;
-    requestAnimationFrame(function(){
-      requestAnimationFrame(alignGoButtons);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded',scheduleAlignment);
-  document.addEventListener('toggle',scheduleAlignment,true);
-  window.addEventListener('load',scheduleAlignment);
-  window.addEventListener('resize',scheduleAlignment);
-  if(document.fonts && document.fonts.ready){
-    document.fonts.ready.then(scheduleAlignment);
-  }
-  new ResizeObserver(scheduleAlignment).observe(document.documentElement);
-})();
-</script>
+<!-- v255-jyvais-axe-verrouille-script: ancien correctif dynamique supprimé (remplacé par le rendu stable v345). -->
 
 <style id="v256-centrages-finaux">
 /* « J’y vais » partage le centre réel de l’heure et le milieu vertical
@@ -8601,82 +8182,7 @@ document.addEventListener("click",function(e){
 }
 </style>
 
-<script id="v256-centrages-finaux-script">
-(function(){
-  var scheduled=false;
-
-  function updateCentres(){
-    scheduled=false;
-
-    document.querySelectorAll('#programme .visit-summary').forEach(function(summary){
-      var time=summary.querySelector('.summary-top-time');
-      var button=summary.querySelector('.go-now-summary');
-      var buttonParent=button && button.offsetParent;
-
-      if(time && button && buttonParent){
-        var timeRect=time.getBoundingClientRect();
-        var parentRect=buttonParent.getBoundingClientRect();
-        if(timeRect.width && parentRect.width){
-          button.style.setProperty(
-            '--v256-action-left',
-            (timeRect.left + timeRect.width / 2 - parentRect.left).toFixed(2) + 'px'
-          );
-        }
-      }
-
-      var details=summary.closest('.visit-details');
-      var tools=summary.querySelector('.summary-title-tools');
-      var main=summary.querySelector('.summary-main');
-      var chevron=summary.querySelector('.chevron');
-
-      if(!tools) return;
-      tools.style.removeProperty('--v256-open-left');
-      tools.style.removeProperty('--v256-open-width');
-
-      if(!details || !details.open || !main || !chevron) return;
-
-      var summaryRect=summary.getBoundingClientRect();
-      var mainRect=main.getBoundingClientRect();
-      var chevronRect=chevron.getBoundingClientRect();
-      var start=summaryRect.left;
-      var end=chevronRect.left + chevronRect.width / 2;
-      var width=end-start;
-
-      if(width>0){
-        tools.style.setProperty(
-          '--v256-open-left',
-          (start-mainRect.left).toFixed(2) + 'px'
-        );
-        tools.style.setProperty(
-          '--v256-open-width',
-          width.toFixed(2) + 'px'
-        );
-      }
-    });
-  }
-
-  function scheduleUpdate(){
-    if(scheduled) return;
-    scheduled=true;
-    requestAnimationFrame(function(){
-      requestAnimationFrame(updateCentres);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded',scheduleUpdate);
-  document.addEventListener('toggle',scheduleUpdate,true);
-  window.addEventListener('load',scheduleUpdate);
-  window.addEventListener('resize',scheduleUpdate);
-  if(document.fonts && document.fonts.ready){
-    document.fonts.ready.then(scheduleUpdate);
-  }
-  new MutationObserver(scheduleUpdate).observe(document.documentElement,{
-    childList:true,
-    subtree:true,
-    characterData:true
-  });
-})();
-</script>
+<!-- v256-centrages-finaux-script: ancien correctif dynamique supprimé (remplacé par le rendu stable v345). -->
 
 <style id="v257-cartes-depliees-restaurees">
 /* Correction limitée aux cartes ouvertes :
@@ -8741,88 +8247,7 @@ document.addEventListener("click",function(e){
 }
 </style>
 
-<script id="v257-cartes-depliees-restaurees-script">
-(function(){
-  var scheduled=false;
-
-  function updateOpenCards(){
-    scheduled=false;
-
-    document.querySelectorAll('#programme .visit-details').forEach(function(details){
-      var summary=details.querySelector(':scope > .visit-summary');
-      var main=summary && summary.querySelector('.summary-main');
-      var tools=summary && summary.querySelector('.summary-title-tools');
-      var chevron=summary && summary.querySelector('.chevron');
-      if(!summary || !tools) return;
-
-      summary.style.removeProperty('--v257-open-min-height');
-      tools.style.removeProperty('--v257-open-left');
-      tools.style.removeProperty('--v257-open-width');
-
-      if(!details.open || !main || !chevron) return;
-
-      var summaryRect=summary.getBoundingClientRect();
-      var mainRect=main.getBoundingClientRect();
-      var chevronRect=chevron.getBoundingClientRect();
-      var start=summaryRect.left;
-      var end=chevronRect.left+chevronRect.width/2;
-      var width=end-start;
-
-      if(width>0){
-        tools.style.setProperty(
-          '--v257-open-left',
-          (start-mainRect.left).toFixed(2)+'px'
-        );
-        tools.style.setProperty(
-          '--v257-open-width',
-          width.toFixed(2)+'px'
-        );
-      }
-
-      var stars=summary.querySelector('.title-stars');
-      var typeLine=tools.querySelector('.summary-line:first-child');
-      if(!stars || !typeLine) return;
-
-      var starsRect=stars.getBoundingClientRect();
-      var typeRect=typeLine.getBoundingClientRect();
-      var overlap=starsRect.bottom-typeRect.top;
-
-      if(overlap>0.5){
-        summary.style.setProperty(
-          '--v257-open-min-height',
-          (summaryRect.height+Math.ceil(overlap*2)+3).toFixed(2)+'px'
-        );
-      }
-    });
-  }
-
-  function scheduleUpdate(){
-    if(scheduled) return;
-    scheduled=true;
-    requestAnimationFrame(function(){
-      requestAnimationFrame(updateOpenCards);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded',scheduleUpdate);
-  document.addEventListener('toggle',scheduleUpdate,true);
-  document.addEventListener('toggle',function(event){
-    if(event.target && event.target.matches('#programme .visit-details')){
-      setTimeout(scheduleUpdate,180);
-    }
-  },true);
-  window.addEventListener('load',scheduleUpdate);
-  window.addEventListener('resize',scheduleUpdate);
-  if(document.fonts && document.fonts.ready){
-    document.fonts.ready.then(scheduleUpdate);
-  }
-  new MutationObserver(scheduleUpdate).observe(document.documentElement,{
-    childList:true,
-    subtree:true,
-    characterData:true
-  });
-})();
-</script>
+<!-- v257-cartes-depliees-restaurees-script: ancien correctif dynamique supprimé (remplacé par le rendu stable v345). -->
 
 <style id="v258-carte-durees-harmonisees-jyvais-centre">
 /* Les tuiles de catégorie et Réservé ont strictement la même hauteur. */
@@ -9135,107 +8560,7 @@ document.addEventListener("click",function(e){
 }
 </style>
 
-<script id="v270-espacement-calcule-depuis-tuile-script">
-(function(){
-  var scheduled=false;
-  var observer=null;
-  var canvas=document.createElement('canvas');
-  var context=canvas.getContext('2d');
-
-  function visibleTextBounds(element){
-    if(!element || !element.textContent.trim()) return null;
-
-    var marker=document.createElement('span');
-    marker.setAttribute('aria-hidden','true');
-    marker.style.cssText='display:inline-block;width:0;height:0;padding:0;margin:0;border:0;vertical-align:baseline;overflow:hidden';
-    element.appendChild(marker);
-    var baseline=marker.getBoundingClientRect().top;
-    marker.remove();
-
-    var style=getComputedStyle(element);
-    if(context){
-      context.font=[
-        style.fontStyle,
-        style.fontVariant,
-        style.fontWeight,
-        style.fontStretch,
-        style.fontSize,
-        style.fontFamily
-      ].join(' ');
-      var metrics=context.measureText(element.textContent.trim());
-      if(Number.isFinite(metrics.actualBoundingBoxAscent) &&
-         Number.isFinite(metrics.actualBoundingBoxDescent)){
-        return {
-          top:baseline-metrics.actualBoundingBoxAscent,
-          bottom:baseline+metrics.actualBoundingBoxDescent
-        };
-      }
-    }
-
-    var rect=element.getBoundingClientRect();
-    return {top:rect.top,bottom:rect.bottom};
-  }
-
-  function equalizeCard(details){
-    var summary=details.querySelector(':scope > .visit-summary');
-    var tools=summary && summary.querySelector('.summary-title-tools');
-    var typeLine=tools && tools.querySelector('.summary-line:first-child');
-    var typeTile=typeLine && typeLine.querySelector('.mini-badge.nature');
-    var stars=summary && summary.querySelector('.title-stars');
-    if(!summary || !tools || !typeLine) return;
-
-    typeLine.style.setProperty('transform','none','important');
-    if(details.open || !typeTile || !stars || !stars.textContent.trim()) return;
-
-    var starsRect=stars.getBoundingClientRect();
-    var tileRect=typeTile.getBoundingClientRect();
-    var shift=Math.max(0,starsRect.bottom+6-tileRect.top);
-    if(shift>0.1){
-      typeLine.style.setProperty(
-        'transform',
-        'translateY('+shift.toFixed(2)+'px)',
-        'important'
-      );
-    }
-  }
-
-  function updateCards(){
-    scheduled=false;
-    if(observer) observer.disconnect();
-    document.querySelectorAll('#programme .visit-details').forEach(equalizeCard);
-    if(observer){
-      observer.observe(document.documentElement,{
-        childList:true,
-        subtree:true,
-        characterData:true
-      });
-    }
-  }
-
-  function scheduleUpdate(){
-    if(scheduled) return;
-    scheduled=true;
-    requestAnimationFrame(function(){
-      requestAnimationFrame(updateCards);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded',scheduleUpdate);
-  document.addEventListener('toggle',scheduleUpdate,true);
-  window.addEventListener('load',scheduleUpdate);
-  window.addEventListener('resize',scheduleUpdate);
-  window.addEventListener('orientationchange',scheduleUpdate);
-  if(document.fonts && document.fonts.ready){
-    document.fonts.ready.then(scheduleUpdate);
-  }
-  observer=new MutationObserver(scheduleUpdate);
-  observer.observe(document.documentElement,{
-    childList:true,
-    subtree:true,
-    characterData:true
-  });
-})();
-</script>
+<!-- v270-espacement-calcule-depuis-tuile-script: ancien correctif dynamique supprimé (remplacé par le rendu stable v345). -->
 
 <style id="v272-jyvais-tuile-et-texte-centres">
 /* L'heure et toute la tuile verte partagent exactement le même axe horizontal. */
@@ -9295,65 +8620,7 @@ document.addEventListener("click",function(e){
 }
 </style>
 
-<script id="v273-jyvais-bords-heure-script">
-(function(){
-  var scheduled=false;
-
-  function visibleTimeRect(time){
-    if(!time) return null;
-    var range=document.createRange();
-    range.selectNodeContents(time);
-    var rect=range.getBoundingClientRect();
-    range.detach();
-    return rect;
-  }
-
-  function alignButtons(){
-    scheduled=false;
-    document.querySelectorAll('#programme .visit-summary').forEach(function(summary){
-      var time=summary.querySelector('.summary-top-time');
-      var button=summary.querySelector('.go-now-summary');
-      var parent=button && button.offsetParent;
-      if(!time || !button || !parent) return;
-
-      var timeRect=visibleTimeRect(time);
-      var parentRect=parent.getBoundingClientRect();
-      if(!timeRect || !timeRect.width || !parentRect.width) return;
-
-      button.style.setProperty(
-        '--v273-action-left',
-        (timeRect.left-parentRect.left).toFixed(2)+'px'
-      );
-      button.style.setProperty(
-        '--v273-action-width',
-        timeRect.width.toFixed(2)+'px'
-      );
-    });
-  }
-
-  function scheduleAlignment(){
-    if(scheduled) return;
-    scheduled=true;
-    requestAnimationFrame(function(){
-      requestAnimationFrame(alignButtons);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded',scheduleAlignment);
-  document.addEventListener('toggle',scheduleAlignment,true);
-  window.addEventListener('load',scheduleAlignment);
-  window.addEventListener('resize',scheduleAlignment);
-  window.addEventListener('orientationchange',scheduleAlignment);
-  if(document.fonts && document.fonts.ready){
-    document.fonts.ready.then(scheduleAlignment);
-  }
-  new MutationObserver(scheduleAlignment).observe(document.documentElement,{
-    childList:true,
-    subtree:true,
-    characterData:true
-  });
-})();
-</script>
+<!-- v273-jyvais-bords-heure-script: ancien correctif dynamique supprimé (remplacé par le rendu stable v345). -->
 
 <style id="v274-jyvais-centre-immediat">
 /* La brique J’y vais et l’heure utilisent en permanence la même colonne :
@@ -9406,73 +8673,7 @@ document.addEventListener("click",function(e){
 }
 </style>
 
-<script id="v277-jyvais-equilibre-visuel-heure-script">
-(function(){
-  var scheduled=false;
-  var canvas=document.createElement('canvas');
-  var context=canvas.getContext('2d');
-
-  function opticalShift(time){
-    if(!context || !time) return 0;
-
-    var text=time.textContent.trim();
-    if(!text) return 0;
-
-    var style=getComputedStyle(time);
-    /* Utilise la police réellement peinte. La valeur fontStretch (100 %)
-       faisait auparavant rejeter toute la déclaration par le canvas, qui
-       mesurait alors l'heure avec sa police de secours 10 px. */
-    context.font=style.font;
-
-    var metrics=context.measureText(text);
-    if(!Number.isFinite(metrics.width) ||
-       !Number.isFinite(metrics.actualBoundingBoxLeft) ||
-       !Number.isFinite(metrics.actualBoundingBoxRight)) return 0;
-
-    return (
-      metrics.actualBoundingBoxRight -
-      metrics.actualBoundingBoxLeft -
-      metrics.width
-    ) / 2;
-  }
-
-  function alignButtons(){
-    scheduled=false;
-    document.querySelectorAll('#programme .visit-summary').forEach(function(summary){
-      var time=summary.querySelector('.summary-top-time');
-      var button=summary.querySelector('.go-now-summary');
-      if(!time || !button) return;
-
-      button.style.setProperty(
-        '--v277-optical-shift',
-        opticalShift(time).toFixed(3)+'px'
-      );
-    });
-  }
-
-  function scheduleAlignment(){
-    if(scheduled) return;
-    scheduled=true;
-    requestAnimationFrame(function(){
-      requestAnimationFrame(alignButtons);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded',scheduleAlignment);
-  document.addEventListener('toggle',scheduleAlignment,true);
-  window.addEventListener('load',scheduleAlignment);
-  window.addEventListener('resize',scheduleAlignment);
-  window.addEventListener('orientationchange',scheduleAlignment);
-  if(document.fonts && document.fonts.ready){
-    document.fonts.ready.then(scheduleAlignment);
-  }
-  new MutationObserver(scheduleAlignment).observe(document.documentElement,{
-    childList:true,
-    subtree:true,
-    characterData:true
-  });
-})();
-</script>
+<!-- v277-jyvais-equilibre-visuel-heure-script: ancien correctif dynamique supprimé (remplacé par le rendu stable v345). -->
 
 <style id="v278-jyvais-texte-centre-dans-tuile">
 /* Le libellé est centré sur toute la surface intérieure de la tuile,
@@ -9524,98 +8725,7 @@ document.addEventListener("click",function(e){
 }
 </style>
 
-<script id="v280-heure-centree-sur-jyvais-script">
-(function(){
-  var scheduled=false;
-  var canvas=document.createElement('canvas');
-  var context=canvas.getContext('2d');
-
-  function opticalOffset(style,text){
-    if(!context || !style || !text) return 0;
-
-    context.font=[
-      style.fontStyle || 'normal',
-      style.fontVariant || 'normal',
-      style.fontWeight || '400',
-      style.fontSize || '16px',
-      style.fontFamily || 'sans-serif'
-    ].join(' ');
-
-    var metrics=context.measureText(text);
-    if(!Number.isFinite(metrics.width) ||
-       !Number.isFinite(metrics.actualBoundingBoxLeft) ||
-       !Number.isFinite(metrics.actualBoundingBoxRight)) return 0;
-
-    return (
-      metrics.actualBoundingBoxRight -
-      metrics.actualBoundingBoxLeft -
-      metrics.width
-    ) / 2;
-  }
-
-  function visibleTextCenter(element,style){
-    var range=document.createRange();
-    range.selectNodeContents(element);
-    var rect=range.getBoundingClientRect();
-    range.detach();
-    return rect.left + rect.width / 2 +
-      opticalOffset(style,element.textContent.trim());
-  }
-
-  function alignTimesAndLabels(){
-    scheduled=false;
-
-    document.querySelectorAll('#programme .visit-summary').forEach(function(summary){
-      var time=summary.querySelector('.summary-top-time');
-      var button=summary.querySelector('.go-now-summary');
-      if(!time || !button) return;
-
-      /* Supprime d'abord tout ancien recalage, puis prend la brique comme repère. */
-      time.style.setProperty('--v280-time-shift','0px');
-      button.style.setProperty('--v280-label-shift','0px');
-
-      var buttonRect=button.getBoundingClientRect();
-      if(!buttonRect.width) return;
-
-      var buttonCenter=buttonRect.left + buttonRect.width / 2;
-      var timeCenter=visibleTextCenter(time,getComputedStyle(time));
-      time.style.setProperty(
-        '--v280-time-shift',
-        (buttonCenter-timeCenter).toFixed(3)+'px'
-      );
-
-      var labelStyle=getComputedStyle(button,'::after');
-      var labelText=button.textContent.trim();
-      button.style.setProperty(
-        '--v280-label-shift',
-        (-opticalOffset(labelStyle,labelText)).toFixed(3)+'px'
-      );
-    });
-  }
-
-  function scheduleAlignment(){
-    if(scheduled) return;
-    scheduled=true;
-    requestAnimationFrame(function(){
-      requestAnimationFrame(alignTimesAndLabels);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded',scheduleAlignment);
-  document.addEventListener('toggle',scheduleAlignment,true);
-  window.addEventListener('load',scheduleAlignment);
-  window.addEventListener('resize',scheduleAlignment);
-  window.addEventListener('orientationchange',scheduleAlignment);
-  if(document.fonts && document.fonts.ready){
-    document.fonts.ready.then(scheduleAlignment);
-  }
-  new MutationObserver(scheduleAlignment).observe(document.documentElement,{
-    childList:true,
-    subtree:true,
-    characterData:true
-  });
-})();
-</script>
+<!-- v280-heure-centree-sur-jyvais-script: ancien correctif dynamique supprimé (remplacé par le rendu stable v345). -->
 
 <style id="v282-pratique-icones-et-tuiles-centrees">
 /* Les quatre onglets restants occupent toute la largeur. */
@@ -10255,6 +9365,7 @@ document.addEventListener("click",function(e){
 (function(){
   let userAccuracyCircle=null;
   let locationWatchId=null;
+  let locationUnavailable=false;
   let lastUserLatLng=null;
   let lastPosition=null;
   let currentHeading=null;
@@ -10397,6 +9508,9 @@ document.addEventListener("click",function(e){
     if(latitude===null||longitude===null)return;
 
     lastPosition=position;
+    locationUnavailable=false;
+    const locationStatus=document.getElementById("mapLocationStatus");
+    if(locationStatus)locationStatus.hidden=true;
     lastUserLatLng=L.latLng(latitude,longitude);
     const accuracy=finiteNumber(position.coords.accuracy);
 
@@ -10437,9 +9551,9 @@ document.addEventListener("click",function(e){
   }
 
   function openLocationFallback(){
-    if(confirm("Chrome n’a pas pu transmettre ta position à ce fichier local. Ouvrir Google Maps pour afficher ta position ?")){
-      window.open("https://www.google.com/maps/search/?api=1&query=My+Location","_blank");
-    }
+    locationUnavailable=true;
+    const locationStatus=document.getElementById("mapLocationStatus");
+    if(locationStatus)locationStatus.hidden=false;
   }
 
   function handleLocationError(){
@@ -10457,6 +9571,7 @@ document.addEventListener("click",function(e){
 
     if(typeof L==="undefined"||!map){openLocationFallback();return;}
     if(locationWatchId!==null)return;
+    if(locationUnavailable)return;
     if(!navigator.geolocation){openLocationFallback();return;}
 
     centerOnNextFix=true;
@@ -11731,7 +10846,7 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
 <script src="/vendor/supabase/supabase.js"></script>
 <script src="/shared-sync.js"></script>
 
-<script src="/header-prestige.js?v=343"></script>
+<script src="/header-prestige.js?v=345"></script>
 <script src="/cloud-backup.js?v=3"></script>
 <script>
 (async()=>{
@@ -11755,7 +10870,6 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
   });
 })();
 </script>
-<script src="/ui-fixes-v7.js?v=32"></script>
 <script src="/day-style-v1.js?v=5"></script>
 <script src="/section-history-v1.js?v=1"></script>
 <script src="/packing-list-v1.js?v=5"></script>

@@ -1,12 +1,12 @@
-const STATIC_CACHE="copenhague-v343-static-v43";
-const RUNTIME_CACHE="copenhague-v343-runtime-v43";
+const STATIC_CACHE="copenhague-v345-static-v45";
+const RUNTIME_CACHE="copenhague-v345-runtime-v45";
 const STATIC_FILES=[
   "/",
   "/index.html",
   "/shared-sync.js",
   "/cloud-backup.js?v=3",
-  "/header-prestige.js?v=343",
-  "/ui-fixes-v7.js?v=32",
+  "/header-prestige.js?v=345",
+  "/ux-stability-v1.css?v=1",
   "/day-style-v1.js?v=5",
   "/packing-list-v1.css?v=9",
   "/packing-list-v1.js?v=5",
@@ -53,6 +53,8 @@ async function networkFirst(request,fallback){
   }
 }
 
+/* Legacy v335 header rewriter retained as inert source for one version so the
+   migration stays easy to audit. It must never be parsed or executed again.
 async function patchedHeader(request){
   try{
     const response=await fetch(request,{cache:"no-store"});
@@ -143,6 +145,7 @@ async function patchedHeader(request){
     return (await caches.match(request))||Response.error();
   }
 }
+*/
 
 async function cacheFirst(request){
   const cached=await caches.match(request);
@@ -168,7 +171,7 @@ self.addEventListener("fetch",event=>{
   }
 
   if(url.origin===self.location.origin && url.pathname==="/header-prestige.js"){
-    event.respondWith(patchedHeader(request));
+    event.respondWith(networkFirst(request));
     return;
   }
 

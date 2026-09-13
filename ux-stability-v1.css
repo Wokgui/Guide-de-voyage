@@ -1,0 +1,774 @@
+/* Couche finale de stabilite visuelle et de performance. */
+html{
+  scrollbar-gutter:stable;
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+
+body{
+  overflow-anchor:none;
+}
+
+header #saveIndicator,
+header #backupSettingsButton{
+  display:none!important;
+}
+
+header h1{
+  margin:0 0 10px!important;
+  padding:0!important;
+  text-align:center!important;
+}
+
+header h1 .title-main{
+  display:block!important;
+  margin:0!important;
+  color:#fff!important;
+  font-family:Georgia,"Times New Roman",serif!important;
+  font-size:clamp(21px,6vw,31px)!important;
+  font-weight:400!important;
+  line-height:1.08!important;
+  letter-spacing:.025em!important;
+  text-transform:uppercase!important;
+  white-space:nowrap!important;
+}
+
+.cph-balanced-flags{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:12px!important;
+  width:min(76%,350px)!important;
+  margin:8px auto 9px!important;
+  line-height:1!important;
+}
+
+.cph-balanced-flags::before,
+.cph-balanced-flags::after{
+  content:"";
+  display:block;
+  flex:1;
+  height:1px;
+  max-width:120px;
+  background:#d9ae62!important;
+}
+
+.cph-balanced-flags span{
+  font-size:24px!important;
+}
+
+header h1 .title-sub{
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:56.5%!important;
+  min-width:220px!important;
+  max-width:405px!important;
+  height:29px!important;
+  margin:0 auto!important;
+  padding:0 13px!important;
+  border:1.15px solid #d9ae62!important;
+  border-radius:999px!important;
+  background:linear-gradient(180deg,#176c7c,#10596b)!important;
+  color:#fff!important;
+  font-size:clamp(10px,2.65vw,12.5px)!important;
+  font-weight:700!important;
+  line-height:1!important;
+  letter-spacing:.19em!important;
+  text-transform:uppercase!important;
+  white-space:nowrap!important;
+}
+
+.footer-actions{
+  display:none!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+  width:min(calc(100% - 32px),360px)!important;
+  margin:20px auto 38px!important;
+}
+
+body.suivi-active .footer-actions{
+  display:grid!important;
+}
+
+.footer-actions>button,
+.footer-actions>label{
+  box-sizing:border-box!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  width:100%!important;
+  min-height:68px!important;
+  padding:8px!important;
+  border:1px solid #c9d9d2!important;
+  border-radius:17px!important;
+  font-size:12px!important;
+  font-weight:850!important;
+  text-align:center!important;
+}
+
+.footer-actions svg{
+  width:24px!important;
+  height:24px!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:1.8!important;
+}
+
+#cphBottomSettingsTile{
+  background:#f8f2e7!important;
+  color:#75592b!important;
+}
+
+.panel,
+.day-section,
+.card,
+.status-card,
+.reservation-card{
+  animation:none!important;
+}
+
+/* Les longues journees hors ecran ne sont peintes qu'au moment utile. */
+#programme .day-section{
+  content-visibility:auto;
+  contain-intrinsic-block-size:760px;
+}
+
+#programme .card,
+#suivi .status-card,
+#suivi .reservation-card{
+  contain:layout paint style;
+}
+
+/* Photos : surface stable, neutre et sans icone generique pendant le chargement. */
+.visit-summary-thumb,
+.tracking-thumb,
+.reservation-thumb,
+.map-list-thumb,
+.visit-photo-wrap{
+  position:relative!important;
+  overflow:hidden!important;
+  isolation:isolate;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.52),rgba(255,255,255,0) 48%),
+    linear-gradient(145deg,#dfece7,#edf3ef 52%,#d8e5df)!important;
+}
+
+.visit-summary-thumb.photo-loading::after,
+.tracking-thumb.photo-loading::after,
+.reservation-thumb.photo-loading::after,
+.map-list-thumb.photo-loading::after,
+.visit-photo-wrap.photo-loading::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.35) 45%,transparent 70%);
+  pointer-events:none;
+}
+
+.visit-summary-thumb img,
+.tracking-thumb img,
+.reservation-thumb img,
+.map-list-thumb img,
+.visit-photo-wrap>img{
+  position:relative;
+  z-index:1;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  opacity:1!important;
+  transform:none!important;
+  filter:none!important;
+  animation:none!important;
+  transition:none!important;
+}
+
+.photo-neutral-placeholder{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  padding:12px;
+  color:#49675f;
+  font-size:12px;
+  font-weight:750;
+  line-height:1.25;
+  text-align:center;
+  background:
+    radial-gradient(circle at 78% 24%,rgba(255,255,255,.72) 0 9%,transparent 10%),
+    linear-gradient(155deg,#e7f0ec 0 48%,#d3e3dc 49% 65%,#bed5cb 66% 100%);
+}
+
+.photo-neutral-placeholder small{
+  color:#607a72;
+  font-size:10px;
+  font-weight:650;
+}
+
+.photo-neutral-placeholder button{
+  min-height:34px;
+  margin-top:4px;
+  padding:6px 11px;
+  border:1px solid #9fbeb2;
+  border-radius:999px;
+  background:rgba(255,255,255,.86);
+  color:#155f50;
+  font:inherit;
+  font-size:11px;
+  cursor:pointer;
+}
+
+/* Programme : aucun calcul JS de taille ou de position n'est necessaire. */
+#programme .visit-summary>.icon{
+  display:none!important;
+}
+
+#programme .visit-details:not([open]) .summary-title-tools .summary-line:first-child,
+#programme .visit-details:not([open]) .summary-title-tools .summary-line:first-child.reservation-below{
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:5px!important;
+  width:100%!important;
+  height:19px!important;
+  min-height:19px!important;
+  max-height:19px!important;
+  margin:0!important;
+  padding:0!important;
+  position:static!important;
+  transform:none!important;
+}
+
+#programme .mini-badge.nature.summary-nature{
+  box-sizing:border-box!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:4px!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:calc(100% - 24px)!important;
+  height:19px!important;
+  min-height:19px!important;
+  max-height:19px!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:#58736a!important;
+  box-shadow:none!important;
+  font-size:11.5px!important;
+  font-weight:750!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+
+#programme .summary-nature-icon{
+  box-sizing:border-box!important;
+  display:grid!important;
+  place-items:center!important;
+  flex:0 0 17px!important;
+  width:17px!important;
+  min-width:17px!important;
+  max-width:17px!important;
+  height:17px!important;
+  min-height:17px!important;
+  max-height:17px!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:visible!important;
+  font-size:15px!important;
+  line-height:1!important;
+  transform:none!important;
+}
+
+#programme .summary-nature-icon>.nature-svg,
+#programme .summary-nature-icon>.nature-emoji,
+#programme .summary-nature-icon>svg{
+  display:block!important;
+  width:17px!important;
+  min-width:17px!important;
+  max-width:17px!important;
+  height:17px!important;
+  min-height:17px!important;
+  max-height:17px!important;
+  margin:0!important;
+  transform:none!important;
+}
+
+#programme .summary-nature-label{
+  display:block!important;
+  min-width:0!important;
+  overflow:hidden!important;
+  line-height:1!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+#programme .reservation-compact{
+  box-sizing:border-box!important;
+  display:grid!important;
+  place-items:center!important;
+  flex:0 0 17px!important;
+  width:17px!important;
+  min-width:17px!important;
+  max-width:17px!important;
+  height:17px!important;
+  min-height:17px!important;
+  max-height:17px!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+#programme .reservation-compact>svg{
+  display:block!important;
+  width:17px!important;
+  height:17px!important;
+}
+
+#programme .visit-details:not([open]) .summary-title-tools .summary-line:nth-child(2){
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:max-content 17px max-content!important;
+  align-items:center!important;
+  justify-content:center!important;
+  justify-items:center!important;
+  column-gap:clamp(10px,3.4vw,16px)!important;
+  width:100%!important;
+  height:19px!important;
+  min-height:19px!important;
+  max-height:19px!important;
+  margin:0!important;
+  padding:0!important;
+  position:absolute!important;
+  left:0!important;
+  bottom:0!important;
+  transform:none!important;
+}
+
+#programme .summary-meta-item{
+  box-sizing:border-box!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:3px!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:100%!important;
+  height:17px!important;
+  min-height:17px!important;
+  max-height:17px!important;
+  margin:0!important;
+  padding:0!important;
+  position:static!important;
+  color:#58736a!important;
+  font-size:11px!important;
+  font-weight:700!important;
+  line-height:1!important;
+  text-align:center!important;
+  transform:none!important;
+  white-space:nowrap!important;
+}
+
+#programme .summary-meta-icon{
+  box-sizing:border-box!important;
+  display:grid!important;
+  place-items:center!important;
+  flex:0 0 17px!important;
+  width:17px!important;
+  min-width:17px!important;
+  max-width:17px!important;
+  height:17px!important;
+  min-height:17px!important;
+  max-height:17px!important;
+  margin:0!important;
+  padding:0!important;
+  color:currentColor!important;
+  line-height:1!important;
+  transform:none!important;
+}
+
+#programme .summary-meta-icon>svg,
+#programme svg.summary-meta-icon{
+  display:block!important;
+  width:17px!important;
+  min-width:17px!important;
+  max-width:17px!important;
+  height:17px!important;
+  min-height:17px!important;
+  max-height:17px!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:1.8!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+  transform:none!important;
+}
+
+#programme .summary-meta-label{
+  display:block!important;
+  min-width:0!important;
+  font:inherit!important;
+  line-height:1!important;
+}
+
+#programme .summary-point-map.summary-meta-item{
+  width:17px!important;
+  min-width:17px!important;
+  max-width:17px!important;
+  height:17px!important;
+  min-height:17px!important;
+  max-height:17px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:#247466!important;
+  font-size:0!important;
+  appearance:none!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+
+#programme .summary-point-map.summary-meta-item::after{
+  content:none!important;
+  display:none!important;
+}
+
+#programme .summary-point-map.summary-meta-item:focus-visible{
+  outline:2px solid #0b7864!important;
+  outline-offset:3px!important;
+  border-radius:4px!important;
+}
+
+/* Carte ouverte : memes pictogrammes, disposes sur une ligne stable. */
+#programme .visit-details[open] .summary-title-tools .summary-line:nth-child(2){
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr)!important;
+  align-items:center!important;
+  justify-items:center!important;
+  gap:4px!important;
+  width:100%!important;
+  transform:none!important;
+}
+
+#programme .visit-details[open] .summary-meta-item{
+  min-height:24px!important;
+}
+
+/* Suivi : les quatre briques demandées restent sur une seule ligne. */
+body.suivi-active header .progress-wrap{
+  display:none!important;
+}
+
+body.suivi-active header .stats{
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  align-items:stretch!important;
+  justify-content:stretch!important;
+  gap:6px!important;
+  width:100%!important;
+  margin:10px 0 2px!important;
+}
+
+body.suivi-active header .stats .stat,
+body.suivi-active header .stats .stat.stat-progress{
+  box-sizing:border-box!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  min-height:58px!important;
+  padding:6px 2px!important;
+  overflow:hidden!important;
+}
+
+body.suivi-active header .stats .stat b{
+  font-size:clamp(16px,4.5vw,21px)!important;
+  line-height:1!important;
+}
+
+body.suivi-active header .stats .stat span{
+  display:block!important;
+  width:100%!important;
+  margin-top:5px!important;
+  overflow:hidden!important;
+  font-size:clamp(8px,2.25vw,11px)!important;
+  font-weight:850!important;
+  line-height:1.05!important;
+  text-align:center!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+body.suivi-active header .stats .stat span>i{
+  display:none!important;
+}
+
+body.suivi-active header .stat-progress{
+  background:linear-gradient(145deg,#effbf7,#dcefe9)!important;
+}
+
+/* Barre d'actions et carte sans retouche DOM apres affichage. */
+#programme .history-actions{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 42px 42px minmax(0,1fr)!important;
+  gap:4px!important;
+  align-items:center!important;
+  width:100%!important;
+}
+
+#programme .history-actions>#dayButtons,
+#programme .history-actions>.compact-hide-done{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  height:34px!important;
+  min-height:34px!important;
+  max-height:34px!important;
+  margin:0!important;
+}
+
+#programme .history-actions>#undoActionBtn,
+#programme .history-actions>#redoActionBtn{
+  box-sizing:border-box!important;
+  width:42px!important;
+  min-width:42px!important;
+  max-width:42px!important;
+  height:34px!important;
+  min-height:34px!important;
+  max-height:34px!important;
+  margin:0!important;
+  padding:0!important;
+  font-size:24px!important;
+  line-height:1!important;
+}
+
+#carte .map-list-item.map-list-item-with-thumb{
+  position:relative!important;
+}
+
+#carte .map-list-item .map-walk-icon.cph-map-go-now{
+  position:absolute!important;
+  right:7px!important;
+  bottom:7px!important;
+  z-index:3!important;
+  box-sizing:border-box!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:62px!important;
+  min-width:62px!important;
+  max-width:62px!important;
+  height:30px!important;
+  min-height:30px!important;
+  max-height:30px!important;
+  margin:0!important;
+  padding:0 6px!important;
+  border:0!important;
+  border-radius:9px!important;
+  background:linear-gradient(180deg,#199d7c,#08785f)!important;
+  color:#fff!important;
+  box-shadow:none!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  text-decoration:none!important;
+}
+
+#carte .map-place-line{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  grid-template-rows:auto auto!important;
+  align-items:center!important;
+  justify-items:center!important;
+  row-gap:3px!important;
+  width:100%!important;
+  margin:0 auto!important;
+  text-align:center!important;
+}
+
+#carte .map-place-line>.map-place-icon{
+  display:flex!important;
+  grid-row:1!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:1.45em!important;
+  height:1.45em!important;
+  margin:0 auto!important;
+  transform:none!important;
+}
+
+#carte .map-place-line>b{
+  display:block!important;
+  grid-row:2!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  font-size:14.5px!important;
+  font-weight:850!important;
+  line-height:1.12!important;
+  text-align:center!important;
+  white-space:normal!important;
+}
+
+#carte .compact-status-options>.cph-map-filter-label{
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  min-width:0!important;
+  min-height:42px!important;
+  padding:4px 5px!important;
+  border-radius:12px!important;
+  font-size:13px!important;
+  font-weight:850!important;
+  line-height:1.05!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+}
+
+button,
+a,
+summary,
+label{
+  touch-action:manipulation;
+}
+
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible{
+  outline:3px solid rgba(255,190,70,.9)!important;
+  outline-offset:2px!important;
+}
+
+@media(max-width:390px){
+  header h1 .title-main{font-size:clamp(19px,5.55vw,23px)!important}
+  .cph-balanced-flags span{font-size:22px!important}
+  header h1 .title-sub{width:58%!important;min-width:205px!important;height:28px!important;font-size:10.2px!important}
+  body.suivi-active header .stats{gap:4px!important}
+  body.suivi-active header .stats .stat{min-height:54px!important;padding-inline:1px!important}
+  #programme .summary-meta-item{font-size:9.8px!important}
+  #programme .visit-details:not([open]) .summary-title-tools .summary-line:nth-child(2){column-gap:8px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
+
+/* Final authority over legacy rules that may still be present during the
+   one-time service-worker upgrade to v345. */
+html body.suivi-active header .stats{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  justify-content:stretch!important;
+  align-items:stretch!important;
+  width:100%!important;
+  max-width:760px!important;
+  gap:clamp(4px,1.4vw,10px)!important;
+  margin-inline:auto!important;
+}
+
+/* A GPS refusal must never interrupt access to the map. */
+.map-location-status{
+  width:min(100% - 24px,760px);
+  margin:9px auto -4px;
+  padding:7px 10px;
+  border:1px solid #d9c99c;
+  border-radius:10px;
+  background:#fff9e8;
+  color:#65562f;
+  font-size:11px;
+  font-weight:750;
+  line-height:1.3;
+  text-align:center;
+}
+
+.map-location-status[hidden]{display:none!important}
+
+html body.suivi-active header .stats .stat,
+html body.suivi-active header .stats .stat.stat-progress{
+  display:flex!important;
+  min-width:0!important;
+  width:auto!important;
+  max-width:none!important;
+  margin:0!important;
+  padding-inline:clamp(4px,1.6vw,12px)!important;
+  box-sizing:border-box!important;
+}
+
+html body #programme .visit-details:not([open]) .visit-summary .summary-main
+  .summary-title-tools .summary-line:nth-child(2){
+  display:grid!important;
+  grid-template-columns:max-content 17px max-content!important;
+  align-items:center!important;
+  justify-content:center!important;
+  column-gap:clamp(10px,3.5vw,16px)!important;
+  width:max-content!important;
+  max-width:100%!important;
+  margin-inline:auto!important;
+  position:relative!important;
+  left:auto!important;
+  right:auto!important;
+  transform:none!important;
+}
+
+html body #programme .summary-meta-icon{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:17px!important;
+  min-width:17px!important;
+  max-width:17px!important;
+  height:17px!important;
+  min-height:17px!important;
+  max-height:17px!important;
+  flex:0 0 17px!important;
+}
+
+html body #programme .summary-meta-icon svg{
+  display:block!important;
+  width:17px!important;
+  height:17px!important;
+}
+
+@media(max-width:390px){
+  html body.suivi-active header .stats .stat,
+  html body.suivi-active header .stats .stat.stat-progress{
+    padding-inline:1px!important;
+  }
+  html body.suivi-active header .stats .stat span{
+    font-size:10.5px!important;
+  }
+}
