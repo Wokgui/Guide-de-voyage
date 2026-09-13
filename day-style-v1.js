@@ -71,6 +71,50 @@ html body .reservation-order>b{
  gap:4px!important;
  text-align:center!important;
 }
+
+/* v350 — dans les cartes repliées, les trois métadonnées et « J’y vais »
+   partagent le centre horizontal de toute la zone située à droite de la photo. */
+html body #programme .visit-details:not([open]) .visit-summary .summary-main{
+ position:relative!important;
+}
+html body #programme .visit-details:not([open]) .visit-summary .summary-title-tools{
+ left:0!important;
+ right:0!important;
+ width:100%!important;
+ max-width:none!important;
+ margin-left:0!important;
+ margin-right:0!important;
+}
+html body #programme .visit-details:not([open]) .visit-summary .summary-title-tools .summary-line:nth-child(2){
+ box-sizing:border-box!important;
+ left:0!important;
+ right:0!important;
+ width:100%!important;
+ max-width:none!important;
+ margin-left:0!important;
+ margin-right:0!important;
+ padding-left:0!important;
+ padding-right:0!important;
+ justify-content:center!important;
+ justify-items:center!important;
+ transform:none!important;
+}
+html body #programme .visit-details:not([open]) .visit-summary .go-now-summary{
+ left:50%!important;
+ right:auto!important;
+ margin-left:0!important;
+ margin-right:0!important;
+ justify-self:center!important;
+ text-align:center!important;
+ transform:translate(-50%,-50%)!important;
+}
+html body #programme .visit-details:not([open]) .visit-summary .go-now-summary::after{
+ left:0!important;
+ right:0!important;
+ width:100%!important;
+ text-align:center!important;
+ transform:none!important;
+}
 `;
 document.head.appendChild(s);
 function normalizeOrderHeadings(root=document){
