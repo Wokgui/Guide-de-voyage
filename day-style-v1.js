@@ -1,10 +1,10 @@
 (function(){
 "use strict";
-if(window.__cphDayStyleV6)return;
-window.__cphDayStyleV6=true;
-["cph-day-style-v1","cph-day-style-v2","cph-day-style-v3","cph-day-style-v4","cph-day-style-v5","cph-day-style-v6"].forEach(id=>document.getElementById(id)?.remove());
+if(window.__cphDayStyleV7)return;
+window.__cphDayStyleV7=true;
+["cph-day-style-v1","cph-day-style-v2","cph-day-style-v3","cph-day-style-v4","cph-day-style-v5","cph-day-style-v6","cph-day-style-v7"].forEach(id=>document.getElementById(id)?.remove());
 const s=document.createElement("style");
-s.id="cph-day-style-v6";
+s.id="cph-day-style-v7";
 s.textContent=`
 /* Style 2 valide : cadre colore uniforme et en-tete teinte colle aux trois bords. */
 html body #programme .day-section.day-section{
@@ -72,48 +72,91 @@ html body .reservation-order>b{
  text-align:center!important;
 }
 
-/* v350 — dans les cartes repliées, les trois métadonnées et « J’y vais »
-   partagent le centre horizontal de toute la zone située à droite de la photo. */
+/* v351 — la zone à droite de la photo comprend désormais aussi l'espace de la
+   flèche. Les trois métadonnées et « J’y vais » ont chacun leur rangée et le
+   même centre horizontal, sans positionnement relatif ni translation. */
+html body #programme .visit-details:not([open]) .visit-summary{
+ grid-template-columns:118px minmax(0,1fr)!important;
+}
 html body #programme .visit-details:not([open]) .visit-summary .summary-main{
+ grid-column:2!important;
+ grid-template-areas:
+  "title time"
+  "tools tools"
+  "action action"
+  "meta meta"!important;
+ grid-template-rows:auto 1fr auto auto!important;
+ gap:4px 7px!important;
  position:relative!important;
 }
 html body #programme .visit-details:not([open]) .visit-summary .summary-title-tools{
- left:0!important;
- right:0!important;
+ position:static!important;
  width:100%!important;
  max-width:none!important;
- margin-left:0!important;
- margin-right:0!important;
+ margin:0!important;
 }
 html body #programme .visit-details:not([open]) .visit-summary .summary-title-tools .summary-line:nth-child(2){
  box-sizing:border-box!important;
- left:0!important;
- right:0!important;
+ display:grid!important;
+ grid-template-columns:max-content 17px max-content!important;
+ position:static!important;
  width:100%!important;
  max-width:none!important;
- margin-left:0!important;
- margin-right:0!important;
- padding-left:0!important;
- padding-right:0!important;
+ margin:0!important;
+ padding:0!important;
  justify-content:center!important;
  justify-items:center!important;
+ column-gap:16px!important;
  transform:none!important;
 }
 html body #programme .visit-details:not([open]) .visit-summary .go-now-summary{
- left:50%!important;
+ grid-area:action!important;
+ position:static!important;
+ left:auto!important;
  right:auto!important;
- margin-left:0!important;
- margin-right:0!important;
+ top:auto!important;
+ bottom:auto!important;
+ width:110px!important;
+ min-width:110px!important;
+ max-width:110px!important;
+ margin:0 auto!important;
  justify-self:center!important;
+ align-self:end!important;
  text-align:center!important;
- transform:translate(-50%,-50%)!important;
+ transform:none!important;
 }
 html body #programme .visit-details:not([open]) .visit-summary .go-now-summary::after{
- left:0!important;
- right:0!important;
+ position:static!important;
+ inset:auto!important;
  width:100%!important;
  text-align:center!important;
  transform:none!important;
+}
+html body #programme .visit-details:not([open]) .visit-summary .chevron{
+ position:absolute!important;
+ right:8px!important;
+ bottom:8px!important;
+ margin:0!important;
+ transform:none!important;
+}
+html body #programme .visit-details:not([open]) .walk-shoe-svg{
+ display:block!important;
+ width:17px!important;
+ height:17px!important;
+ overflow:visible!important;
+ fill:none!important;
+ stroke:currentColor!important;
+ stroke-width:1.75!important;
+ stroke-linecap:round!important;
+ stroke-linejoin:round!important;
+}
+@media(max-width:390px){
+ html body #programme .visit-details:not([open]) .visit-summary{
+  grid-template-columns:116px minmax(0,1fr)!important;
+ }
+ html body #programme .visit-details:not([open]) .visit-summary .summary-title-tools .summary-line:nth-child(2){
+  column-gap:12px!important;
+ }
 }
 `;
 document.head.appendChild(s);

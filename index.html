@@ -17,7 +17,7 @@
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Copenhague" name="apple-mobile-web-app-title"/>
-<title>Copenhague &amp; Malmö — v347</title>
+<title>Copenhague &amp; Malmö — v351</title>
 <link href="/manifest.webmanifest" rel="manifest"/>
 <link href="/icons/app-icon.svg" rel="icon" type="image/svg+xml"/>
 <link href="/icons/app-icon-192.png?v=2" rel="apple-touch-icon"/>
@@ -6983,11 +6983,11 @@ function renderProgramme(adapt=adaptiveAll()){
       <div class="summary-top-time">${esc(state.timeOverrides[p.id]||(sc?minToHm(sc.start):p.plannedStart))}</div>
      </div>
      <div class="summary-title-tools ${rs==="yes"?"has-reservation":"no-reservation"}">
-      <div class="summary-line"><span class="mini-badge nature summary-nature"><span class="summary-nature-icon">${natureIcon}</span><span class="summary-nature-label">${esc(pointNature)}</span></span>${rs==="yes"?'<span class="reservation-compact" role="img" aria-label="Réservé" title="Réservé"><svg aria-hidden="true" viewBox="0 0 18 18"><rect x="1" y="2.5" width="16" height="14.5" rx="3.2" fill="#d98218"/><path d="M1 7h16" stroke="#fff" stroke-width="1.45"/><path d="M5 1.5v3.4M13 1.5v3.4" stroke="#d98218" stroke-width="2" stroke-linecap="round"/><text x="9" y="14.2" text-anchor="middle" font-family="Arial, sans-serif" font-size="7.2" font-weight="700" fill="#fff">31</text></svg></span>':""}</div>
-      <div class="summary-line">
-        <span class="summary-visit-duration summary-meta-item"><span class="visit-duration-icon summary-meta-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.2 2"/></svg></span><span class="summary-meta-label">${state.durationOverrides[p.id]||p.durationMins} min</span></span>
-        <button class="map-title-button summary-point-map summary-meta-item" type="button" aria-label="Ouvrir la carte de ${esc(p.name)}"><svg class="summary-meta-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/></svg></button>
-        <span class="summary-walk-duration summary-meta-item"><span class="summary-meta-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="13" cy="4.5" r="2"/><path d="m10 9 3-2 2.5 2.5 2.5 1M13 7l-2 5 3 2 1 5M11 12l-3 6"/></svg></span><span class="summary-meta-label">${route.mins} min</span></span>
+       <div class="summary-line"><span class="mini-badge nature summary-nature"><span class="summary-nature-icon">${natureIcon}</span><span class="summary-nature-label">${esc(pointNature)}</span></span>${rs==="yes"?'<span class="cph-reserved-one" role="img" aria-label="Réservé" title="Réservé"><svg class="cph-reserved-date-icon" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><rect x="1" y="2.5" width="16" height="14.5" rx="3.2" fill="#d98218"/><path d="M1 7h16" stroke="#fff" stroke-width="1.45"/><path d="M5 1.5v3.4M13 1.5v3.4" stroke="#d98218" stroke-width="2" stroke-linecap="round"/><text x="9" y="14.2" text-anchor="middle" font-family="Arial, sans-serif" font-size="7.2" font-weight="700" fill="#fff">31</text></svg></span>':""}</div>
+       <div class="summary-line">
+        <span class="summary-visit-duration summary-meta-item cph-summary-meta"><span class="visit-duration-icon summary-meta-icon cph-summary-meta-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.2 2"/></svg></span><span class="summary-meta-label cph-summary-meta-label">${state.durationOverrides[p.id]||p.durationMins} min</span></span>
+        <button class="map-title-button summary-point-map summary-meta-item cph-summary-meta" type="button" aria-label="Ouvrir la carte de ${esc(p.name)}"><svg class="summary-meta-icon cph-summary-meta-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/></svg></button>
+        <span class="summary-walk-duration summary-meta-item cph-summary-meta"><span class="summary-meta-icon cph-summary-meta-icon" aria-hidden="true"><svg class="walk-shoe-svg" viewBox="0 0 24 24"><path d="M3 15.5c2.9 1.1 5.3.2 6.8-2.7l1.2-2.3 2.2 1.6c2.3 1.7 4.4 2.5 7.3 2.8.9.1 1.5.8 1.5 1.7v1.4H4.6A2.6 2.6 0 0 1 2 15.7l1-.2Z"/><path d="m12.2 12.3 1.4-1.5m.3 2.9 1.5-1.4M4.7 18.3h16.8"/></svg></span><span class="summary-meta-label cph-summary-meta-label">${route.mins} min</span></span>
       </div>
      </div>
      <button class="button go-now-summary" type="button" onclick="event.stopPropagation()">J’y vais</button>
@@ -10871,7 +10871,7 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
   });
 })();
 </script>
-<script src="/day-style-v1.js?v=5"></script>
+<script src="/day-style-v1.js?v=6"></script>
 <script src="/section-history-v1.js?v=1"></script>
 <script src="/packing-list-v1.js?v=5"></script>
 </body>
