@@ -108,8 +108,10 @@ const dirty={programme:false,carte:false,suivi:false,sejour:false};
 const samples={renderAll:[],programme:[],carte:[],suivi:[],sejour:[],switchTab:[],polish:[]};
 const counters={renderAll:0,programme:0,carte:0,suivi:0,sejour:0,switchTab:0,polish:0,longTasks:0};
 const MAX_SAMPLES=600;
+const POLISH_PANELS=new Set(["programme","suivi"]);
 let renderDepth=0;
 let polishQueued=false;
+let polishTarget=null;
 
 function now(){return typeof performance!=="undefined"&&typeof performance.now==="function"?performance.now():Date.now();}
 function activeTab(){return document.querySelector(".panel.active")?.id||document.querySelector(".tab.active")?.dataset?.tab||"programme";}
@@ -133,7 +135,7 @@ function markDataPanelsDirty(except){["programme","carte","suivi"].forEach(name=
 function panelRoot(name){return document.getElementById(name)||document;}
 
 const perfApi={
- version:"1.1.0",
+ version:"1.2.0",
  logging:new URLSearchParams(location.search).has("perf")||localStorage.getItem("cphGuidePerfLogs")==="1",
  dirty,counters,samples,
  report(){return {version:this.version,active:activeTab(),dirty:{...dirty},longTasks:counters.longTasks,renderAll:stat("renderAll"),programme:stat("programme"),carte:stat("carte"),suivi:stat("suivi"),sejour:stat("sejour"),switchTab:stat("switchTab"),polish:stat("polish")};},
@@ -157,13 +159,18 @@ const perfApi={
 };
 
 function runPolishers(name){
+ if(!POLISH_PANELS.has(name))return;
+ polishTarget=name;
  if(polishQueued)return;
  polishQueued=true;
  requestAnimationFrame(()=>{
   polishQueued=false;
+  const target=polishTarget;
+  polishTarget=null;
+  if(!target)return;
   const t0=now();
   try{
-   const root=panelRoot(name);
+   const root=panelRoot(target);
    if(typeof window.__cphDayStyleRefresh==="function")window.__cphDayStyleRefresh(root);
   }catch(err){console.warn("[guide-perf] polish",err);}
   remember("polish",now()-t0);
