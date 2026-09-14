@@ -40,11 +40,16 @@ assert.match(header,/function refresh\(\)[\s\S]*?removeVisitHelperTexts\(\)/,'le
 assert.match(header,/function centerScheduleEditorFields\(\)[\s\S]*?\["Heure souhaitée","Durée prévue","Jour de visite"\][\s\S]*?exactTextElements\(root,text\)\.forEach/,'les trois titres de toutes les visites doivent être traités');
 assert.match(css,/\.cph-editor-title-centered\{[\s\S]*?text-align:center!important/,'les titres de l’éditeur doivent être centrés');
 assert.match(css,/\.time-editor \.cph-time-control-centered\{[\s\S]*?width:min\(180px,100%\)!important;[\s\S]*?margin-left:auto!important;[\s\S]*?text-align:center!important/,'le contrôle Heure souhaitée doit être réellement centré horizontalement');
+assert.match(header,/text==="Jour de visite"[\s\S]*?cph-day-control-centered/,'le sélecteur Jour de visite doit être marqué sur toutes les visites');
+assert.match(css,/\.cph-day-control-centered\{[\s\S]*?width:min\(150px,100%\)!important;[\s\S]*?margin-left:auto!important;[\s\S]*?text-align:center!important/,'le sélecteur Jour de visite doit être compact et centré');
 
 assert.match(header,/function normalizeDurationEditors\(\)[\s\S]*?exactTextElements\(root,"Durée prévue"\)\.forEach/,'tous les éditeurs de durée doivent être normalisés');
+assert.match(header,/title\.classList\.add\("cph-duration-title"\)/,'le titre Durée prévue doit avoir un ciblage dédié');
 assert.match(header,/unit\.textContent="minutes"/,'le mot minutes doit être ajouté à droite du champ numérique');
 assert.match(header,/editor\.insertBefore\(unit,apply\)/,'minutes doit précéder directement Appliquer dans la rangée de durée');
-assert.match(css,/\.duration-editor\.cph-duration-editor\{[\s\S]*?grid-template-columns:minmax\(0,1fr\) auto auto!important/,'champ, minutes et Appliquer doivent partager la même rangée');
+assert.match(css,/\.duration-editor\.cph-duration-editor\{[\s\S]*?grid-template-columns:88px auto auto!important;[\s\S]*?justify-content:center!important/,'la rangée durée doit être compacte et centrée');
+assert.match(css,/\.cph-duration-title\{[\s\S]*?text-align:center!important/,'la mention Durée prévue doit être centrée');
+assert.match(css,/\.cph-duration-control\{[\s\S]*?width:88px!important;[\s\S]*?text-align:center!important/,'le champ Durée prévue doit être plus étroit et centré');
 assert.match(css,/\.duration-editor\.cph-duration-editor>\.cph-duration-unit\{[\s\S]*?height:var\(--cph-duration-control-height,44px\)!important/,'minutes doit être aligné verticalement sur le champ');
 assert.match(css,/\.duration-editor\.cph-duration-editor>\.cph-duration-apply\{[\s\S]*?height:var\(--cph-duration-control-height,44px\)!important/,'Appliquer doit avoir exactement la hauteur du champ Durée prévue');
 
@@ -75,4 +80,4 @@ assert.match(header,/window\.restorePointOriginalTime=function\(id\)[\s\S]*?casc
 assert.match(sw,/copenhague-v358-static-v51/,'le cache statique doit rester cohérent');
 assert.match(sw,/\/interaction-layout-v358\.css\?v=358/,'la feuille v358 doit être précachée');
 
-console.log(JSON.stringify({ok:true,departure:'actual-removed',actions:'uniform-66px-compact-v361',editor:'all-visits-clean-inline-v363',photos:'named-svg-fallback',cascade:'clicked-point-first'},null,2));
+console.log(JSON.stringify({ok:true,departure:'actual-removed',actions:'uniform-66px-compact-v361',editor:'centered-compact-v364',photos:'named-svg-fallback',cascade:'clicked-point-first'},null,2));
