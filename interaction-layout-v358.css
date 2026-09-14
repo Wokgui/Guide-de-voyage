@@ -21,6 +21,39 @@
   cursor:not-allowed!important;
 }
 
+/* v359 — les actions principales ont la même grille et une hauteur accrue de 50 %. */
+#programme .day-departure{
+  display:none!important;
+}
+
+#programme .action-grid.status.actions,
+#programme .visit-now-actions{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  align-items:stretch!important;
+  gap:6px!important;
+  width:100%!important;
+}
+
+#programme .action-grid.status.actions>button,
+#programme .visit-now-actions>.button{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  height:66px!important;
+  min-height:66px!important;
+  margin:0!important;
+  padding:8px 5px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  white-space:normal!important;
+  font-size:12px!important;
+  font-weight:800!important;
+  line-height:1.15!important;
+}
+
 @media(max-width:420px){
   #programme .time-editor>label{
     flex:1 1 100%!important;
@@ -29,5 +62,14 @@
   #programme .time-editor>.time-editor-actions{
     flex:1 1 100%!important;
     width:100%!important;
+  }
+}
+
+@media(max-width:380px){
+  #programme .action-grid.status.actions>button,
+  #programme .visit-now-actions>.button{
+    padding-left:3px!important;
+    padding-right:3px!important;
+    font-size:11px!important;
   }
 }
