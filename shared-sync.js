@@ -22,6 +22,7 @@
     "customOrderDays","dayOverrides","stayInfo"
   ]);
   const ARRAY_KEYS=new Set(["customPoints","deletedIds"]);
+  const FORM_ONLY_REMOTE_KEYS=new Set(["globalNotes","stayInfo"]);
   const FORBIDDEN_SEGMENTS=new Set(["__proto__","prototype","constructor"]);
 
   const statusBox=document.getElementById("sharedSyncStatus");
@@ -44,7 +45,12 @@
   const isPlainObject=value=>value!==null&&typeof value==="object"&&!Array.isArray(value);
   const encodeSegment=value=>String(value).replace(/~/g,"~0").replace(/\//g,"~1");
   const decodeSegment=value=>String(value).replace(/~1/g,"/").replace(/~0/g,"~");
-  const comparable=value=>JSON.stringify(value);
+  const comparable=value=>{
+    if(value===undefined)return "undefined";
+    if(value===null||typeof value!=="object")return JSON.stringify(value);
+    if(Array.isArray(value))return `[${value.map(comparable).join(",")}]`;
+    return `{${Object.keys(value).sort().map(key=>`${JSON.stringify(key)}:${comparable(value[key])}`).join(",")}}`;
+  };
   const timestampValue=value=>{
     const parsed=Date.parse(String(value||""));
     return Number.isFinite(parsed)?parsed:0;
@@ -114,6 +120,7 @@
   let retryTimer=null;
   let retryDelay=2500;
   let renderTimer=null;
+  let pendingRemoteNeedsDataRender=false;
   let pollInFlight=false;
   let channel=null;
   let realtimeReady=false;
@@ -272,6 +279,21 @@
     return segments;
   }
 
+  function currentAtPath(path){
+    const segments=pathSegments(path);
+    if(!segments)return {valid:false,exists:false,value:undefined,segments:null};
+    let target=state;
+    for(let index=0;index<segments.length-1;index++){
+      if(target===null||typeof target!=="object"||!Object.prototype.hasOwnProperty.call(target,segments[index])){
+        return {valid:true,exists:false,value:undefined,segments};
+      }
+      target=target[segments[index]];
+    }
+    const key=segments[segments.length-1];
+    const exists=target!==null&&typeof target==="object"&&Object.prototype.hasOwnProperty.call(target,key);
+    return {valid:true,exists,value:exists?target[key]:undefined,segments};
+  }
+
   function setAtPath(path,value){
     const segments=pathSegments(path);
     if(!segments)return false;
@@ -313,13 +335,34 @@
     const known=String(pathClock[row.path]||"");
     if(!force&&known&&timestampValue(known)>timestampValue(incoming))return false;
     if(!force&&row.device_id===deviceId)return false;
-    const changed=row.is_deleted?deleteAtPath(row.path):setAtPath(row.path,row.value);
-    if(changed&&incoming){
+
+    const current=currentAtPath(row.path);
+    if(!current.valid)return false;
+    let changed=false;
+    if(row.is_deleted){
+      if(current.segments.length===1){
+        const fallback=defaultForKey(current.segments[0]);
+        const before=current.exists?current.value:fallback;
+        changed=comparable(before)!==comparable(fallback);
+      }else changed=current.exists;
+    }else{
+      changed=!current.exists||comparable(current.value)!==comparable(row.value);
+    }
+
+    if(changed){
+      if(row.is_deleted)deleteAtPath(row.path);
+      else setAtPath(row.path,row.value);
+    }
+
+    if(incoming){
       const normalizedIncoming=normalizedTimestamp(incoming);
-      pathClock[row.path]=force
+      const nextClock=force
         ?normalizedIncoming
         :(timestampValue(incoming)>timestampValue(known)?normalizedIncoming:known);
-      persistClock();
+      if(nextClock&&nextClock!==known){
+        pathClock[row.path]=nextClock;
+        persistClock();
+      }
     }
     return changed;
   }
@@ -351,9 +394,13 @@
     if(typeof updateStayAddressActions==="function")updateStayAddressActions();
   }
 
-  function renderRemoteChanges(){
+  function renderRemoteChanges(changedKeys){
+    if(!changedKeys||!changedKeys.size)pendingRemoteNeedsDataRender=true;
+    else if(Array.from(changedKeys).some(key=>!FORM_ONLY_REMOTE_KEYS.has(key)))pendingRemoteNeedsDataRender=true;
     clearTimeout(renderTimer);
     renderTimer=setTimeout(()=>{
+      const needsDataRender=pendingRemoteNeedsDataRender;
+      pendingRemoteNeedsDataRender=false;
       applyingRemote=true;
       try{
         normalizeSharedState();
@@ -366,8 +413,10 @@
           actionHistory.redo.length=0;
           if(typeof updateHistoryButtons==="function")updateHistoryButtons();
         }
-        if(typeof renderDayButtons==="function")renderDayButtons();
-        if(typeof renderAll==="function")renderAll();
+        if(needsDataRender){
+          if(typeof renderDayButtons==="function")renderDayButtons();
+          if(typeof renderAll==="function")renderAll();
+        }
       }finally{
         applyingRemote=false;
       }
@@ -812,8 +861,14 @@
       persistQueue();
       if(Array.isArray(data)){
         let changed=false;
-        data.forEach(row=>{if(row.device_id!==deviceId&&applyRemoteRow(row,true))changed=true;});
-        if(changed)renderRemoteChanges();
+        const changedKeys=new Set();
+        data.forEach(row=>{
+          if(row.device_id===deviceId||!applyRemoteRow(row,true))return;
+          changed=true;
+          const segments=pathSegments(row.path);
+          if(segments)changedKeys.add(segments[0]);
+        });
+        if(changed)renderRemoteChanges(changedKeys);
       }
       markCloudSaved(latestUpdatedAt(data));
       retryDelay=2500;
@@ -850,11 +905,17 @@
 
   function applyRemoteRows(rows,force=true){
     let changed=false;
+    const changedKeys=new Set();
     rows
       .slice()
       .sort((left,right)=>left.path.split("/").length-right.path.split("/").length||left.path.localeCompare(right.path))
-      .forEach(row=>{if(applyRemoteRow(row,force))changed=true;});
-    if(changed)renderRemoteChanges();
+      .forEach(row=>{
+        if(!applyRemoteRow(row,force))return;
+        changed=true;
+        const segments=pathSegments(row.path);
+        if(segments)changedKeys.add(segments[0]);
+      });
+    if(changed)renderRemoteChanges(changedKeys);
     return changed;
   }
 

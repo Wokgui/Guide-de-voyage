@@ -273,6 +273,11 @@ function withAdaptiveSnapshot(callback){
  try{return callback(adapt);}finally{window.adaptiveAll=current;}
 }
 
+function finalizeProgrammeDom(){
+ const uiFixes=window.__cphUiFixesStableV31;
+ if(uiFixes&&typeof uiFixes.polish==="function")uiFixes.polish();
+}
+
 function renderPanel(name,reason){
  const t0=now();
  renderDepth++;
@@ -280,6 +285,7 @@ function renderPanel(name,reason){
   if(name==="programme"){
    withAdaptiveSnapshot(adapt=>{
     originals.renderProgramme(adapt||undefined);
+    finalizeProgrammeDom();
     if(adapt&&originals.updateStats)originals.updateStats(adapt);
    });
   }else if(name==="suivi"){
