@@ -118,7 +118,7 @@
   white-space:nowrap!important;
 }
 
-/* v362/v363 — édition des visites homogène pour toutes les cartes. */
+/* v362-v364 — édition des visites homogène, centrée et compacte. */
 #programme .cph-editor-title-centered{
   display:block!important;
   width:100%!important;
@@ -141,12 +141,24 @@
   text-align:center!important;
   text-align-last:center!important;
 }
+#programme .cph-day-control-centered{
+  display:block!important;
+  box-sizing:border-box!important;
+  width:min(150px,100%)!important;
+  max-width:150px!important;
+  min-width:0!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  text-align:center!important;
+  text-align-last:center!important;
+}
 
-/* Durée : champ, unité puis Appliquer sur une seule ligne. */
+/* Durée : titre centré, champ compact, unité puis Appliquer sur une seule ligne. */
 #programme .duration-editor.cph-duration-editor{
   display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto auto!important;
+  grid-template-columns:88px auto auto!important;
   grid-template-rows:auto!important;
+  justify-content:center!important;
   align-items:end!important;
   column-gap:6px!important;
   row-gap:0!important;
@@ -155,13 +167,27 @@
 #programme .duration-editor.cph-duration-editor>.cph-duration-field{
   grid-column:1!important;
   min-width:0!important;
-  width:100%!important;
+  width:88px!important;
+  max-width:88px!important;
   margin:0!important;
+  text-align:center!important;
+}
+#programme .duration-editor.cph-duration-editor .cph-duration-title{
+  display:block!important;
+  width:100%!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  text-align:center!important;
 }
 #programme .duration-editor.cph-duration-editor .cph-duration-control{
   box-sizing:border-box!important;
-  width:100%!important;
+  display:block!important;
+  width:88px!important;
+  max-width:88px!important;
   min-width:0!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  text-align:center!important;
 }
 #programme .duration-editor.cph-duration-editor>.cph-duration-unit{
   grid-column:2!important;
@@ -279,8 +305,18 @@
   #programme .visit-now-actions>.button .cph-now-label{
     font-size:10px!important;
   }
+  #programme .cph-day-control-centered{
+    width:min(140px,100%)!important;
+    max-width:140px!important;
+  }
   #programme .duration-editor.cph-duration-editor{
+    grid-template-columns:82px auto auto!important;
     column-gap:5px!important;
+  }
+  #programme .duration-editor.cph-duration-editor>.cph-duration-field,
+  #programme .duration-editor.cph-duration-editor .cph-duration-control{
+    width:82px!important;
+    max-width:82px!important;
   }
   #programme .duration-editor.cph-duration-editor>.cph-duration-unit{
     font-size:11px!important;
@@ -312,7 +348,13 @@
     min-height:16px!important;
   }
   #programme .duration-editor.cph-duration-editor{
+    grid-template-columns:78px auto auto!important;
     column-gap:4px!important;
+  }
+  #programme .duration-editor.cph-duration-editor>.cph-duration-field,
+  #programme .duration-editor.cph-duration-editor .cph-duration-control{
+    width:78px!important;
+    max-width:78px!important;
   }
   #programme .duration-editor.cph-duration-editor>.cph-duration-unit{
     font-size:10.5px!important;
