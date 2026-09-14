@@ -69,10 +69,27 @@ function keepTrackingClosedOnEntry(){
  }
 }
 
-function hideActualDepartureTile(){
+function removeActualDepartureTile(){
  document.querySelectorAll("#programme .day-departure").forEach(tile=>{
   const label=tile.querySelector(".day-departure-label");
-  tile.hidden=(label?.textContent||"").trim()==="Départ réel";
+  if((label?.textContent||"").trim()==="Départ réel")tile.remove();
+ });
+}
+
+const NOW_ACTIONS=[
+ [".here-now","J’y suis","maintenant",'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-5.3 7-12a7 7 0 1 0-14 0c0 6.7 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>'],
+ [".restore-original-time","Rétablir l’heure","d’origine",'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7v5h5"/><path d="M5.6 16.4A8 8 0 1 0 6 6.8L4 9"/></svg>'],
+ [".go-now","J’y vais","maintenant",'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h12"/><path d="m13 7 5 5-5 5"/></svg>']
+];
+
+function normalizeNowActionButtons(){
+ document.querySelectorAll("#programme .visit-now-actions").forEach(group=>{
+  NOW_ACTIONS.forEach(([selector,line1,line2,icon])=>{
+   const button=group.querySelector(selector);
+   if(!button||button.dataset.cphUniformNowAction==="1")return;
+   button.dataset.cphUniformNowAction="1";
+   button.innerHTML=`<span class="cph-now-icon">${icon}</span><span class="cph-now-label"><span>${line1}</span><span>${line2}</span></span>`;
+  });
  });
 }
 
@@ -80,7 +97,8 @@ function refresh(){
  bindSettings();
  bindTrackingShortcuts();
  keepTrackingClosedOnEntry();
- hideActualDepartureTile();
+ removeActualDepartureTile();
+ normalizeNowActionButtons();
 }
 
 document.addEventListener("guide:rendered",refresh);
