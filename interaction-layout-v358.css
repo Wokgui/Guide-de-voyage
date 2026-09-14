@@ -118,6 +118,78 @@
   white-space:nowrap!important;
 }
 
+/* v362 — alignement fin de l'éditeur horaire et des actions. */
+#programme .cph-editor-title-centered{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  text-align:center!important;
+}
+#programme .cph-editor-field-centered{
+  text-align:center!important;
+  justify-content:center!important;
+  align-items:center!important;
+}
+#programme .cph-time-control-centered{
+  display:block!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  text-align:center!important;
+  text-align-last:center!important;
+}
+#programme .cph-duration-apply{
+  box-sizing:border-box!important;
+  height:var(--cph-duration-control-height,44px)!important;
+  min-height:var(--cph-duration-control-height,44px)!important;
+  max-height:var(--cph-duration-control-height,44px)!important;
+  align-self:center!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+#programme .action-grid.status.actions>button.cph-aside-button{
+  display:grid!important;
+  grid-template-columns:18px minmax(0,max-content)!important;
+  align-items:center!important;
+  align-content:center!important;
+  justify-content:center!important;
+  justify-items:center!important;
+  column-gap:5px!important;
+}
+#programme .cph-aside-icon{
+  display:flex!important;
+  width:18px!important;
+  height:100%!important;
+  min-width:18px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  align-self:stretch!important;
+  margin:0!important;
+  padding:0!important;
+  font-size:15px!important;
+  line-height:1!important;
+}
+#programme .cph-aside-label{
+  display:grid!important;
+  grid-template-rows:auto auto!important;
+  justify-items:center!important;
+  align-items:center!important;
+  width:max-content!important;
+  line-height:1.08!important;
+  text-align:center!important;
+}
+#programme .cph-aside-label>span{
+  display:block!important;
+  width:100%!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+}
+#programme .visit-now-actions>.restore-original-time{
+  row-gap:6px!important;
+}
+
 /* Sécurité si une ancienne version du DOM porte encore hidden. */
 #programme .day-departure[hidden]{
   display:none!important;
