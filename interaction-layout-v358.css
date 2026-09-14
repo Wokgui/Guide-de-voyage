@@ -21,7 +21,7 @@
   cursor:not-allowed!important;
 }
 
-/* v359 — les actions principales ont la même grille et une hauteur accrue de 50 %. */
+/* v359/v360 — rangées principales uniformes. */
 #programme .action-grid.status.actions,
 #programme .visit-now-actions{
   display:grid!important;
@@ -31,13 +31,13 @@
   width:100%!important;
 }
 
-#programme .action-grid.status.actions>button,
-#programme .visit-now-actions>.button{
+#programme .action-grid.status.actions>button{
   box-sizing:border-box!important;
   width:100%!important;
   min-width:0!important;
   height:66px!important;
   min-height:66px!important;
+  max-height:66px!important;
   margin:0!important;
   padding:8px 5px!important;
   display:flex!important;
@@ -48,6 +48,73 @@
   font-size:12px!important;
   font-weight:800!important;
   line-height:1.15!important;
+}
+
+/* Les trois actions temporelles ont exactement la même boîte et la même typographie. */
+#programme .visit-now-actions{
+  grid-auto-rows:66px!important;
+}
+#programme .visit-now-actions>.button{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:66px!important;
+  min-height:66px!important;
+  max-height:66px!important;
+  margin:0!important;
+  padding:5px 3px!important;
+  display:grid!important;
+  grid-template-rows:20px auto!important;
+  align-content:center!important;
+  align-items:center!important;
+  justify-items:center!important;
+  row-gap:3px!important;
+  text-align:center!important;
+  white-space:normal!important;
+  font-size:0!important;
+  line-height:1!important;
+}
+#programme .visit-now-actions>.button .cph-now-icon{
+  display:flex!important;
+  width:20px!important;
+  height:20px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  line-height:1!important;
+}
+#programme .visit-now-actions>.button .cph-now-icon svg{
+  display:block!important;
+  width:20px!important;
+  height:20px!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:1.9!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+#programme .visit-now-actions>.button .cph-now-label{
+  display:grid!important;
+  grid-template-rows:auto auto!important;
+  justify-items:center!important;
+  gap:0!important;
+  width:100%!important;
+  min-width:0!important;
+  font-size:11.5px!important;
+  font-weight:800!important;
+  line-height:1.12!important;
+  letter-spacing:-.05px!important;
+  text-align:center!important;
+}
+#programme .visit-now-actions>.button .cph-now-label>span{
+  display:block!important;
+  width:100%!important;
+  white-space:nowrap!important;
+}
+
+/* Sécurité si une ancienne version du DOM porte encore hidden. */
+#programme .day-departure[hidden]{
+  display:none!important;
 }
 
 @media(max-width:420px){
@@ -62,10 +129,17 @@
 }
 
 @media(max-width:380px){
-  #programme .action-grid.status.actions>button,
-  #programme .visit-now-actions>.button{
+  #programme .action-grid.status.actions>button{
     padding-left:3px!important;
     padding-right:3px!important;
     font-size:11px!important;
+  }
+  #programme .visit-now-actions>.button .cph-now-label{
+    font-size:10.8px!important;
+  }
+  #programme .visit-now-actions>.button .cph-now-icon,
+  #programme .visit-now-actions>.button .cph-now-icon svg{
+    width:19px!important;
+    height:19px!important;
   }
 }
