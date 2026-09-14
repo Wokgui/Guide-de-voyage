@@ -69,6 +69,15 @@ function keepTrackingClosedOnEntry(){
  }
 }
 
+function loadDomStabilityV356(){
+ if(document.querySelector('script[data-cph-dom-stability="356"]'))return;
+ const script=document.createElement("script");
+ script.src="/dom-stability-v356.js?v=356";
+ script.async=false;
+ script.dataset.cphDomStability="356";
+ document.head.appendChild(script);
+}
+
 function refresh(){
  bindSettings();
  bindTrackingShortcuts();
@@ -76,6 +85,11 @@ function refresh(){
 }
 
 document.addEventListener("guide:rendered",refresh);
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",refresh,{once:true});
-else refresh();
+if(document.readyState==="loading"){
+ document.addEventListener("DOMContentLoaded",refresh,{once:true});
+ document.addEventListener("DOMContentLoaded",loadDomStabilityV356,{once:true});
+}else{
+ refresh();
+ loadDomStabilityV356();
+}
 })();
