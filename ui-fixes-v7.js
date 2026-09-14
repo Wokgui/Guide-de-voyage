@@ -335,6 +335,10 @@ function polish(){
 function schedule(){if(scheduled)return;scheduled=true;queueMicrotask(polish);}
 function relevantMutation(records){return records.some(r=>{const t=r.target&&r.target.nodeType===1?r.target:r.target&&r.target.parentElement;if(!t)return false;if(t.closest&&t.closest("#map,.leaflet-container,.leaflet-pane,.leaflet-control-container"))return false;return !!(t.closest&&t.closest("#programme,#carte .map-list,#dayButtons,.history-actions"))})}
 function start(){observer=new MutationObserver(records=>{if(relevantMutation(records))schedule()});polish();window.addEventListener("resize",schedule,{passive:true});}
-window[GLOBAL_KEY]={stop(){observer?.disconnect();observer=null;scheduled=false;}};
+window[GLOBAL_KEY]={
+ polish,
+ schedule,
+ stop(){observer?.disconnect();observer=null;scheduled=false;}
+};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
