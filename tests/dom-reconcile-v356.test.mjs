@@ -13,7 +13,7 @@ assert.match(source,/snapshotProgrammeDom/);
 assert.match(source,/reconcileProgrammeDom/);
 assert.match(source,/\.day-section/);
 assert.match(source,/\.visit-details/);
-assert.match(source,/querySelectorAll\("img"\)/);
+assert.match(source,/list\(root,"img"\)/,'les images du Programme doivent être capturées et réconciliées');
 assert.match(source,/newNode\.replaceWith\(oldNode\)/,'les nœuds inchangés doivent garder leur identité DOM');
 assert.match(source,/newImage\.replaceWith\(oldImage\)/,'une image déjà chargée ne doit pas être recréée');
 assert.doesNotMatch(source,/setTimeout|setInterval|requestAnimationFrame/,'v356 ne doit pas masquer le flash avec une temporisation');
