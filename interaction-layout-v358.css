@@ -118,7 +118,7 @@
   white-space:nowrap!important;
 }
 
-/* v362 — alignement fin de l'éditeur horaire et des actions. */
+/* v362/v363 — édition des visites homogène pour toutes les cartes. */
 #programme .cph-editor-title-centered{
   display:block!important;
   width:100%!important;
@@ -132,54 +132,116 @@
   justify-content:center!important;
   align-items:center!important;
 }
-#programme .cph-time-control-centered{
+#programme .time-editor .cph-time-control-centered{
   display:block!important;
+  width:min(180px,100%)!important;
+  max-width:180px!important;
   margin-left:auto!important;
   margin-right:auto!important;
   text-align:center!important;
   text-align-last:center!important;
 }
-#programme .cph-duration-apply{
+
+/* Durée : champ, unité puis Appliquer sur une seule ligne. */
+#programme .duration-editor.cph-duration-editor{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto auto!important;
+  grid-template-rows:auto!important;
+  align-items:end!important;
+  column-gap:6px!important;
+  row-gap:0!important;
+  width:100%!important;
+}
+#programme .duration-editor.cph-duration-editor>.cph-duration-field{
+  grid-column:1!important;
+  min-width:0!important;
+  width:100%!important;
+  margin:0!important;
+}
+#programme .duration-editor.cph-duration-editor .cph-duration-control{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+}
+#programme .duration-editor.cph-duration-editor>.cph-duration-unit{
+  grid-column:2!important;
+  align-self:end!important;
+  box-sizing:border-box!important;
+  height:var(--cph-duration-control-height,44px)!important;
+  min-height:var(--cph-duration-control-height,44px)!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  margin:0!important;
+  padding:0 1px!important;
+  white-space:nowrap!important;
+  font-size:12px!important;
+  font-weight:650!important;
+  line-height:1!important;
+}
+#programme .duration-editor.cph-duration-editor>.cph-duration-apply{
+  grid-column:3!important;
   box-sizing:border-box!important;
   height:var(--cph-duration-control-height,44px)!important;
   min-height:var(--cph-duration-control-height,44px)!important;
   max-height:var(--cph-duration-control-height,44px)!important;
-  align-self:center!important;
+  align-self:end!important;
+  margin:0!important;
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
+  white-space:nowrap!important;
 }
+
+/* Actions de statut : icônes stables et libellés centrés. */
+#programme .action-grid.status.actions>button.cph-visit-button,
 #programme .action-grid.status.actions>button.cph-aside-button{
   display:grid!important;
-  grid-template-columns:18px minmax(0,max-content)!important;
+  grid-template-columns:20px minmax(0,max-content)!important;
   align-items:center!important;
   align-content:center!important;
   justify-content:center!important;
   justify-items:center!important;
-  column-gap:5px!important;
+  column-gap:6px!important;
 }
+#programme .cph-status-icon,
 #programme .cph-aside-icon{
   display:flex!important;
-  width:18px!important;
+  width:20px!important;
   height:100%!important;
-  min-width:18px!important;
+  min-width:20px!important;
   align-items:center!important;
   justify-content:center!important;
   align-self:stretch!important;
   margin:0!important;
   padding:0!important;
-  font-size:15px!important;
   line-height:1!important;
 }
+#programme .cph-aside-icon{
+  font-size:15px!important;
+}
+#programme .cph-status-icon svg{
+  display:block!important;
+  width:19px!important;
+  height:19px!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:1.8!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+#programme .cph-status-label,
 #programme .cph-aside-label{
   display:grid!important;
   grid-template-rows:auto auto!important;
   justify-items:center!important;
   align-items:center!important;
   width:max-content!important;
+  min-width:0!important;
   line-height:1.08!important;
   text-align:center!important;
 }
+#programme .cph-status-label>span,
 #programme .cph-aside-label>span{
   display:block!important;
   width:100%!important;
@@ -188,6 +250,16 @@
 }
 #programme .visit-now-actions>.restore-original-time{
   row-gap:6px!important;
+}
+
+/* Une photo cassée conserve les mêmes dimensions avec le visuel de remplacement. */
+#programme img.cph-place-photo-fallback,
+.place-card img.cph-place-photo-fallback,
+.poi-card img.cph-place-photo-fallback,
+.visit-card img.cph-place-photo-fallback,
+[data-place-id] img.cph-place-photo-fallback{
+  object-fit:cover!important;
+  object-position:center!important;
 }
 
 /* Sécurité si une ancienne version du DOM porte encore hidden. */
@@ -206,6 +278,16 @@
   }
   #programme .visit-now-actions>.button .cph-now-label{
     font-size:10px!important;
+  }
+  #programme .duration-editor.cph-duration-editor{
+    column-gap:5px!important;
+  }
+  #programme .duration-editor.cph-duration-editor>.cph-duration-unit{
+    font-size:11px!important;
+  }
+  #programme .duration-editor.cph-duration-editor>.cph-duration-apply{
+    padding-left:9px!important;
+    padding-right:9px!important;
   }
 }
 
@@ -228,5 +310,16 @@
     height:16px!important;
     min-width:16px!important;
     min-height:16px!important;
+  }
+  #programme .duration-editor.cph-duration-editor{
+    column-gap:4px!important;
+  }
+  #programme .duration-editor.cph-duration-editor>.cph-duration-unit{
+    font-size:10.5px!important;
+  }
+  #programme .duration-editor.cph-duration-editor>.cph-duration-apply{
+    padding-left:7px!important;
+    padding-right:7px!important;
+    font-size:11px!important;
   }
 }
