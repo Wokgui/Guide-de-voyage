@@ -20,9 +20,14 @@ assert.match(html,/class="button secondary reset-time" type="button" \$\{state\.
 assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/,'les deux boutons d’édition doivent rester côte à côte');
 assert.match(css,/@media\(max-width:420px\)[\s\S]*?\.time-editor-actions[\s\S]*?width:100%!important/,'le groupe d’édition doit occuper toute la largeur sur mobile');
 
-assert.match(css,/#programme \.action-grid\.status\.actions,[\s\S]*?#programme \.visit-now-actions\{[\s\S]*?grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/,'les deux rangées d’actions doivent utiliser trois colonnes identiques');
-assert.match(css,/#programme \.action-grid\.status\.actions>button,[\s\S]*?#programme \.visit-now-actions>\.button\{[\s\S]*?height:66px!important;[\s\S]*?min-height:66px!important/,'les six tuiles principales doivent mesurer 66 px de haut');
-assert.match(header,/function hideActualDepartureTile\(\)[\s\S]*?===\"Départ réel\"/,'seule la tuile Départ réel doit être masquée');
+assert.match(css,/#programme \.visit-now-actions\{[\s\S]*?grid-auto-rows:66px!important/,'la rangée des actions temporelles doit imposer 66 px');
+assert.match(css,/#programme \.visit-now-actions>\.button\{[\s\S]*?height:66px!important;[\s\S]*?max-height:66px!important/,'les trois actions temporelles doivent avoir exactement la même hauteur');
+assert.match(css,/\.cph-now-icon svg\{[\s\S]*?width:20px!important;[\s\S]*?height:20px!important/,'les trois icônes doivent avoir la même taille');
+assert.match(css,/\.cph-now-label\{[\s\S]*?font-size:11\.5px!important/,'la taille de police des trois libellés doit être uniforme');
+assert.match(header,/function removeActualDepartureTile\(\)[\s\S]*?===\"Départ réel\"\)tile\.remove\(\)/,'la tuile Départ réel doit être réellement supprimée du DOM');
+assert.match(header,/function normalizeNowActionButtons\(\)[\s\S]*?\.here-now[\s\S]*?\.restore-original-time[\s\S]*?\.go-now/,'les trois boutons temporels doivent être normalisés ensemble');
+assert.match(header,/cph-now-icon/,'les actions temporelles doivent utiliser une icône structurée');
+assert.match(header,/cph-now-label/,'les actions temporelles doivent utiliser un libellé structuré');
 
 const cascadeStart=header.indexOf('function cascadeFromClickedPoint');
 const cascadeEnd=header.indexOf('function currentMinute',cascadeStart);
@@ -38,4 +43,4 @@ assert.match(header,/window\.restorePointOriginalTime=function\(id\)[\s\S]*?casc
 assert.match(sw,/copenhague-v358-static-v51/,'le cache statique doit rester cohérent');
 assert.match(sw,/\/interaction-layout-v358\.css\?v=358/,'la feuille v358 doit être précachée');
 
-console.log(JSON.stringify({ok:true,departure:'actual-hidden-only',actions:'three-columns-66px',cascade:'clicked-point-first'},null,2));
+console.log(JSON.stringify({ok:true,departure:'actual-removed',actions:'uniform-66px-svg',cascade:'clicked-point-first'},null,2));
