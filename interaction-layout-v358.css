@@ -22,10 +22,6 @@
 }
 
 /* v359 — les actions principales ont la même grille et une hauteur accrue de 50 %. */
-#programme .day-departure{
-  display:none!important;
-}
-
 #programme .action-grid.status.actions,
 #programme .visit-now-actions{
   display:grid!important;
