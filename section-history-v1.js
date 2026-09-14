@@ -125,26 +125,36 @@
   updateButtons();
 })();
 
-/* v352 — garde d’hydratation : la synchronisation peut réémettre plusieurs fois
-   exactement le même état au démarrage. Ces appels ne doivent pas reconstruire
-   toute l’interface ni relancer les images. */
+/* v353 — rendu idempotent : un appel avec exactement les mêmes données et le
+   même contexte visuel ne doit jamais reconstruire le Programme ni relancer
+   les images. Une vraie modification d'état, de jour ou d'onglet rend aussitôt. */
 (()=>{
-  if(window.__cphStartupRenderGuardV1||typeof window.renderAll!=='function')return;
+  if(window.__cphRenderDedupeV2||typeof window.renderAll!=='function')return;
   const originalRenderAll=window.renderAll;
-  const stats={skipped:0,rendered:0,remainingDuplicateSkips:4};
+  const stats={skipped:0,rendered:0};
   const stable=value=>{
     if(value===null||typeof value!=='object')return JSON.stringify(value);
     if(Array.isArray(value))return `[${value.map(stable).join(',')}]`;
     return `{${Object.keys(value).sort().map(key=>`${JSON.stringify(key)}:${stable(value[key])}`).join(',')}}`;
   };
+  const readGlobal=name=>{
+    try{return typeof globalThis[name]==='undefined'?null:globalThis[name]}catch{return null}
+  };
   const fingerprint=()=>{
-    try{return typeof state==='undefined'?null:stable(state)}catch{return null}
+    try{
+      const panel=document.querySelector?.('.panel.active')?.id||null;
+      return stable({
+        state:typeof state==='undefined'?null:state,
+        selectedDay:readGlobal('selectedDay'),
+        reopenOrderDay:readGlobal('reopenOrderDay'),
+        panel
+      });
+    }catch{return null}
   };
   let lastFingerprint=fingerprint();
   window.renderAll=function(){
     const current=fingerprint();
-    if(stats.remainingDuplicateSkips>0&&current!==null&&current===lastFingerprint){
-      stats.remainingDuplicateSkips--;
+    if(current!==null&&current===lastFingerprint){
       stats.skipped++;
       return 0;
     }
@@ -153,5 +163,9 @@
     stats.rendered++;
     return result;
   };
-  window.__cphStartupRenderGuardV1={stats,force(){lastFingerprint=null;return window.renderAll()}};
+  window.__cphRenderDedupeV2={
+    stats,
+    force(){lastFingerprint=null;return window.renderAll();},
+    fingerprint
+  };
 })();
