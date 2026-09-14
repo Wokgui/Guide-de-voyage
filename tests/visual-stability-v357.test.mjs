@@ -13,7 +13,7 @@ new vm.Script(header,{filename:'header-prestige.js'});
 new vm.Script(loader,{filename:'cloud-backup-loader.js'});
 
 assert.doesNotMatch(ui,/document\.createElement\("style"\)/,'aucun style ne doit être injecté après le premier rendu');
-assert.match(html,/<title>Copenhague &amp; Malmö — v357<\/title>/,'le document doit annoncer la version corrigée');
+assert.match(html,/<title>Copenhague &amp; Malmö — v358<\/title>/,'le document doit annoncer la version corrigée');
 assert.doesNotMatch(ui,/getBoundingClientRect\(\)\.height/,'la barre Programme ne doit plus être mesurée au chargement');
 assert.match(ui,/cphStaticUiStyles="v357"/,'polish doit reconnaître les styles statiques v357');
 assert.match(css,/#programme \.history-actions[\s\S]*?height:30px!important/,'la barre Programme doit avoir sa hauteur finale dès le CSS initial');

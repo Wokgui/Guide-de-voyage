@@ -23,8 +23,8 @@ assert.match(html,/class="day-calendar-icon"[^>]*><svg[^>]*width="18"[^>]*height
 assert.match(stableCss,/font-size:11px!important/,'taille finale des filtres absente du CSS initial');
 assert.match(stableCss,/font-size:var\(--cph-summary-meta-text-size,12px\)!important/,'taille finale des durées absente du CSS initial');
 assert.match(stableCss,/contain:layout paint!important/,'surface photo non réservée');
-assert.match(sw,/copenhague-v357-static-v50/,'cache statique non versionné pour v357');
-assert.match(sw,/copenhague-v357-runtime-v50/,'cache runtime non versionné pour v357');
+assert.match(sw,/copenhague-v358-static-v51/,'cache statique non versionné pour v358');
+assert.match(sw,/copenhague-v358-runtime-v51/,'cache runtime non versionné pour v358');
 assert.match(sw,/\/first-paint-v355\.css\?v=355/,'le service worker doit précacher la feuille critique');
 assert.match(sw,/\/visual-stability-v357\.css\?v=357/,'le service worker doit précacher la feuille finale');
 
