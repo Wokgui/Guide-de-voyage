@@ -1,0 +1,39 @@
+name: Apply v354 patch
+
+on:
+  push:
+    branches:
+      - fix/remote-render-354
+    paths:
+      - tools/apply-v354.mjs
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/remote-render-354
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Appliquer la correction v354
+        run: node tools/apply-v354.mjs
+      - name: Vérifier les tests ciblés
+        run: |
+          node tests/remote-render-stability.test.mjs
+          node tests/perf-runtime.test.mjs
+          node tests/visit-card-layout.test.mjs
+          node tests/startup-render-guard.test.mjs
+      - name: Commit de la correction
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add shared-sync.js ui-fixes-v7.js day-style-v1.js tests/remote-render-stability.test.mjs
+          git diff --cached --quiet && exit 0
+          git commit -m "Fix v354: synchronisation sans rendu intermédiaire"
+          git push
