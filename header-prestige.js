@@ -93,12 +93,78 @@ function normalizeNowActionButtons(){
  });
 }
 
+function normalizedText(element){
+ return (element?.textContent||"").replace(/\s+/g," ").trim();
+}
+
+function findExactText(root,text){
+ const candidates=Array.from(root.querySelectorAll("label,legend,strong,b,span,p,div,h3,h4,h5"))
+  .filter(element=>normalizedText(element)===text);
+ return candidates.sort((a,b)=>a.children.length-b.children.length)[0]||null;
+}
+
+function centerScheduleEditorFields(){
+ const root=document.querySelector("#programme");
+ if(!root)return;
+ ["Heure souhaitée","Durée prévue","Jour de visite"].forEach(text=>{
+  const title=findExactText(root,text);
+  if(!title)return;
+  title.classList.add("cph-editor-title-centered");
+  const label=title.closest("label")||(title.matches("label")?title:null);
+  if(label)label.classList.add("cph-editor-field-centered");
+  if(text==="Heure souhaitée"){
+   const scope=label||title.parentElement;
+   const control=scope?.querySelector('input[type="time"],input,select');
+   if(control)control.classList.add("cph-time-control-centered");
+  }
+ });
+}
+
+function syncDurationApplyHeight(){
+ const root=document.querySelector("#programme");
+ if(!root)return;
+ const title=findExactText(root,"Durée prévue");
+ if(!title)return;
+ let scope=title.parentElement;
+ let apply=null;
+ for(let depth=0;scope&&scope!==root&&depth<6;depth++,scope=scope.parentElement){
+  apply=Array.from(scope.querySelectorAll("button,.button")).find(button=>normalizedText(button)==="Appliquer")||null;
+  if(apply)break;
+ }
+ if(!apply)return;
+ const label=title.closest("label");
+ const control=(label&&label.querySelector("input,select"))||scope?.querySelector("input,select");
+ if(!control)return;
+ apply.classList.add("cph-duration-apply");
+ control.classList.add("cph-duration-control");
+ const matchHeight=()=>{
+  const height=Math.round(control.getBoundingClientRect().height);
+  if(height>0)apply.style.setProperty("--cph-duration-control-height",`${height}px`);
+ };
+ matchHeight();
+ requestAnimationFrame(matchHeight);
+}
+
+function normalizeAsideButton(){
+ document.querySelectorAll("#programme .action-grid.status.actions button").forEach(button=>{
+  if(button.dataset.cphAsideAligned==="1")return;
+  const text=normalizedText(button).replace(/^📌\s*/,"");
+  if(text!=="Mettre de côté")return;
+  button.dataset.cphAsideAligned="1";
+  button.classList.add("cph-aside-button");
+  button.innerHTML='<span class="cph-aside-icon" aria-hidden="true">📌</span><span class="cph-aside-label"><span>Mettre de</span><span>côté</span></span>';
+ });
+}
+
 function refresh(){
  bindSettings();
  bindTrackingShortcuts();
  keepTrackingClosedOnEntry();
  removeActualDepartureTile();
  normalizeNowActionButtons();
+ centerScheduleEditorFields();
+ syncDurationApplyHeight();
+ normalizeAsideButton();
 }
 
 document.addEventListener("guide:rendered",refresh);
