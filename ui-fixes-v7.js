@@ -8,10 +8,14 @@ let observer=null,scheduled=false;
 const norm=e=>(e&&e.textContent||"").replace(/\s+/g," ").trim();
 function important(el,name,value){if(el)el.style.setProperty(name,value,"important")}
 function addStyles(){
- if(document.getElementById(STYLE_ID))return;
- const s=document.createElement("style");
- s.id=STYLE_ID;
- s.textContent=`
+ /* v357 : les styles finaux sont désormais dans visual-stability-v357.css,
+    feuille bloquante du <head>. Garder cette fonction idempotente permet aux
+    anciennes installations du service worker d'appeler polish sans réinjecter
+    de CSS après le premier affichage. */
+ document.documentElement.dataset.cphStaticUiStyles="v357";
+ return;
+ /* istanbul ignore next -- CSS historique gardé comme texte inerte une version. */
+ const legacyCss=`
 /* Types de lieux : alignement fixe, sans calcul vertical ni oscillation. */
 #programme .mini-badge.nature.cph-nature-autoalign{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;line-height:1!important;vertical-align:middle!important}
 #programme .mini-badge.nature.cph-nature-autoalign>.cph-nature-icon{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;margin:0!important;padding:0!important;position:static!important;inset:auto!important;line-height:1!important;vertical-align:middle!important;transform:none!important;will-change:auto!important}
@@ -164,8 +168,7 @@ html body #programme .visit-details:not([open]) .summary-title-tools .cph-reserv
  overflow:visible!important;
 }
 
-`;
- document.head.appendChild(s);
+ `;
 }
 
 function wrapMetaLabel(container){
@@ -291,14 +294,6 @@ function normalizeReservations(){
   }
  });
 }
-function measureNativeHeight(row,controls){
- const saved=Number(row.dataset.cphNativeActionHeight||0);
- if(saved>=24&&saved<=60)return saved;
- const values=controls.map(el=>el?.getBoundingClientRect().height||0).filter(v=>v>=24&&v<=60).sort((a,b)=>a-b);
- const h=values.length?values[Math.floor(values.length/2)]:34;
- row.dataset.cphNativeActionHeight=String(h);
- return h;
-}
 function fixHistoryActions(){
  document.querySelectorAll("#programme .history-actions").forEach(row=>{
   const day=row.querySelector(":scope > #dayButtons")||row.querySelector("#dayButtons");
@@ -306,17 +301,7 @@ function fixHistoryActions(){
   const redo=row.querySelector("#redoActionBtn");
   const hide=row.querySelector(":scope > .compact-hide-done")||row.querySelector(".compact-hide-done");
   if(!day||!undo||!redo||!hide)return;
-  const h=measureNativeHeight(row,[undo,redo,hide]);
-  important(row,"display","grid");important(row,"grid-template-columns","minmax(0,1fr) 42px 42px minmax(0,1fr)");important(row,"gap","4px");important(row,"align-items","center");
-  [day,undo,redo,hide].forEach(el=>{important(el,"box-sizing","border-box");important(el,"height",`${h}px`);important(el,"min-height",`${h}px`);important(el,"max-height",`${h}px`);important(el,"margin","0");important(el,"align-self","center")});
-  [day,hide].forEach(el=>{important(el,"width","100%");important(el,"min-width","0");important(el,"max-width","none")});
-  const dayControls=Array.from(day.querySelectorAll("button,label,select,.day-select,.day-select-label"));
-  dayControls.forEach(el=>{important(el,"box-sizing","border-box");important(el,"height",`${h}px`);important(el,"min-height",`${h}px`);important(el,"max-height",`${h}px`);important(el,"margin","0");important(el,"font-size","11px");important(el,"line-height","1")});
-  important(hide,"position","relative");important(hide,"font-size","11px");important(hide,"line-height","1");important(hide,"padding-left","25px");important(hide,"padding-right","3px");important(hide,"white-space","normal");
-  const hideText=hide.querySelector("span");if(hideText){important(hideText,"white-space","normal");important(hideText,"line-height",".95");important(hideText,"text-align","center");important(hideText,"overflow","visible")}
-  const check=hide.querySelector('input[type="checkbox"]');
-  if(check){important(check,"display","block");important(check,"visibility","visible");important(check,"opacity","1");important(check,"position","absolute");important(check,"left","5px");important(check,"top","50%");important(check,"transform","translateY(-50%)");important(check,"z-index","2");important(check,"width","16px");important(check,"min-width","16px");important(check,"max-width","16px");important(check,"height","16px");important(check,"min-height","16px");important(check,"max-height","16px");important(check,"margin","0");important(check,"padding","0");important(check,"flex","none")}
-  [undo,redo].forEach(el=>{important(el,"width","42px");important(el,"min-width","42px");important(el,"max-width","42px");important(el,"font-size","24px");important(el,"padding","0");important(el,"line-height","1")});
+  row.dataset.cphHistoryLayout="v357";
  });
 }
 function mapGoButtons(){

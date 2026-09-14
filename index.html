@@ -17,7 +17,7 @@
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Copenhague" name="apple-mobile-web-app-title"/>
-<title>Copenhague &amp; Malmö — v351</title>
+<title>Copenhague &amp; Malmö — v357</title>
 <link href="/manifest.webmanifest" rel="manifest"/>
 <link href="/icons/app-icon.svg" rel="icon" type="image/svg+xml"/>
 <link href="/icons/app-icon-192.png?v=2" rel="apple-touch-icon"/>
@@ -5217,6 +5217,7 @@ body.backup-settings-open{overflow:hidden}
 </style>
 <link href="/ux-stability-v1.css?v=1" rel="stylesheet"/>
 <link href="/first-paint-v355.css?v=355" rel="stylesheet"/>
+<link href="/visual-stability-v357.css?v=357" rel="stylesheet"/>
 </head>
 <body>
 <header>
@@ -6690,8 +6691,44 @@ function preparePhotoSurface(wrap){
  if(!wrap.querySelector(":scope > img"))wrap.replaceChildren();
 }
 
+const PROGRAMME_VISUAL_STABILITY_STATS={
+ renders:0,
+ cardsCreated:0,
+ cardsReused:0,
+ thumbnailNodesReused:0
+};
+window.__cphVisualStabilityV357=PROGRAMME_VISUAL_STABILITY_STATS;
+const PROGRAMME_THUMBNAIL_NODE_CACHE=new Map();
+
+function programmeThumbnailCacheKey(wrap,p){
+ return wrap?.classList?.contains("visit-summary-thumb")?String(p.id):null;
+}
+function mountReadyThumbnail(wrap,p,src,img,{reused=false}={}){
+ if(!wrap||!img||THUMBNAIL_PENDING.get(wrap)!==p)return false;
+ img.className="photo-ready";
+ img.alt=p.name;
+ wrap.replaceChildren(img);
+ wrap.classList.remove("photo-loading");
+ wrap.removeAttribute("aria-busy");
+ wrap.dataset.realPhoto="1";
+ wrap.dataset.vector="0";
+ wrap.dataset.loaded="1";
+ wrap.dataset.loading="0";
+ const cacheKey=programmeThumbnailCacheKey(wrap,p);
+ if(cacheKey)PROGRAMME_THUMBNAIL_NODE_CACHE.set(cacheKey,{src,img});
+ if(reused)PROGRAMME_VISUAL_STABILITY_STATS.thumbnailNodesReused++;
+ return true;
+}
+function reuseReadyThumbnail(wrap,p,src){
+ const cacheKey=programmeThumbnailCacheKey(wrap,p);
+ const cached=cacheKey?PROGRAMME_THUMBNAIL_NODE_CACHE.get(cacheKey):null;
+ if(!cached||cached.src!==src||!cached.img.complete||!cached.img.naturalWidth)return false;
+ return mountReadyThumbnail(wrap,p,src,cached.img,{reused:true});
+}
+
 function revealThumbnail(wrap,p,src){
  if(!wrap||!wrap.isConnected)return Promise.resolve(false);
+ if(reuseReadyThumbnail(wrap,p,src))return Promise.resolve(true);
  return new Promise(resolve=>{
   const img=new Image();
   img.alt=p.name;
@@ -6700,15 +6737,7 @@ function revealThumbnail(wrap,p,src){
   img.referrerPolicy="no-referrer";
   img.onload=()=>{
    if(!wrap.isConnected||THUMBNAIL_PENDING.get(wrap)!==p){resolve(false);return;}
-   img.className="photo-ready";
-   wrap.replaceChildren(img);
-   wrap.classList.remove("photo-loading");
-   wrap.removeAttribute("aria-busy");
-   wrap.dataset.realPhoto="1";
-   wrap.dataset.vector="0";
-   wrap.dataset.loaded="1";
-   wrap.dataset.loading="0";
-   resolve(true);
+   resolve(mountReadyThumbnail(wrap,p,src,img));
   };
   img.onerror=()=>resolve(false);
   img.src=src;
@@ -6765,9 +6794,10 @@ function loadPointThumbnail(p,root,selector){
  THUMBNAIL_PENDING.set(wrap,p);
  preparePhotoSurface(wrap);
  const known=knownPhotoSource(p);
+ if(known&&reuseReadyThumbnail(wrap,p,known))return;
  if(known){hydratePointThumbnail(wrap,p);return;}
  if(THUMBNAIL_OBSERVER)THUMBNAIL_OBSERVER.observe(wrap);
- else setTimeout(()=>hydratePointThumbnail(wrap,p),0);
+ else hydratePointThumbnail(wrap,p);
 }
 async function loadExternalPhoto(p,card){
  if(!card)return;
@@ -6944,8 +6974,29 @@ function pointSmallIcon(p){
  return `<span class="nature-emoji" aria-hidden="true">${iconMarkup}</span>`;
 }
 
+function programmeCardRenderSignature(p,{st,isAside,sc,route,rs,openingWarning}){
+ return JSON.stringify({
+  point:p,
+  item:st,
+  isAside,
+  schedule:sc||null,
+  route:route||null,
+  reservation:rs,
+  openingWarning:openingWarning||"",
+  effectiveDay:effectiveDay(p),
+  effectiveOpeningHours:effectiveOpeningHours(p),
+  timeOverride:state.timeOverrides?.[p.id]||null,
+  durationOverride:state.durationOverrides?.[p.id]||null,
+  openingOverride:state.openingOverrides?.[p.id]||null,
+  manualAside:!!state.manualAside?.[p.id],
+  forced:!!state.forced?.[p.id]
+ });
+}
+
 function renderProgramme(adapt=adaptiveAll()){
- list.innerHTML="";
+ PROGRAMME_VISUAL_STABILITY_STATS.renders++;
+ const previousCards=new Map(Array.from(list.querySelectorAll("article.card[data-point-id]"),card=>[card.dataset.pointId,card]));
+ const nextProgramme=document.createDocumentFragment();
  const days=selectedDay==="Tous"?DAYS.slice(1):[selectedDay];let shown=0;
  days.forEach(day=>{
   const visibleDayItems=dayItems(day).filter(p=>{
@@ -6964,14 +7015,25 @@ function renderProgramme(adapt=adaptiveAll()){
    const route=sc?.route||routeBetween(previousDisplay,p);
    if(hideDone.checked&&(st.status!=="todo"||isAside))return;
    shown++;
-   const card=document.createElement("article");
    const rs=reservationState(p.id);
-   card.className=`card ${p.type} ${st.status==="visited"?"visited":st.status==="missed"?"missed":""} ${isAside?"aside":""} ${rs==="yes"?"reserved":""}`;
-   card.dataset.pointId=p.id;
+   const cardClass=`card ${p.type} ${st.status==="visited"?"visited":st.status==="missed"?"missed":""} ${isAside?"aside":""} ${rs==="yes"?"reserved":""}`;
    const pointNature=natureLabel(p);
    const natureIcon=pointSmallIcon(p);
    const displayedStart=hmToMin(state.timeOverrides[p.id]||(sc?minToHm(sc.start):p.plannedStart||p.time||"00:00"));
    const openingWarning=openingStatusForPoint(p,displayedStart,state.durationOverrides[p.id]||p.durationMins);
+   const renderSignature=programmeCardRenderSignature(p,{st,isAside,sc,route,rs,openingWarning});
+   const previousCard=previousCards.get(String(p.id));
+   if(previousCard&&previousCard.__cphProgrammeRenderSignature===renderSignature){
+    body.appendChild(previousCard);
+    PROGRAMME_VISUAL_STABILITY_STATS.cardsReused++;
+    previousDisplay=p;
+    return;
+   }
+   const card=document.createElement("article");
+   card.className=cardClass;
+   card.dataset.pointId=p.id;
+   card.__cphProgrammeRenderSignature=renderSignature;
+   PROGRAMME_VISUAL_STABILITY_STATS.cardsCreated++;
    if(openingWarning)card.classList.add("outside-opening");
    card.innerHTML=`
    <details class="visit-details">
@@ -6984,7 +7046,7 @@ function renderProgramme(adapt=adaptiveAll()){
       <div class="summary-top-time">${esc(state.timeOverrides[p.id]||(sc?minToHm(sc.start):p.plannedStart))}</div>
      </div>
      <div class="summary-title-tools ${rs==="yes"?"has-reservation":"no-reservation"}">
-       <div class="summary-line"><span class="mini-badge nature summary-nature"><span class="summary-nature-icon">${natureIcon}</span><span class="summary-nature-label">${esc(pointNature)}</span></span>${rs==="yes"?'<span class="cph-reserved-one" role="img" aria-label="Réservé" title="Réservé"><svg class="cph-reserved-date-icon" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><rect x="1" y="2.5" width="16" height="14.5" rx="3.2" fill="#d98218"/><path d="M1 7h16" stroke="#fff" stroke-width="1.45"/><path d="M5 1.5v3.4M13 1.5v3.4" stroke="#d98218" stroke-width="2" stroke-linecap="round"/><text x="9" y="14.2" text-anchor="middle" font-family="Arial, sans-serif" font-size="7.2" font-weight="700" fill="#fff">31</text></svg></span>':""}</div>
+       <div class="summary-line"><span class="mini-badge nature summary-nature cph-nature-autoalign"><span class="summary-nature-icon cph-nature-icon">${natureIcon}</span><span class="summary-nature-label cph-nature-label">${esc(pointNature)}</span></span>${rs==="yes"?'<span class="cph-reserved-one" role="img" aria-label="Réservé" title="Réservé"><svg class="cph-reserved-date-icon" aria-hidden="true" focusable="false" viewBox="0 0 18 18"><rect x="1" y="2.5" width="16" height="14.5" rx="3.2" fill="#d98218"/><path d="M1 7h16" stroke="#fff" stroke-width="1.45"/><path d="M5 1.5v3.4M13 1.5v3.4" stroke="#d98218" stroke-width="2" stroke-linecap="round"/><text x="9" y="14.2" text-anchor="middle" font-family="Arial, sans-serif" font-size="7.2" font-weight="700" fill="#fff">31</text></svg></span>':""}</div>
        <div class="summary-line">
         <span class="summary-visit-duration summary-meta-item cph-summary-meta"><span class="visit-duration-icon summary-meta-icon cph-summary-meta-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.2 2"/></svg></span><span class="summary-meta-label cph-summary-meta-label">${state.durationOverrides[p.id]||p.durationMins} min</span></span>
         <button class="map-title-button summary-point-map summary-meta-item cph-summary-meta" type="button" aria-label="Ouvrir la carte de ${esc(p.name)}"><svg class="summary-meta-icon cph-summary-meta-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/></svg></button>
@@ -7144,9 +7206,15 @@ function renderProgramme(adapt=adaptiveAll()){
   const dayActions=document.createElement("div");dayActions.className="day-inline-actions";
   dayActions.append(orderEditor(day,body),addPointEditor(day));
   body.appendChild(dayActions);
-  list.appendChild(section);
+  nextProgramme.appendChild(section);
  });
- if(!shown)list.innerHTML='<div class="empty">Aucun point avec ces filtres.</div>';
+ if(!shown){
+  const empty=document.createElement("div");
+  empty.className="empty";
+  empty.textContent="Aucun point avec ces filtres.";
+  nextProgramme.appendChild(empty);
+ }
+ list.replaceChildren(nextProgramme);
  restoreRememberedDetails(list);
 }
 function trackingChronologicalSort(a,b){
@@ -10848,7 +10916,7 @@ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostnam
 <script src="/vendor/supabase/supabase.js"></script>
 <script src="/shared-sync.js"></script>
 
-<script src="/header-prestige.js?v=347"></script>
+<script src="/header-prestige.js?v=357"></script>
 <script src="/cloud-backup.js?v=3"></script>
 <script>
 (async()=>{

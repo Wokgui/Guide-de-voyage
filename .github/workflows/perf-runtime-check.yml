@@ -8,15 +8,15 @@ on:
     paths:
       - cloud-backup-loader.js
       - day-style-v1.js
-      - dom-stability-v356.js
       - first-paint-v355.css
+      - visual-stability-v357.css
       - header-prestige.js
       - index.html
       - section-history-v1.js
       - shared-sync.js
       - sw.js
       - ui-fixes-v7.js
-      - tests/dom-reconcile-v356.test.mjs
+      - tests/visual-stability-v357.test.mjs
       - tests/perf-runtime.test.mjs
       - tests/visit-card-layout.test.mjs
       - tests/startup-render-guard.test.mjs
@@ -43,4 +43,4 @@ jobs:
           node tests/startup-render-guard.test.mjs
           node tests/remote-render-stability.test.mjs
           node tests/first-paint-stability.test.mjs
-          node tests/dom-reconcile-v356.test.mjs
+          node tests/visual-stability-v357.test.mjs
