@@ -69,10 +69,18 @@ function keepTrackingClosedOnEntry(){
  }
 }
 
+function hideActualDepartureTile(){
+ document.querySelectorAll("#programme .day-departure").forEach(tile=>{
+  const label=tile.querySelector(".day-departure-label");
+  tile.hidden=(label?.textContent||"").trim()==="Départ réel";
+ });
+}
+
 function refresh(){
  bindSettings();
  bindTrackingShortcuts();
  keepTrackingClosedOnEntry();
+ hideActualDepartureTile();
 }
 
 document.addEventListener("guide:rendered",refresh);
