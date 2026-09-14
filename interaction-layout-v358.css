@@ -1,0 +1,33 @@
+/* v358 — départ effectif et actions d'horaire stables dès le premier rendu. */
+
+#programme .time-editor>.time-editor-actions{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:stretch!important;
+  gap:6px!important;
+  flex:1 1 180px!important;
+  min-width:180px!important;
+}
+#programme .time-editor>.time-editor-actions>.apply-time,
+#programme .time-editor>.time-editor-actions>.reset-time{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  white-space:nowrap!important;
+}
+#programme .time-editor>.time-editor-actions>.reset-time:disabled{
+  opacity:.48!important;
+  cursor:not-allowed!important;
+}
+
+@media(max-width:420px){
+  #programme .time-editor>label{
+    flex:1 1 100%!important;
+    width:100%!important;
+  }
+  #programme .time-editor>.time-editor-actions{
+    flex:1 1 100%!important;
+    width:100%!important;
+  }
+}

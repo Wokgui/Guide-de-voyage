@@ -10,6 +10,7 @@ on:
       - day-style-v1.js
       - first-paint-v355.css
       - visual-stability-v357.css
+      - interaction-layout-v358.css
       - header-prestige.js
       - index.html
       - section-history-v1.js
@@ -17,6 +18,7 @@ on:
       - sw.js
       - ui-fixes-v7.js
       - tests/visual-stability-v357.test.mjs
+      - tests/departure-restore-v358.test.mjs
       - tests/perf-runtime.test.mjs
       - tests/visit-card-layout.test.mjs
       - tests/startup-render-guard.test.mjs
@@ -44,3 +46,4 @@ jobs:
           node tests/remote-render-stability.test.mjs
           node tests/first-paint-stability.test.mjs
           node tests/visual-stability-v357.test.mjs
+          node tests/departure-restore-v358.test.mjs

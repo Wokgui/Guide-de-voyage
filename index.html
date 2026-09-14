@@ -17,7 +17,7 @@
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Copenhague" name="apple-mobile-web-app-title"/>
-<title>Copenhague &amp; Malmö — v357</title>
+<title>Copenhague &amp; Malmö — v358</title>
 <link href="/manifest.webmanifest" rel="manifest"/>
 <link href="/icons/app-icon.svg" rel="icon" type="image/svg+xml"/>
 <link href="/icons/app-icon-192.png?v=2" rel="apple-touch-icon"/>
@@ -5218,6 +5218,7 @@ body.backup-settings-open{overflow:hidden}
 <link href="/ux-stability-v1.css?v=1" rel="stylesheet"/>
 <link href="/first-paint-v355.css?v=355" rel="stylesheet"/>
 <link href="/visual-stability-v357.css?v=357" rel="stylesheet"/>
+<link href="/interaction-layout-v358.css?v=358" rel="stylesheet"/>
 </head>
 <body>
 <header>
@@ -7007,7 +7008,9 @@ function renderProgramme(adapt=adaptiveAll()){
   });
   if(dayItems(day).length&&visibleDayItems.length===0)return;
   const section=document.createElement("section");section.className="day-section";
-  section.innerHTML=`<div class="day-banner day-${day}"><div class="day-banner-title"><span class="day-calendar-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span><h2>${dayLabel(day)}</h2></div><p class="day-departure"><span class="day-departure-label">Départ prévu</span><strong>${DAY_CONFIG[day].departure}</strong></p></div><div class="day-body"></div>`;
+  const effectiveDeparture=state.starts?.[day]||DAY_CONFIG[day].departure;
+  const departureLabel=state.starts?.[day]?"Départ réel":"Départ prévu";
+  section.innerHTML=`<div class="day-banner day-${day}"><div class="day-banner-title"><span class="day-calendar-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span><h2>${dayLabel(day)}</h2></div><p class="day-departure"><span class="day-departure-label">${departureLabel}</span><strong>${effectiveDeparture}</strong></p></div><div class="day-body"></div>`;
   const body=section.querySelector(".day-body");
   let previousDisplay=null;
   dayItems(day).forEach(p=>{
@@ -7106,8 +7109,10 @@ function renderProgramme(adapt=adaptiveAll()){
        <label>Heure souhaitée
         <input class="point-time" type="time" value="${esc(state.timeOverrides[p.id]||p.fixedTime||minToHm(sc?sc.start:hmToMin(p.plannedStart)))}">
        </label>
-       <button class="button secondary apply-time" type="button" data-point-id="${p.id}">Appliquer</button>
-       ${state.timeOverrides[p.id]?'<button class="button secondary reset-time" type="button">Rétablir</button>':""}
+       <div class="time-editor-actions">
+        <button class="button secondary apply-time" type="button" data-point-id="${p.id}">Appliquer</button>
+        <button class="button secondary reset-time" type="button" ${state.timeOverrides[p.id]?"":"disabled"}>Rétablir</button>
+       </div>
        <div class="time-note">${rs==="yes"?"Événement réservé : tu peux modifier son horaire manuellement, mais les recalculs lancés depuis un autre point ne le déplaceront jamais.":"Le reste de la journée est recalculé automatiquement à partir de cet horaire, sans modifier les événements réservés."}</div>
       </div>
       <div class="duration-editor">
