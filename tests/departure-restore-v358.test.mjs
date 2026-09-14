@@ -26,10 +26,21 @@ assert.match(css,/#programme \.visit-now-actions>\.button\{[\s\S]*?grid-template
 assert.match(css,/\.cph-now-icon svg\{[\s\S]*?width:17px!important;[\s\S]*?height:17px!important/,'les trois icônes doivent être compactes et de même taille');
 assert.match(css,/\.cph-now-label\{[\s\S]*?font-size:10\.5px!important/,'la taille de police des trois libellés doit être uniforme et compacte');
 assert.match(css,/@media\(max-width:380px\)[\s\S]*?\.cph-now-label\{[\s\S]*?font-size:9\.6px!important/,'la police doit encore s’adapter aux petits écrans');
+assert.match(css,/\.visit-now-actions>\.restore-original-time\{[\s\S]*?row-gap:6px!important/,'Rétablir doit conserver un espace suffisant sous son icône');
+
 assert.match(header,/function removeActualDepartureTile\(\)[\s\S]*?===\"Départ réel\"\)tile\.remove\(\)/,'la tuile Départ réel doit être réellement supprimée du DOM');
 assert.match(header,/function normalizeNowActionButtons\(\)[\s\S]*?\.here-now[\s\S]*?\.restore-original-time[\s\S]*?\.go-now/,'les trois boutons temporels doivent être normalisés ensemble');
 assert.match(header,/cph-now-icon/,'les actions temporelles doivent utiliser une icône structurée');
 assert.match(header,/cph-now-label/,'les actions temporelles doivent utiliser un libellé structuré');
+
+assert.match(header,/function centerScheduleEditorFields\(\)[\s\S]*?\["Heure souhaitée","Durée prévue","Jour de visite"\]/,'les trois titres de l’éditeur doivent être centrés ensemble');
+assert.match(css,/\.cph-editor-title-centered\{[\s\S]*?text-align:center!important/,'les titres de l’éditeur doivent être centrés');
+assert.match(css,/\.cph-time-control-centered\{[\s\S]*?margin-left:auto!important;[\s\S]*?text-align:center!important/,'le contrôle Heure souhaitée doit être centré');
+assert.match(header,/function syncDurationApplyHeight\(\)[\s\S]*?getBoundingClientRect\(\)\.height[\s\S]*?--cph-duration-control-height/,'Appliquer doit reprendre dynamiquement la hauteur du contrôle Durée prévue');
+assert.match(css,/\.cph-duration-apply\{[\s\S]*?height:var\(--cph-duration-control-height,44px\)!important/,'la hauteur mesurée de Durée prévue doit être appliquée au bouton Appliquer');
+assert.match(header,/function normalizeAsideButton\(\)[\s\S]*?Mettre de côté[\s\S]*?cph-aside-icon[\s\S]*?cph-aside-label/,'Mettre de côté doit avoir une structure stable pour aligner icône et texte');
+assert.match(css,/\.cph-aside-icon\{[\s\S]*?align-items:center!important;[\s\S]*?justify-content:center!important/,'l’épingle Mettre de côté doit être centrée verticalement');
+assert.match(css,/\.cph-aside-label\{[\s\S]*?justify-items:center!important/,'côté doit être centré sous Mettre de');
 
 const cascadeStart=header.indexOf('function cascadeFromClickedPoint');
 const cascadeEnd=header.indexOf('function currentMinute',cascadeStart);
@@ -45,4 +56,4 @@ assert.match(header,/window\.restorePointOriginalTime=function\(id\)[\s\S]*?casc
 assert.match(sw,/copenhague-v358-static-v51/,'le cache statique doit rester cohérent');
 assert.match(sw,/\/interaction-layout-v358\.css\?v=358/,'la feuille v358 doit être précachée');
 
-console.log(JSON.stringify({ok:true,departure:'actual-removed',actions:'uniform-66px-compact-v361',cascade:'clicked-point-first'},null,2));
+console.log(JSON.stringify({ok:true,departure:'actual-removed',actions:'uniform-66px-compact-v361',editor:'centered-and-aligned-v362',cascade:'clicked-point-first'},null,2));
