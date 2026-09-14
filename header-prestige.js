@@ -135,10 +135,14 @@ function centerScheduleEditorFields(){
    title.classList.add("cph-editor-title-centered");
    const label=title.closest("label")||(title.matches("label")?title:null);
    if(label)label.classList.add("cph-editor-field-centered");
+   const scope=label||title.parentElement;
    if(text==="Heure souhaitée"){
-    const scope=label||title.parentElement;
     const control=scope?.querySelector('input[type="time"],input,select');
     if(control)control.classList.add("cph-time-control-centered");
+   }
+   if(text==="Jour de visite"){
+    const control=scope?.querySelector("select,input");
+    if(control)control.classList.add("cph-day-control-centered");
    }
   });
  });
@@ -169,6 +173,7 @@ function normalizeDurationEditors(){
 
   editor.classList.add("cph-duration-editor");
   if(label)label.classList.add("cph-duration-field");
+  title.classList.add("cph-duration-title");
   apply.classList.add("cph-duration-apply");
   control.classList.add("cph-duration-control");
 
