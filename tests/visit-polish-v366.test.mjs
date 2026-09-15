@@ -31,6 +31,10 @@ assert.match(refinement,/\.cph-section-title>span:first-child\{[\s\S]*?right:cal
 assert.match(refinement,/font-family:"Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif!important/,'les anciennes icônes doivent conserver un rendu emoji natif');
 assert.match(refinement,/\.cph-section-title>span:first-child svg\{[\s\S]*?display:none!important/,'les icônes vectorielles intermédiaires ne doivent plus être visibles');
 
+assert.match(refinement,/\.time-editor input\.point-time,[\s\S]*?padding-left:36px!important;[\s\S]*?padding-right:36px!important/,'Heure souhaitée doit réserver exactement la même largeur à gauche et à droite de la valeur');
+assert.match(refinement,/\.time-editor input\.point-time,[\s\S]*?text-align:center!important;[\s\S]*?background-position:right 11px center!important/,'la flèche doit rester indépendante du centrage de la valeur');
+assert.match(refinement,/::-webkit-datetime-edit[\s\S]*?width:100%!important;[\s\S]*?text-align:center!important/,'le texte interne du contrôle time doit être centré sur WebKit/Android');
+
 assert.match(sectionScroll,/function directSummary\(details\)[\s\S]*?child\.tagName==="SUMMARY"/,'chaque onglet details doit être piloté par son summary direct');
 assert.match(sectionScroll,/document\.querySelectorAll\("#programme details"\)/,'le recalage doit s’appliquer à tous les onglets details du programme');
 assert.match(sectionScroll,/document\.querySelectorAll\("#programme \.day-banner"\)/,'le recalage doit aussi s’appliquer aux onglets de journées');
@@ -39,17 +43,24 @@ assert.match(sectionScroll,/function desiredTargetTop\(\)[\s\S]*?stickyHeaderOff
 assert.match(sectionScroll,/window\.scrollTo\(\{top,behavior:"smooth"\}\)/,'le recalage doit être fluide');
 assert.match(sectionScroll,/window\.setTimeout\(\(\)=>settleTarget\(target,owner,token\),420\)/,'une correction finale doit compenser le mouvement du bandeau sticky pendant le scroll');
 
+assert.match(sectionScroll,/function ensureVisitHeroImages\(\)[\s\S]*?#programme details\.visit-details/,'toute visite doit être examinée pour une grande image');
+assert.match(sectionScroll,/summary\.insertAdjacentElement\("afterend",hero\)/,'une visite sans grande photo doit recevoir une image immédiatement après son en-tête');
+assert.match(sectionScroll,/safari\|zoo\|animal\|faune\|wildlife/,'les visites de type Safari/Zoo doivent recevoir un visuel nature adapté');
+assert.match(sectionScroll,/img\.addEventListener\("error",\(\)=>useGenericImage\(img,name\),\{once:true\}\)/,'une grande image distante cassée doit aussi basculer sur le visuel local');
+assert.match(refinement,/\.visit-details>\.cph-generated-hero\{[\s\S]*?aspect-ratio:4\/3!important/,'l’image générique doit avoir un gabarit élégant et stable');
+assert.match(refinement,/img\.cph-generic-visit-image\{[\s\S]*?object-fit:cover!important/,'l’image générique doit remplir proprement son cadre');
+
 assert.match(refinement,/\.visit-details\[open\] \.visit-summary \.summary-title\{[\s\S]*?grid-column:2!important/,'le nom d’un événement ouvert doit suivre la colonne de la durée de visite');
 assert.match(refinement,/\.visit-details\[open\] \.visit-summary \.title-stars\{[\s\S]*?position:absolute!important/,'les étoiles ne doivent plus déplacer le centre du nom');
 assert.match(refinement,/\.day-banner::after\{[\s\S]*?content:"⌄"!important/,'la flèche de journée doit être visible dès le premier rendu du bandeau');
 assert.match(refinement,/\.day-banner>\.cph-day-toggle svg\{[\s\S]*?opacity:0!important/,'la flèche DOM tardive ne doit pas créer une seconde apparition visuelle');
 assert.match(refinement,/\.day-banner:has\(>\.cph-day-toggle\[aria-expanded="false"\]\)::after/,'la flèche immédiate doit refléter l’état replié');
 
-assert.match(sw,/copenhague-v358-static-v60/,'le cache doit être renouvelé');
-assert.match(sw,/visit-refinement-v369\.css\?v=372/,'le raffinement visuel doit être précaché dans sa nouvelle version');
-assert.match(sw,/visit-section-scroll-v370\.js\?v=371/,'le correctif de recalage doit être précaché dans sa nouvelle version');
-assert.match(sw,/const sectionScrollRequest=new Request/,'le correctif de recalage doit être concaténé au script principal');
+assert.match(sw,/copenhague-v358-static-v61/,'le cache doit être renouvelé');
+assert.match(sw,/visit-refinement-v369\.css\?v=373/,'le raffinement visuel centré doit être précaché');
+assert.match(sw,/visit-section-scroll-v370\.js\?v=373/,'le correctif de recalage et d’images doit être précaché');
+assert.match(sw,/const sectionScrollRequest=new Request/,'le correctif v373 doit être concaténé au script principal');
 assert.match(sw,/enhancedInteractionStyle\(request\)/,'le raffinement visuel doit être concaténé à la feuille chargée dans head');
 assert.match(sw,/url\.pathname==="\/interaction-layout-v358\.css"/,'l’interception CSS doit viser la feuille réellement chargée');
 
-console.log(JSON.stringify({ok:true,sections:'classic-icons-equal-8px-stable-wrap',sectionScroll:'all-details-and-days-visible-below-sticky-header',openTitle:'duration-axis-independent-stars',days:'first-paint-chevron',cache:'v60'},null,2));
+console.log(JSON.stringify({ok:true,sections:'classic-icons-equal-8px-stable-wrap',time:'symmetrical-padding-centered',sectionScroll:'all-details-and-days-visible-below-sticky-header',images:'full-hero-local-fallback',days:'first-paint-chevron',cache:'v61'},null,2));
