@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v358-static-v60";
-const RUNTIME_CACHE="copenhague-v358-runtime-v60";
+const STATIC_CACHE="copenhague-v358-static-v61";
+const RUNTIME_CACHE="copenhague-v358-runtime-v61";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -7,8 +7,8 @@ const STATIC_FILES=[
   "/cloud-backup.js?v=3",
   "/header-prestige.js?v=357",
   "/visit-polish-v366.js?v=366",
-  "/visit-section-scroll-v370.js?v=371",
-  "/visit-refinement-v369.css?v=372",
+  "/visit-section-scroll-v370.js?v=373",
+  "/visit-refinement-v369.css?v=373",
   "/ux-stability-v1.css?v=1",
   "/first-paint-v355.css?v=355",
   "/visual-stability-v357.css?v=357",
@@ -69,7 +69,7 @@ async function cacheFirst(request){
 async function enhancedHeader(request){
   try{
     const polishRequest=new Request(new URL("/visit-polish-v366.js?v=366",self.location.origin),{method:"GET"});
-    const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=371",self.location.origin),{method:"GET"});
+    const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=373",self.location.origin),{method:"GET"});
     let [headerResponse,polishResponse,sectionScrollResponse]=await Promise.all([
       fetch(request,{cache:"no-store"}),
       fetch(polishRequest,{cache:"no-store"}),
@@ -95,7 +95,7 @@ async function enhancedHeader(request){
     if(runtime)return runtime;
     const headerRequest=new Request(new URL("/header-prestige.js?v=357",self.location.origin));
     const polishRequest=new Request(new URL("/visit-polish-v366.js?v=366",self.location.origin));
-    const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=371",self.location.origin));
+    const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=373",self.location.origin));
     const [headerResponse,polishResponse,sectionScrollResponse]=await Promise.all([
       caches.match(headerRequest),
       caches.match(polishRequest),
@@ -111,7 +111,7 @@ async function enhancedHeader(request){
 
 async function enhancedInteractionStyle(request){
   try{
-    const refinementRequest=new Request(new URL("/visit-refinement-v369.css?v=372",self.location.origin),{method:"GET"});
+    const refinementRequest=new Request(new URL("/visit-refinement-v369.css?v=373",self.location.origin),{method:"GET"});
     let [baseResponse,refinementResponse]=await Promise.all([
       fetch(request,{cache:"no-store"}),
       fetch(refinementRequest,{cache:"no-store"})
@@ -133,7 +133,7 @@ async function enhancedInteractionStyle(request){
     const runtime=await caches.match(request);
     if(runtime)return runtime;
     const baseRequest=new Request(new URL("/interaction-layout-v358.css?v=358",self.location.origin));
-    const refinementRequest=new Request(new URL("/visit-refinement-v369.css?v=372",self.location.origin));
+    const refinementRequest=new Request(new URL("/visit-refinement-v369.css?v=373",self.location.origin));
     const [baseResponse,refinementResponse]=await Promise.all([caches.match(baseRequest),caches.match(refinementRequest)]);
     if(!baseResponse)return Response.error();
     const base=await baseResponse.text();
