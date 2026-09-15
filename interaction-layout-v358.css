@@ -1,5 +1,13 @@
 /* v358 — départ effectif et actions d'horaire stables dès le premier rendu. */
 
+/* Le départ effectif n'est jamais peint : seul un départ prévu validé par le JS est affiché. */
+#programme .day-banner .day-departure{
+  display:none!important;
+}
+#programme .day-banner .day-departure.cph-departure-visible{
+  display:flex!important;
+}
+
 #programme .time-editor>.time-editor-actions{
   display:grid!important;
   grid-template-columns:repeat(2,minmax(0,1fr))!important;
@@ -118,7 +126,7 @@
   white-space:nowrap!important;
 }
 
-/* v362-v364 — édition des visites homogène, centrée et compacte. */
+/* v362-v365 — édition des visites homogène, centrée et compacte. */
 #programme .cph-editor-title-centered{
   display:block!important;
   width:100%!important;
@@ -132,6 +140,28 @@
   justify-content:center!important;
   align-items:center!important;
 }
+
+/* Ces règles s'appliquent avant le JS et donc aussi aux nouvelles visites. */
+#programme .visit-details label:has(select){
+  text-align:center!important;
+}
+#programme .visit-details label:has(select)>select,
+#programme .visit-details label:has(select) select{
+  display:block!important;
+  box-sizing:border-box!important;
+  width:min(150px,100%)!important;
+  max-width:150px!important;
+  min-width:0!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  text-align:center!important;
+  text-align-last:center!important;
+}
+#programme .duration-editor label:has(input[type="number"]),
+#programme .duration-editor>label{
+  text-align:center!important;
+}
+
 #programme .time-editor .cph-time-control-centered{
   display:block!important;
   width:min(180px,100%)!important;
@@ -278,7 +308,7 @@
   row-gap:6px!important;
 }
 
-/* Une photo cassée conserve les mêmes dimensions avec le visuel de remplacement. */
+/* Photos cassées ou absentes : même gabarit que les vraies miniatures. */
 #programme img.cph-place-photo-fallback,
 .place-card img.cph-place-photo-fallback,
 .poi-card img.cph-place-photo-fallback,
@@ -287,8 +317,12 @@
   object-fit:cover!important;
   object-position:center!important;
 }
+#programme .visit-summary-thumb.cph-generated-place-photo{
+  display:block!important;
+  object-fit:cover!important;
+  object-position:center!important;
+}
 
-/* Sécurité si une ancienne version du DOM porte encore hidden. */
 #programme .day-departure[hidden]{
   display:none!important;
 }
@@ -305,6 +339,8 @@
   #programme .visit-now-actions>.button .cph-now-label{
     font-size:10px!important;
   }
+  #programme .visit-details label:has(select)>select,
+  #programme .visit-details label:has(select) select,
   #programme .cph-day-control-centered{
     width:min(140px,100%)!important;
     max-width:140px!important;
