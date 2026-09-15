@@ -1,4 +1,4 @@
-/* v372 — icônes classiques équilibrées et stabilité du premier affichage. */
+/* v373 — icônes classiques équilibrées, heure réellement centrée et images de secours. */
 
 /* Horaire et Notes : anciennes icônes emoji conservées. Le titre Horaire est
    explicitement découpé sur deux lignes afin que la roue soit réellement accolée
@@ -47,6 +47,33 @@ html body #programme .cph-section-title>span:last-child{
   white-space:nowrap!important;
 }
 
+/* Heure souhaitée : la flèche reste à droite mais ne participe plus au centrage visuel.
+   Les réserves gauche/droite sont strictement identiques. */
+html body #programme .time-editor input.point-time,
+html body #programme .time-editor input[type="time"].cph-time-control-centered{
+  box-sizing:border-box!important;
+  padding-left:36px!important;
+  padding-right:36px!important;
+  text-align:center!important;
+  text-align-last:center!important;
+  direction:ltr!important;
+  background-position:right 11px center!important;
+}
+html body #programme .time-editor input[type="time"]::-webkit-datetime-edit,
+html body #programme .time-editor input.point-time::-webkit-datetime-edit{
+  box-sizing:border-box!important;
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:center!important;
+}
+html body #programme .time-editor input[type="time"]::-webkit-datetime-edit-fields-wrapper,
+html body #programme .time-editor input.point-time::-webkit-datetime-edit-fields-wrapper{
+  margin:0 auto!important;
+  padding:0!important;
+  text-align:center!important;
+}
+
 /* Carte dépliée : le centre du NOM, et non du groupe nom+étoiles, suit exactement
    l'axe de la durée de visite. Les étoiles n'influencent plus ce centrage. */
 html body #programme .visit-details[open] .visit-summary .summary-title{
@@ -83,6 +110,32 @@ html body #programme .visit-details[open] .visit-summary .title-stars{
   padding:0!important;
   transform:translateY(-50%)!important;
   white-space:nowrap!important;
+}
+
+/* Une visite qui n'a aucune grande photo reçoit une illustration locale,
+   donc visible même si la source distante manque ou tombe en erreur. */
+html body #programme .visit-details>.cph-generated-hero{
+  box-sizing:border-box!important;
+  width:calc(100% - 24px)!important;
+  max-width:100%!important;
+  aspect-ratio:4/3!important;
+  margin:10px 12px 14px!important;
+  border-radius:20px!important;
+  overflow:hidden!important;
+  background:#dcebea!important;
+  box-shadow:0 5px 14px rgba(31,78,73,.10)!important;
+}
+html body #programme .visit-details>.cph-generated-hero>img,
+html body #programme .visit-details img.cph-generic-visit-image{
+  display:block!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  margin:0!important;
+  border:0!important;
+  object-fit:cover!important;
+  object-position:center!important;
 }
 
 /* Flèche de journée visible dès que le bandeau lui-même est rendu.
