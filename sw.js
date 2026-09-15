@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v358-static-v63";
-const RUNTIME_CACHE="copenhague-v358-runtime-v63";
+const STATIC_CACHE="copenhague-v358-static-v64";
+const RUNTIME_CACHE="copenhague-v358-runtime-v64";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -9,6 +9,7 @@ const STATIC_FILES=[
   "/visit-polish-v366.js?v=366",
   "/visit-section-scroll-v370.js?v=374",
   "/visit-photo-fallback-v2.js?v=2",
+  "/visit-photo-collapsed-v3.js?v=3",
   "/visit-refinement-v369.css?v=373",
   "/visit-photo-fallback-v2.css?v=2",
   "/ux-stability-v1.css?v=1",
@@ -73,21 +74,25 @@ async function enhancedHeader(request){
     const polishRequest=new Request(new URL("/visit-polish-v366.js?v=366",self.location.origin),{method:"GET"});
     const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=374",self.location.origin),{method:"GET"});
     const photoFallbackRequest=new Request(new URL("/visit-photo-fallback-v2.js?v=2",self.location.origin),{method:"GET"});
-    let [headerResponse,polishResponse,sectionScrollResponse,photoFallbackResponse]=await Promise.all([
+    const collapsedPhotoRequest=new Request(new URL("/visit-photo-collapsed-v3.js?v=3",self.location.origin),{method:"GET"});
+    let [headerResponse,polishResponse,sectionScrollResponse,photoFallbackResponse,collapsedPhotoResponse]=await Promise.all([
       fetch(request,{cache:"no-store"}),
       fetch(polishRequest,{cache:"no-store"}),
       fetch(sectionScrollRequest,{cache:"no-store"}),
-      fetch(photoFallbackRequest,{cache:"no-store"})
+      fetch(photoFallbackRequest,{cache:"no-store"}),
+      fetch(collapsedPhotoRequest,{cache:"no-store"})
     ]);
     if(!headerResponse.ok)throw new Error("header fetch failed");
     if(!polishResponse.ok)polishResponse=await caches.match(polishRequest);
     if(!sectionScrollResponse.ok)sectionScrollResponse=await caches.match(sectionScrollRequest);
     if(!photoFallbackResponse.ok)photoFallbackResponse=await caches.match(photoFallbackRequest);
+    if(!collapsedPhotoResponse.ok)collapsedPhotoResponse=await caches.match(collapsedPhotoRequest);
     const source=await headerResponse.text();
     const polish=polishResponse?await polishResponse.text():"";
     const sectionScroll=sectionScrollResponse?await sectionScrollResponse.text():"";
     const photoFallback=photoFallbackResponse?await photoFallbackResponse.text():"";
-    const response=new Response(`${source}\n${polish}\n${sectionScroll}\n${photoFallback}`,{
+    const collapsedPhoto=collapsedPhotoResponse?await collapsedPhotoResponse.text():"";
+    const response=new Response(`${source}\n${polish}\n${sectionScroll}\n${photoFallback}\n${collapsedPhoto}`,{
       status:200,
       statusText:"OK",
       headers:{
@@ -103,18 +108,21 @@ async function enhancedHeader(request){
     const polishRequest=new Request(new URL("/visit-polish-v366.js?v=366",self.location.origin));
     const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=374",self.location.origin));
     const photoFallbackRequest=new Request(new URL("/visit-photo-fallback-v2.js?v=2",self.location.origin));
-    const [headerResponse,polishResponse,sectionScrollResponse,photoFallbackResponse]=await Promise.all([
+    const collapsedPhotoRequest=new Request(new URL("/visit-photo-collapsed-v3.js?v=3",self.location.origin));
+    const [headerResponse,polishResponse,sectionScrollResponse,photoFallbackResponse,collapsedPhotoResponse]=await Promise.all([
       caches.match(headerRequest),
       caches.match(polishRequest),
       caches.match(sectionScrollRequest),
-      caches.match(photoFallbackRequest)
+      caches.match(photoFallbackRequest),
+      caches.match(collapsedPhotoRequest)
     ]);
     if(!headerResponse)return Response.error();
     const source=await headerResponse.text();
     const polish=polishResponse?await polishResponse.text():"";
     const sectionScroll=sectionScrollResponse?await sectionScrollResponse.text():"";
     const photoFallback=photoFallbackResponse?await photoFallbackResponse.text():"";
-    return new Response(`${source}\n${polish}\n${sectionScroll}\n${photoFallback}`,{headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"no-store"}});
+    const collapsedPhoto=collapsedPhotoResponse?await collapsedPhotoResponse.text():"";
+    return new Response(`${source}\n${polish}\n${sectionScroll}\n${photoFallback}\n${collapsedPhoto}`,{headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"no-store"}});
   }
 }
 
