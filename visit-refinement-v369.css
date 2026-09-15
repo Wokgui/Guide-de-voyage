@@ -1,50 +1,46 @@
-/* v369 — corrections optiques et stabilité du premier affichage. */
+/* v370 — icônes classiques rapprochées et stabilité du premier affichage. */
 
-/* Horaire et Notes : même icône vectorielle 18 px, même distance réelle de 4 px au texte. */
+/* Horaire et Notes : on garde les anciennes icônes emoji. Le texte reste centré
+   indépendamment de l'icône, placée très près à gauche. */
 html body #programme .cph-section-title{
-  display:inline-grid!important;
-  grid-template-columns:20px auto!important;
-  align-items:center!important;
-  justify-content:center!important;
-  column-gap:4px!important;
+  display:block!important;
+  width:max-content!important;
+  max-width:calc(100% - 108px)!important;
+  margin:0!important;
+  text-align:center!important;
 }
 html body #programme .cph-section-title>span:first-child{
-  position:static!important;
-  inset:auto!important;
+  position:absolute!important;
+  left:auto!important;
+  right:calc(100% + 1px)!important;
+  top:50%!important;
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
-  box-sizing:border-box!important;
-  width:20px!important;
-  min-width:20px!important;
-  max-width:20px!important;
-  height:20px!important;
-  min-height:20px!important;
-  max-height:20px!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
   margin:0!important;
   padding:0!important;
-  transform:none!important;
+  transform:translateY(-50%)!important;
+  font-family:"Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif!important;
+  font-size:18px!important;
+  font-weight:400!important;
+  line-height:1!important;
+  white-space:nowrap!important;
 }
 html body #programme .cph-section-title>span:first-child svg{
-  display:block!important;
-  box-sizing:border-box!important;
-  width:18px!important;
-  min-width:18px!important;
-  max-width:18px!important;
-  height:18px!important;
-  min-height:18px!important;
-  max-height:18px!important;
-  margin:0!important;
-  padding:0!important;
-  fill:none!important;
-  stroke:currentColor!important;
-  stroke-width:1.8!important;
-  stroke-linecap:round!important;
-  stroke-linejoin:round!important;
+  display:none!important;
 }
 html body #programme .cph-section-title>span:last-child{
+  display:block!important;
   margin:0!important;
   padding:0!important;
+  text-align:center!important;
+  line-height:1.15!important;
 }
 
 /* Carte dépliée : le centre du NOM, et non du groupe nom+étoiles, suit exactement
