@@ -1,7 +1,7 @@
-/* v370 — icônes classiques rapprochées et stabilité du premier affichage. */
+/* v371 — icônes classiques équilibrées et stabilité du premier affichage. */
 
-/* Horaire et Notes : on garde les anciennes icônes emoji. Le texte reste centré
-   indépendamment de l'icône, placée très près à gauche. */
+/* Horaire et Notes : anciennes icônes emoji conservées, avec exactement le même
+   écart visuel de 5 px avant le titre. Le texte reste centré indépendamment de l'icône. */
 html body #programme .cph-section-title{
   display:block!important;
   width:max-content!important;
@@ -12,7 +12,7 @@ html body #programme .cph-section-title{
 html body #programme .cph-section-title>span:first-child{
   position:absolute!important;
   left:auto!important;
-  right:calc(100% + 1px)!important;
+  right:calc(100% + 5px)!important;
   top:50%!important;
   display:flex!important;
   align-items:center!important;
