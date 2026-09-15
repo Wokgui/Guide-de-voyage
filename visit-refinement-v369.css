@@ -1,0 +1,140 @@
+/* v369 — corrections optiques et stabilité du premier affichage. */
+
+/* Horaire et Notes : même icône vectorielle 18 px, même distance réelle de 4 px au texte. */
+html body #programme .cph-section-title{
+  display:inline-grid!important;
+  grid-template-columns:20px auto!important;
+  align-items:center!important;
+  justify-content:center!important;
+  column-gap:4px!important;
+}
+html body #programme .cph-section-title>span:first-child{
+  position:static!important;
+  inset:auto!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+  width:20px!important;
+  min-width:20px!important;
+  max-width:20px!important;
+  height:20px!important;
+  min-height:20px!important;
+  max-height:20px!important;
+  margin:0!important;
+  padding:0!important;
+  transform:none!important;
+}
+html body #programme .cph-section-title>span:first-child svg{
+  display:block!important;
+  box-sizing:border-box!important;
+  width:18px!important;
+  min-width:18px!important;
+  max-width:18px!important;
+  height:18px!important;
+  min-height:18px!important;
+  max-height:18px!important;
+  margin:0!important;
+  padding:0!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:1.8!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+html body #programme .cph-section-title>span:last-child{
+  margin:0!important;
+  padding:0!important;
+}
+
+/* Carte dépliée : le centre du NOM, et non du groupe nom+étoiles, suit exactement
+   l'axe de la durée de visite. Les étoiles n'influencent plus ce centrage. */
+html body #programme .visit-details[open] .visit-summary .summary-title{
+  position:relative!important;
+  display:block!important;
+  grid-column:2!important;
+  justify-self:stretch!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:center!important;
+  overflow:visible!important;
+}
+html body #programme .visit-details[open] .visit-summary .summary-title-name{
+  display:block!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:center!important;
+}
+html body #programme .visit-details[open] .visit-summary .title-stars{
+  position:absolute!important;
+  left:calc(100% + 6px)!important;
+  top:50%!important;
+  display:block!important;
+  width:max-content!important;
+  margin:0!important;
+  padding:0!important;
+  transform:translateY(-50%)!important;
+  white-space:nowrap!important;
+}
+
+/* Flèche de journée visible dès que le bandeau lui-même est rendu.
+   Le bouton réel reste le hit-target mais son SVG est invisible : aucune seconde flèche
+   n'apparaît lorsque le JavaScript termine son initialisation. */
+html body #programme#programme .day-banner{
+  position:relative!important;
+  box-sizing:border-box!important;
+  padding-right:58px!important;
+}
+html body #programme#programme .day-banner::after{
+  content:"⌄"!important;
+  position:absolute!important;
+  right:19px!important;
+  top:50%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:20px!important;
+  height:20px!important;
+  margin:0!important;
+  padding:0!important;
+  color:inherit!important;
+  font-size:22px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  transform:translateY(-50%) rotate(0deg)!important;
+  transform-origin:center!important;
+  pointer-events:none!important;
+  z-index:3!important;
+}
+html body #programme#programme .day-banner:has(>.cph-day-toggle[aria-expanded="false"])::after{
+  transform:translateY(-50%) rotate(-90deg)!important;
+}
+html body #programme#programme .day-banner>.cph-day-toggle{
+  position:absolute!important;
+  right:12px!important;
+  top:50%!important;
+  box-sizing:border-box!important;
+  width:34px!important;
+  min-width:34px!important;
+  max-width:34px!important;
+  height:34px!important;
+  min-height:34px!important;
+  max-height:34px!important;
+  margin:0!important;
+  padding:0!important;
+  transform:translateY(-50%)!important;
+  background:transparent!important;
+  z-index:4!important;
+}
+html body #programme#programme .day-banner>.cph-day-toggle svg{
+  opacity:0!important;
+  visibility:hidden!important;
+}
