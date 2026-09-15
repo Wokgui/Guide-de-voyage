@@ -4,12 +4,15 @@ import vm from 'node:vm';
 
 const polish=fs.readFileSync(new URL('../visit-polish-v366.js',import.meta.url),'utf8');
 const sectionScroll=fs.readFileSync(new URL('../visit-section-scroll-v370.js',import.meta.url),'utf8');
+const photoFallback=fs.readFileSync(new URL('../visit-photo-fallback-v2.js',import.meta.url),'utf8');
+const photoFallbackCss=fs.readFileSync(new URL('../visit-photo-fallback-v2.css',import.meta.url),'utf8');
 const css=fs.readFileSync(new URL('../interaction-layout-v358.css',import.meta.url),'utf8');
 const refinement=fs.readFileSync(new URL('../visit-refinement-v369.css',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8');
 
 new vm.Script(polish,{filename:'visit-polish-v366.js'});
 new vm.Script(sectionScroll,{filename:'visit-section-scroll-v370.js'});
+new vm.Script(photoFallback,{filename:'visit-photo-fallback-v2.js'});
 
 assert.match(polish,/Horaire, durée et organisation/,'le panneau horaire doit être ciblé');
 assert.match(polish,/spec\.key==="notes"/,'le panneau Notes doit être ciblé');
@@ -42,13 +45,18 @@ assert.match(sectionScroll,/button\.addEventListener\("click",\(\)=>\{[\s\S]*?sc
 assert.match(sectionScroll,/function desiredTargetTop\(\)[\s\S]*?stickyHeaderOffset\(\)\+12/,'le titre ciblé doit rester sous le bandeau supérieur avec une marge de sécurité');
 assert.match(sectionScroll,/window\.scrollTo\(\{top,behavior:"smooth"\}\)/,'le recalage doit être fluide');
 assert.match(sectionScroll,/window\.setTimeout\(\(\)=>settleTarget\(target,owner,token\),420\)/,'une correction finale doit compenser le mouvement du bandeau sticky pendant le scroll');
+assert.doesNotMatch(sectionScroll,/genericHeroDataUrl|ensureVisitHeroImages/,'le script de scroll ne doit plus générer de visuel photo concurrent');
 
-assert.match(sectionScroll,/function ensureVisitHeroImages\(\)[\s\S]*?#programme details\.visit-details/,'toute visite doit être examinée pour une grande image');
-assert.match(sectionScroll,/summary\.insertAdjacentElement\("afterend",hero\)/,'une visite sans grande photo doit recevoir une image immédiatement après son en-tête');
-assert.match(sectionScroll,/safari\|zoo\|animal\|faune\|wildlife/,'les visites de type Safari/Zoo doivent recevoir un visuel nature adapté');
-assert.match(sectionScroll,/img\.addEventListener\("error",\(\)=>useGenericImage\(img,name\),\{once:true\}\)/,'une grande image distante cassée doit aussi basculer sur le visuel local');
-assert.match(refinement,/\.visit-details>\.cph-generated-hero\{[\s\S]*?aspect-ratio:4\/3!important/,'l’image générique doit avoir un gabarit élégant et stable');
-assert.match(refinement,/img\.cph-generic-visit-image\{[\s\S]*?object-fit:cover!important/,'l’image générique doit remplir proprement son cadre');
+assert.match(photoFallback,/const FALLBACKS=\{[\s\S]*?cruise:[\s\S]*?hotel:[\s\S]*?station:[\s\S]*?castle:[\s\S]*?museum:[\s\S]*?safari:[\s\S]*?park:[\s\S]*?dining:[\s\S]*?square:/,'les principales catégories doivent avoir une vraie photo de secours dédiée');
+assert.match(photoFallback,/croisi\|canal\|bateau\|boat/,'les croisières doivent être reconnues par catégorie');
+assert.match(photoFallback,/safari\|zoo\|animal\|faune\|wildlife/,'les lieux animaliers doivent être reconnus par catégorie');
+assert.match(photoFallback,/function ensureSummaryPhoto\(summary\)[\s\S]*?visit-summary-thumb/,'une miniature manquante doit être créée sur la carte principale');
+assert.match(photoFallback,/function ensureHeroPhoto\(details\)[\s\S]*?insertAdjacentElement\("afterend",hero\)/,'une visite dépliée sans photo doit recevoir un seul grand visuel');
+assert.match(photoFallback,/function removeUnavailablePhotoBlocks\(scope\)[\s\S]*?Photo momentanément indisponible[\s\S]*?Réessayer/,'l’ancien bloc photo indisponible doit être supprimé');
+assert.match(photoFallback,/generated\.forEach\([\s\S]*?node\.remove\(\)/,'les visuels générés en double doivent être supprimés');
+assert.match(photoFallback,/img\.addEventListener\("error",useFallback,\{once:true\}\)/,'une vraie photo cassée doit basculer automatiquement sur sa photo de catégorie');
+assert.match(photoFallbackCss,/\.visit-details\[open\][\s\S]*?\.cph-category-fallback-hero[\s\S]*?aspect-ratio:4\/3!important/,'la grande photo de secours doit conserver un gabarit stable');
+assert.match(photoFallbackCss,/\.cph-generated-place-hero:not\(\.cph-category-fallback-hero\)[\s\S]*?display:none!important/,'les anciens emplacements générés ne doivent plus créer un second espace');
 
 assert.match(refinement,/\.visit-details\[open\] \.visit-summary \.summary-title\{[\s\S]*?grid-column:2!important/,'le nom d’un événement ouvert doit suivre la colonne de la durée de visite');
 assert.match(refinement,/\.visit-details\[open\] \.visit-summary \.title-stars\{[\s\S]*?position:absolute!important/,'les étoiles ne doivent plus déplacer le centre du nom');
@@ -56,11 +64,12 @@ assert.match(refinement,/\.day-banner::after\{[\s\S]*?content:"⌄"!important/,'
 assert.match(refinement,/\.day-banner>\.cph-day-toggle svg\{[\s\S]*?opacity:0!important/,'la flèche DOM tardive ne doit pas créer une seconde apparition visuelle');
 assert.match(refinement,/\.day-banner:has\(>\.cph-day-toggle\[aria-expanded="false"\]\)::after/,'la flèche immédiate doit refléter l’état replié');
 
-assert.match(sw,/copenhague-v358-static-v61/,'le cache doit être renouvelé');
-assert.match(sw,/visit-refinement-v369\.css\?v=373/,'le raffinement visuel centré doit être précaché');
-assert.match(sw,/visit-section-scroll-v370\.js\?v=373/,'le correctif de recalage et d’images doit être précaché');
-assert.match(sw,/const sectionScrollRequest=new Request/,'le correctif v373 doit être concaténé au script principal');
-assert.match(sw,/enhancedInteractionStyle\(request\)/,'le raffinement visuel doit être concaténé à la feuille chargée dans head');
+assert.match(sw,/copenhague-v358-static-v63/,'le cache doit être renouvelé');
+assert.match(sw,/visit-section-scroll-v370\.js\?v=374/,'le script de recalage sans ancien générateur photo doit être précaché');
+assert.match(sw,/visit-photo-fallback-v2\.js\?v=2/,'le nouveau moteur de photos de secours doit être précaché');
+assert.match(sw,/visit-photo-fallback-v2\.css\?v=2/,'le style des photos de secours doit être précaché');
+assert.match(sw,/const photoFallbackRequest=new Request/,'le moteur photo doit être concaténé au script principal');
+assert.match(sw,/const photoFallbackStyleRequest=new Request/,'le style photo doit être concaténé à la feuille chargée dans head');
 assert.match(sw,/url\.pathname==="\/interaction-layout-v358\.css"/,'l’interception CSS doit viser la feuille réellement chargée');
 
-console.log(JSON.stringify({ok:true,sections:'classic-icons-equal-8px-stable-wrap',time:'symmetrical-padding-centered',sectionScroll:'all-details-and-days-visible-below-sticky-header',images:'full-hero-local-fallback',days:'first-paint-chevron',cache:'v61'},null,2));
+console.log(JSON.stringify({ok:true,sections:'classic-icons-equal-8px-stable-wrap',time:'symmetrical-padding-centered',sectionScroll:'all-details-and-days-visible-below-sticky-header',images:'category-photo-single-fallback',days:'first-paint-chevron',cache:'v63'},null,2));
