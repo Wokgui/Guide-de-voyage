@@ -1,0 +1,52 @@
+/* v2 — photos de secours par catégorie, sans second bloc vide. */
+
+#programme .visit-summary .cph-category-fallback-thumb,
+#programme .visit-summary .cph-category-photo-fallback{
+  object-fit:cover!important;
+  object-position:center!important;
+  background-position:center!important;
+  background-size:cover!important;
+}
+
+#programme .visit-details:not([open])>.cph-category-fallback-hero{
+  display:none!important;
+}
+
+#programme .visit-details[open]>.cph-category-fallback-hero,
+#programme .visit-details[open] .cph-category-fallback-hero{
+  display:block!important;
+  box-sizing:border-box!important;
+  width:calc(100% - 24px)!important;
+  max-width:none!important;
+  aspect-ratio:4/3!important;
+  height:auto!important;
+  margin:12px auto 14px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:20px!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  overflow:hidden!important;
+  box-shadow:0 8px 24px rgba(23,56,70,.10)!important;
+}
+
+/* Les anciens visuels générés ne doivent jamais créer un second emplacement. */
+#programme .visit-details .cph-generated-place-hero:not(.cph-category-fallback-hero){
+  display:none!important;
+}
+
+/* Si l'ancien bloc d'erreur photo existe le temps d'un rendu, on l'empêche de réserver de la hauteur. */
+#programme .visit-details .photo-error,
+#programme .visit-details .image-error,
+#programme .visit-details .photo-unavailable,
+#programme .visit-details .image-unavailable,
+#programme .visit-details [data-photo-error],
+#programme .visit-details [data-image-error]{
+  display:none!important;
+  min-height:0!important;
+  height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  overflow:hidden!important;
+}
