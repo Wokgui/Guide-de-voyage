@@ -6,15 +6,138 @@ window.__cphVisitPolishV366=true;
 const style=document.createElement("style");
 style.id="cphVisitPolishV366Style";
 style.textContent=`
-#programme .day-banner .day-departure,
-#programme .day-banner .day-departure.cph-departure-visible{display:none!important}
-#programme .cph-section-summary{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;box-sizing:border-box!important;padding-left:46px!important;padding-right:46px!important;text-align:center!important}
-#programme .cph-section-title{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;max-width:100%!important;text-align:center!important}
-#programme .cph-section-arrow{position:absolute!important;right:14px!important;top:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;width:28px!important;height:28px!important;margin:0!important;transform:translateY(-50%) rotate(0deg)!important;transform-origin:center!important;transition:transform .18s ease!important;font-size:20px!important;font-weight:900!important;line-height:1!important}
-#programme details[open]>.cph-section-summary .cph-section-arrow{transform:translateY(-50%) rotate(180deg)!important}
-#programme .cph-note-editor{text-align:justify!important;text-justify:inter-word!important;line-height:1.45!important}
-#programme .cph-day-toggle{display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 34px!important;width:34px!important;height:34px!important;min-width:34px!important;margin-left:auto!important;padding:0!important;border:0!important;background:transparent!important;color:inherit!important;box-shadow:none!important;cursor:pointer!important}
-#programme .cph-day-toggle svg{display:block!important;width:20px!important;height:20px!important;fill:none!important;stroke:currentColor!important;stroke-width:2.2!important;stroke-linecap:round!important;stroke-linejoin:round!important;transition:transform .18s ease!important}
+#programme .day-departure{display:none!important}
+
+/* Un seul indicateur d'ouverture : la grande flèche placée à droite. */
+#programme summary.cph-section-summary::marker{content:""!important;font-size:0!important}
+#programme summary.cph-section-summary::-webkit-details-marker{display:none!important}
+#programme summary.cph-section-summary::before,
+#programme summary.cph-section-summary::after{content:none!important;display:none!important}
+#programme .cph-section-summary{
+ position:relative!important;
+ display:block!important;
+ width:100%!important;
+ box-sizing:border-box!important;
+ min-height:64px!important;
+ padding-left:48px!important;
+ padding-right:48px!important;
+ text-align:center!important;
+ list-style:none!important;
+}
+#programme .cph-section-title{
+ position:absolute!important;
+ left:50%!important;
+ top:50%!important;
+ transform:translate(-50%,-50%)!important;
+ display:inline-flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ gap:7px!important;
+ width:max-content!important;
+ max-width:calc(100% - 108px)!important;
+ margin:0!important;
+ text-align:center!important;
+}
+#programme .cph-section-title>span:first-child{
+ display:inline-flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ flex:0 0 auto!important;
+ line-height:1!important;
+}
+#programme .cph-section-title>span:last-child{
+ display:block!important;
+ min-width:0!important;
+ text-align:center!important;
+ line-height:1.15!important;
+}
+#programme .cph-section-arrow{
+ position:absolute!important;
+ right:14px!important;
+ top:50%!important;
+ display:flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ width:30px!important;
+ height:30px!important;
+ margin:0!important;
+ transform:translateY(-50%) rotate(0deg)!important;
+ transform-origin:center!important;
+ transition:transform .18s ease!important;
+ font-size:22px!important;
+ font-weight:900!important;
+ line-height:1!important;
+}
+#programme details[open]>.cph-section-summary .cph-section-arrow{
+ transform:translateY(-50%) rotate(180deg)!important
+}
+
+/* Durée : le titre occupe toute la largeur de la grande tuile, comme Heure souhaitée. */
+#programme .duration-editor.cph-duration-editor{
+ grid-template-rows:auto auto!important;
+ row-gap:6px!important;
+}
+#programme .duration-editor.cph-duration-editor::before{
+ content:"Durée prévue";
+ grid-column:1/-1!important;
+ grid-row:1!important;
+ display:block!important;
+ width:100%!important;
+ margin:0!important;
+ text-align:center!important;
+ font-size:14px!important;
+ font-weight:800!important;
+ line-height:1.2!important;
+}
+#programme .duration-editor.cph-duration-editor>.cph-duration-field{
+ grid-row:2!important;
+ font-size:0!important;
+ line-height:0!important;
+}
+#programme .duration-editor.cph-duration-editor .cph-duration-title:not(.cph-duration-field){
+ display:none!important;
+}
+#programme .duration-editor.cph-duration-editor .cph-duration-control{
+ font-size:16px!important;
+ line-height:normal!important;
+}
+#programme .duration-editor.cph-duration-editor>.cph-duration-unit,
+#programme .duration-editor.cph-duration-editor>.cph-duration-apply{
+ grid-row:2!important;
+}
+
+#programme .cph-note-editor{
+ text-align:justify!important;
+ text-justify:inter-word!important;
+ line-height:1.45!important;
+}
+#programme .cph-day-toggle{
+ display:flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ flex:0 0 34px!important;
+ width:34px!important;
+ height:34px!important;
+ min-width:34px!important;
+ margin-left:auto!important;
+ padding:0!important;
+ border:0!important;
+ background:transparent!important;
+ color:inherit!important;
+ box-shadow:none!important;
+ cursor:pointer!important;
+}
+#programme .cph-day-toggle svg{
+ display:block!important;
+ width:20px!important;
+ height:20px!important;
+ fill:none!important;
+ stroke:currentColor!important;
+ stroke-width:2.2!important;
+ stroke-linecap:round!important;
+ stroke-linejoin:round!important;
+ transition:transform .18s ease!important;
+}
 #programme .cph-day-toggle[aria-expanded="false"] svg{transform:rotate(-90deg)!important}
 #programme .day-body.cph-day-body-collapsed{display:none!important}
 `;
