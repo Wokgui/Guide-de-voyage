@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v358-static-v62";
-const RUNTIME_CACHE="copenhague-v358-runtime-v62";
+const STATIC_CACHE="copenhague-v358-static-v63";
+const RUNTIME_CACHE="copenhague-v358-runtime-v63";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -7,7 +7,7 @@ const STATIC_FILES=[
   "/cloud-backup.js?v=3",
   "/header-prestige.js?v=357",
   "/visit-polish-v366.js?v=366",
-  "/visit-section-scroll-v370.js?v=373",
+  "/visit-section-scroll-v370.js?v=374",
   "/visit-photo-fallback-v2.js?v=2",
   "/visit-refinement-v369.css?v=373",
   "/visit-photo-fallback-v2.css?v=2",
@@ -71,7 +71,7 @@ async function cacheFirst(request){
 async function enhancedHeader(request){
   try{
     const polishRequest=new Request(new URL("/visit-polish-v366.js?v=366",self.location.origin),{method:"GET"});
-    const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=373",self.location.origin),{method:"GET"});
+    const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=374",self.location.origin),{method:"GET"});
     const photoFallbackRequest=new Request(new URL("/visit-photo-fallback-v2.js?v=2",self.location.origin),{method:"GET"});
     let [headerResponse,polishResponse,sectionScrollResponse,photoFallbackResponse]=await Promise.all([
       fetch(request,{cache:"no-store"}),
@@ -101,7 +101,7 @@ async function enhancedHeader(request){
     if(runtime)return runtime;
     const headerRequest=new Request(new URL("/header-prestige.js?v=357",self.location.origin));
     const polishRequest=new Request(new URL("/visit-polish-v366.js?v=366",self.location.origin));
-    const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=373",self.location.origin));
+    const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=374",self.location.origin));
     const photoFallbackRequest=new Request(new URL("/visit-photo-fallback-v2.js?v=2",self.location.origin));
     const [headerResponse,polishResponse,sectionScrollResponse,photoFallbackResponse]=await Promise.all([
       caches.match(headerRequest),
