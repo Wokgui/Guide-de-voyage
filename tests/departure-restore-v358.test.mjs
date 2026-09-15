@@ -31,6 +31,8 @@ assert.match(css,/html body #programme \.day-departure,[\s\S]*?\.day-departure\.
 assert.match(header,/function removeActualDepartureTile\(\)[\s\S]*?Départ réel[\s\S]*?tile\.remove\(\)/,'Départ réel doit aussi être supprimé du DOM');
 
 assert.match(css,/html body #programme \.time-editor input\.point-time,[\s\S]*?-webkit-appearance:none!important;[\s\S]*?appearance:none!important/,'Heure souhaitée doit neutraliser la seconde flèche native');
+assert.match(refinement,/\.time-editor input\.point-time,[\s\S]*?padding-left:36px!important;[\s\S]*?padding-right:36px!important/,'Heure souhaitée doit rester centrée indépendamment de la flèche à droite');
+assert.match(refinement,/::-webkit-datetime-edit[\s\S]*?text-align:center!important/,'le contenu WebKit du champ Heure souhaitée doit être centré');
 assert.match(css,/\.day-editor>\.apply-day\{[\s\S]*?width:min\(210px,68%\)!important/,'Changer de jour doit rester plus étroit et centré');
 
 assert.match(refinement,/\.cph-section-title>span:first-child\{[\s\S]*?right:calc\(100% \+ 8px\)!important/,'Horaire et Notes doivent conserver exactement le même écart icône-titre');
@@ -47,8 +49,12 @@ assert.match(sectionScroll,/document\.querySelectorAll\("#programme \.day-banner
 assert.match(sectionScroll,/desiredTargetTop\(\)[\s\S]*?stickyHeaderOffset\(\)\+12/,'le titre doit rester visible sous le bandeau sticky');
 assert.match(sectionScroll,/button\.addEventListener\("click",\(\)=>\{[\s\S]*?scrollTargetBelowHeader\(banner,banner\)/,'chaque ouverture ou fermeture de journée doit recaler son bandeau');
 
-assert.match(header,/function ensureMissingPlacePhotos\(\)[\s\S]*?#programme \.visit-summary[\s\S]*?visit-summary-thumb cph-place-photo-fallback cph-generated-place-photo/,'une visite sans photo doit recevoir une miniature de remplacement');
-assert.match(header,/function installPlaceImageFallbacks\(\)[\s\S]*?ensureMissingPlacePhotos\(\)/,'les photos absentes et cassées doivent être traitées ensemble');
+assert.match(header,/function ensureMissingPlacePhotos\(\)[\s\S]*?#programme \.visit-summary[\s\S]*?visit-summary-thumb cph-place-photo-fallback cph-generated-place-photo/,'une visite sans miniature doit recevoir une miniature de remplacement');
+assert.match(header,/function installPlaceImageFallbacks\(\)[\s\S]*?ensureMissingPlacePhotos\(\)/,'les miniatures absentes et cassées doivent être traitées ensemble');
+assert.match(sectionScroll,/function ensureVisitHeroImages\(\)[\s\S]*?#programme details\.visit-details/,'une visite sans grande photo doit être détectée');
+assert.match(sectionScroll,/summary\.insertAdjacentElement\("afterend",hero\)/,'une grande image générique doit être ajoutée quand aucune photo n’existe');
+assert.match(sectionScroll,/safari\|zoo\|animal\|faune\|wildlife/,'Safari et les lieux animaliers doivent recevoir un visuel nature local');
+assert.match(refinement,/\.visit-details>\.cph-generated-hero\{[\s\S]*?aspect-ratio:4\/3!important/,'la grande image de secours doit conserver un gabarit stable');
 
 const cascadeStart=header.indexOf('function cascadeFromClickedPoint');
 const cascadeEnd=header.indexOf('function currentMinute',cascadeStart);
@@ -58,9 +64,9 @@ assert.match(cascade,/const ordered=dayItems\(day\)\.slice\(\)/,'l’ordre affic
 assert.match(cascade,/state\.timeOverrides\[id\]=minToHm\(target\)/,'le premier événement doit recevoir directement la nouvelle heure');
 assert.doesNotMatch(cascade,/reorderDayChronologically/,'aucun réordonnancement ne doit changer la cible avant la propagation');
 
-assert.match(sw,/copenhague-v358-static-v60/,'le cache statique doit être renouvelé pour la correction de scroll');
-assert.match(sw,/visit-refinement-v369\.css\?v=372/,'la feuille de raffinement doit être précachée');
-assert.match(sw,/visit-section-scroll-v370\.js\?v=371/,'le script de restauration des icônes et de recalage doit être précaché');
+assert.match(sw,/copenhague-v358-static-v61/,'le cache statique doit être renouvelé pour les nouvelles corrections');
+assert.match(sw,/visit-refinement-v369\.css\?v=373/,'la feuille de raffinement centrée doit être précachée');
+assert.match(sw,/visit-section-scroll-v370\.js\?v=373/,'le script de recalage et d’image générique doit être précaché');
 assert.match(sw,/enhancedInteractionStyle\(request\)/,'la feuille de raffinement doit être servie avec interaction-layout dès le head');
 
-console.log(JSON.stringify({ok:true,departure:'never-painted',actions:'iconless',sections:'classic-icons-equal-8px',sectionScroll:'all-details-and-days-title-visible',openTitle:'duration-axis',dayBanner:'first-paint-arrow',cache:'v60'},null,2));
+console.log(JSON.stringify({ok:true,departure:'never-painted',actions:'iconless',time:'symmetrical-padding-centered',sections:'classic-icons-equal-8px',sectionScroll:'all-details-and-days-title-visible',images:'thumbnail-and-full-hero-fallbacks',cache:'v61'},null,2));
