@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v358-static-v64";
-const RUNTIME_CACHE="copenhague-v358-runtime-v64";
+const STATIC_CACHE="copenhague-v358-static-v65";
+const RUNTIME_CACHE="copenhague-v358-runtime-v65";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -8,8 +8,8 @@ const STATIC_FILES=[
   "/header-prestige.js?v=357",
   "/visit-polish-v366.js?v=366",
   "/visit-section-scroll-v370.js?v=374",
-  "/visit-photo-fallback-v2.js?v=2",
-  "/visit-photo-collapsed-v3.js?v=3",
+  "/visit-photo-fallback-v2.js?v=3",
+  "/visit-photo-collapsed-v3.js?v=4",
   "/visit-refinement-v369.css?v=373",
   "/visit-photo-fallback-v2.css?v=2",
   "/ux-stability-v1.css?v=1",
@@ -73,8 +73,8 @@ async function enhancedHeader(request){
   try{
     const polishRequest=new Request(new URL("/visit-polish-v366.js?v=366",self.location.origin),{method:"GET"});
     const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=374",self.location.origin),{method:"GET"});
-    const photoFallbackRequest=new Request(new URL("/visit-photo-fallback-v2.js?v=2",self.location.origin),{method:"GET"});
-    const collapsedPhotoRequest=new Request(new URL("/visit-photo-collapsed-v3.js?v=3",self.location.origin),{method:"GET"});
+    const photoFallbackRequest=new Request(new URL("/visit-photo-fallback-v2.js?v=3",self.location.origin),{method:"GET"});
+    const collapsedPhotoRequest=new Request(new URL("/visit-photo-collapsed-v3.js?v=4",self.location.origin),{method:"GET"});
     let [headerResponse,polishResponse,sectionScrollResponse,photoFallbackResponse,collapsedPhotoResponse]=await Promise.all([
       fetch(request,{cache:"no-store"}),
       fetch(polishRequest,{cache:"no-store"}),
@@ -107,8 +107,8 @@ async function enhancedHeader(request){
     const headerRequest=new Request(new URL("/header-prestige.js?v=357",self.location.origin));
     const polishRequest=new Request(new URL("/visit-polish-v366.js?v=366",self.location.origin));
     const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=374",self.location.origin));
-    const photoFallbackRequest=new Request(new URL("/visit-photo-fallback-v2.js?v=2",self.location.origin));
-    const collapsedPhotoRequest=new Request(new URL("/visit-photo-collapsed-v3.js?v=3",self.location.origin));
+    const photoFallbackRequest=new Request(new URL("/visit-photo-fallback-v2.js?v=3",self.location.origin));
+    const collapsedPhotoRequest=new Request(new URL("/visit-photo-collapsed-v3.js?v=4",self.location.origin));
     const [headerResponse,polishResponse,sectionScrollResponse,photoFallbackResponse,collapsedPhotoResponse]=await Promise.all([
       caches.match(headerRequest),
       caches.match(polishRequest),
