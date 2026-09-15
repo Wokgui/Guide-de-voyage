@@ -402,3 +402,270 @@ html body #programme .day-departure.cph-departure-visible{
     font-size:11px!important;
   }
 }
+
+/* v367 — premier rendu stable et commandes simplifiées. */
+
+/* Les six tuiles d'action ont leur géométrie finale avant toute retouche JS.
+   Les libellés visibles sont dessinés par CSS : aucun emoji/SVG ne peut apparaître
+   puis faire bouger la tuile lors de l'ouverture. */
+html body #programme .action-grid.status.actions,
+html body #programme .visit-now-actions{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  grid-auto-rows:56px!important;
+  gap:6px!important;
+  align-items:stretch!important;
+  width:100%!important;
+}
+html body #programme .action-grid.status.actions>button,
+html body #programme .visit-now-actions>.button{
+  position:relative!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:56px!important;
+  min-height:56px!important;
+  max-height:56px!important;
+  margin:0!important;
+  padding:5px 5px!important;
+  font-size:0!important;
+  line-height:1!important;
+  text-align:center!important;
+  white-space:normal!important;
+  overflow:hidden!important;
+}
+html body #programme .action-grid.status.actions>button::after,
+html body #programme .visit-now-actions>.button::after{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  font-size:11.5px!important;
+  font-weight:800!important;
+  line-height:1.12!important;
+  letter-spacing:0!important;
+  text-align:center!important;
+  white-space:pre-line!important;
+}
+html body #programme .action-grid.status.actions>.done[data-s="visited"]::after{content:"Visité"}
+html body #programme .action-grid.status.actions>.todo[data-s="todo"]::after{content:"À visiter"}
+html body #programme .action-grid.status.actions>.aside-point::after{content:"Mettre de côté"}
+html body #programme .card.aside .action-grid.status.actions>.aside-point::after{content:"Remettre"}
+html body #programme .visit-now-actions>.here-now::after{content:"J’y suis\A maintenant"}
+html body #programme .visit-now-actions>.restore-original-time::after{content:"Rétablir l’heure\A d’origine"}
+html body #programme .visit-now-actions>.go-now::after{content:"J’y vais\A maintenant"}
+
+/* Les anciennes icônes/labels restent dans le DOM pour l'accessibilité,
+   mais n'occupent plus aucun espace visuel. */
+html body #programme .cph-now-icon,
+html body #programme .cph-status-icon,
+html body #programme .cph-aside-icon{
+  display:none!important;
+}
+html body #programme .cph-now-label,
+html body #programme .cph-status-label,
+html body #programme .cph-aside-label{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  margin:-1px!important;
+  padding:0!important;
+  overflow:hidden!important;
+  clip:rect(0 0 0 0)!important;
+  clip-path:inset(50%)!important;
+  white-space:nowrap!important;
+}
+
+/* Avertissements d'ouverture : petite tuile centrée autour du texte. */
+html body #programme .visit-expanded .warning-box{
+  box-sizing:border-box!important;
+  display:block!important;
+  width:fit-content!important;
+  max-width:calc(100% - 16px)!important;
+  min-height:0!important;
+  margin:8px auto!important;
+  padding:5px 9px!important;
+  border-radius:9px!important;
+  font-size:11.5px!important;
+  font-weight:700!important;
+  line-height:1.25!important;
+  text-align:center!important;
+}
+
+/* Les intitulés Horaire… et Notes sont centrés par leur TEXTE seul.
+   L'icône est accolée à gauche sans décaler cet axe ; la flèche reste indépendante à droite. */
+html body #programme summary.cph-section-summary{
+  position:relative!important;
+  display:block!important;
+  min-height:64px!important;
+  padding-left:48px!important;
+  padding-right:48px!important;
+  text-align:center!important;
+}
+html body #programme .cph-section-title{
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  display:block!important;
+  width:max-content!important;
+  max-width:calc(100% - 126px)!important;
+  margin:0!important;
+  transform:translate(-50%,-50%)!important;
+  text-align:center!important;
+}
+html body #programme .cph-section-title>span:first-child{
+  position:absolute!important;
+  left:auto!important;
+  right:calc(100% + 7px)!important;
+  top:50%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:22px!important;
+  min-width:22px!important;
+  height:22px!important;
+  margin:0!important;
+  transform:translateY(-50%)!important;
+  font-size:18px!important;
+  line-height:1!important;
+}
+html body #programme .cph-section-title>span:last-child{
+  display:block!important;
+  width:100%!important;
+  margin:0!important;
+  text-align:center!important;
+  line-height:1.15!important;
+  white-space:normal!important;
+}
+html body #programme .cph-section-arrow{
+  right:14px!important;
+}
+
+/* Jour et heure : le texte est centré dans toute la tuile, sans réserver
+   une moitié de l'espace visuel à l'indicateur situé à droite. */
+html body #programme .day-editor select,
+html body #programme .cph-day-control-centered{
+  -webkit-appearance:none!important;
+  appearance:none!important;
+  box-sizing:border-box!important;
+  display:block!important;
+  width:min(150px,100%)!important;
+  max-width:150px!important;
+  min-width:0!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  padding-left:30px!important;
+  padding-right:30px!important;
+  text-align:center!important;
+  text-align-last:center!important;
+  background-color:#fff!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='m5 7 5 5 5-5' fill='none' stroke='%23506760' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+  background-repeat:no-repeat!important;
+  background-position:right 10px center!important;
+  background-size:14px 14px!important;
+}
+html body #programme .time-editor input.point-time,
+html body #programme .time-editor .cph-time-control-centered{
+  position:relative!important;
+  box-sizing:border-box!important;
+  display:block!important;
+  width:min(180px,100%)!important;
+  max-width:180px!important;
+  min-width:0!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  padding-left:34px!important;
+  padding-right:34px!important;
+  text-align:center!important;
+  background-color:#fff!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='m5 7 5 5 5-5' fill='none' stroke='%23506760' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+  background-repeat:no-repeat!important;
+  background-position:right 11px center!important;
+  background-size:14px 14px!important;
+}
+html body #programme .time-editor input[type="time"]::-webkit-datetime-edit{
+  width:100%!important;
+  padding:0!important;
+  text-align:center!important;
+}
+html body #programme .time-editor input[type="time"]::-webkit-calendar-picker-indicator{
+  position:absolute!important;
+  right:0!important;
+  top:0!important;
+  width:34px!important;
+  height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  opacity:0!important;
+  cursor:pointer!important;
+}
+
+/* Carte dépliée : le nom reprend exactement la colonne de la durée de visite.
+   Son axe horizontal coïncide donc avec l'icône/valeur de temps de visite. */
+html body #programme .visit-details[open] .visit-summary .summary-title-row{
+  position:relative!important;
+  left:var(--v257-open-left,var(--v256-open-left,0px))!important;
+  display:grid!important;
+  grid-template-columns:24px minmax(0,1fr) auto minmax(0,1fr)!important;
+  column-gap:4px!important;
+  align-items:center!important;
+  width:var(--v257-open-width,var(--v256-open-width,100%))!important;
+  max-width:none!important;
+}
+html body #programme .visit-details[open] .visit-summary .summary-title{
+  grid-column:2!important;
+  justify-self:stretch!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  text-align:center!important;
+}
+html body #programme .visit-details[open] .visit-summary .summary-title-name{
+  width:100%!important;
+  max-width:100%!important;
+  text-align:center!important;
+}
+
+@media(max-width:420px){
+  html body #programme .action-grid.status.actions,
+  html body #programme .visit-now-actions{
+    grid-auto-rows:54px!important;
+  }
+  html body #programme .action-grid.status.actions>button,
+  html body #programme .visit-now-actions>.button{
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+  }
+  html body #programme .action-grid.status.actions>button::after,
+  html body #programme .visit-now-actions>.button::after{
+    font-size:10.5px!important;
+  }
+  html body #programme .day-editor select,
+  html body #programme .cph-day-control-centered{
+    width:min(140px,100%)!important;
+    max-width:140px!important;
+  }
+  html body #programme .cph-section-title{
+    max-width:calc(100% - 118px)!important;
+  }
+}
+
+@media(max-width:380px){
+  html body #programme .action-grid.status.actions>button::after,
+  html body #programme .visit-now-actions>.button::after{
+    font-size:10px!important;
+  }
+  html body #programme .visit-now-actions>.restore-original-time::after{
+    font-size:9.6px!important;
+  }
+}
