@@ -307,7 +307,6 @@ function refresh(){
  centerScheduleEditorFields();
  normalizeDurationEditors();
  normalizeStatusButtons();
- installPlaceImageFallbacks();
 }
 
 document.addEventListener("guide:rendered",refresh);

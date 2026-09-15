@@ -6271,7 +6271,6 @@ function orderEditor(day,dayBody){
 const PHOTO_PAGES={
  "Rundetaarn":["en","Rundetaarn"],
  "Gråbrødretorv":["da","Gråbrødretorv"],
- "Conditori La Glace":["da","Conditori_La_Glace"],
  "Strøget":["en","Strøget"],
  "Amagertorv":["en","Amagertorv"],
  "Kongens Nytorv":["en","Kongens_Nytorv"],
@@ -6305,9 +6304,9 @@ const PHOTO_PAGES={
  "Canaux de Christianshavn":["en","Christianshavn"],
  "Christiania":["en","Freetown_Christiania"],
  "Broens Street Food":["da","Broens_Gadekøkken"],
- "Inderhavnsbroen":["en","Inner_Harbour_Bridge"],
+ "Inderhavnsbroen":["en","Inderhavnsbroen"],
  "Cirkelbroen":["en","Circle_Bridge"],
- "Dronning Louises Bro":["en","Queen_Louise's_Bridge"],
+ "Dronning Louises Bro":["en","Dronning_Louises_Bro"],
  "Assistens Kirkegård":["en","Assistens_Cemetery_(Copenhagen)"],
  "Jægersborggade":["da","Jægersborggade"],
  "Torvehallerne":["en","Torvehallerne"],
@@ -6316,11 +6315,20 @@ const PHOTO_PAGES={
  "Zoo de Copenhague":["en","Copenhagen_Zoo"]
 };
 const PHOTO_DIRECT={
+ "Conditori La Glace":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Conditori%20La%20Glace.jpg?width=1280",
  "Lilla Torg":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Lilla-Torg-Malmo.jpg?width=1280",
  "Torvehallerne":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Torvehallerne%2C%20Copenhagen%2C%20Denmark%20%28Unsplash%20Eo9ZNtEUH_Y%29.jpg?width=1280",
  "Israels Plads":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Israels_Plads%2C_Copenhagen.jpg?width=1280",
  "Malmö Saluhall":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Malmo%20Saluhall%2020160920%20750A9536%20%2829728429201%29.jpg?width=1280",
  "Broens Street Food":"https://files.guidedanmark.org/files/382/312635_3_Broens.png"
+};
+const PHOTO_FALLBACKS_BY_ID={
+ "p03-d-p":"/assets/place-fallbacks/dop.webp",
+ "p11-restaurant-pal-gade":"/assets/place-fallbacks/restaurant-palaegade.webp",
+ "p33-restaurant-kronborg":"/assets/place-fallbacks/restaurant-kronborg.webp",
+ "p51-hallernes-sm-rrebr-d":"/assets/place-fallbacks/hallernes-smorrebrod.webp",
+ "custom-1785177723866-xtyhp":"/assets/place-fallbacks/safari.webp",
+ "custom-1785179305752-lv4j4":"/assets/place-fallbacks/the-pescatarian.webp"
 };
 
 function specialLargePhotoData(p){
@@ -6340,7 +6348,17 @@ const PHOTO_CACHE_MAX_AGE=30*24*60*60*1000;
 const PHOTO_FAILURE_RETRY_MS=60*1000;
 const PHOTO_FAILURE_AT={};
 let PHOTO_PERSISTED_CACHE={};
-try{PHOTO_PERSISTED_CACHE=JSON.parse(localStorage.getItem(PHOTO_CACHE_KEY)||"{}")||{}}catch(_){PHOTO_PERSISTED_CACHE={}}
+try{
+ PHOTO_PERSISTED_CACHE=JSON.parse(localStorage.getItem(PHOTO_CACHE_KEY)||"{}")||{};
+ let changed=false;
+ Object.keys(PHOTO_PERSISTED_CACHE).forEach(id=>{
+  if(PHOTO_PERSISTED_CACHE[id]?.credit==="Wikipédia / Wikimedia Commons"){
+   delete PHOTO_PERSISTED_CACHE[id];
+   changed=true;
+  }
+ });
+ if(changed)localStorage.setItem(PHOTO_CACHE_KEY,JSON.stringify(PHOTO_PERSISTED_CACHE));
+}catch(_){PHOTO_PERSISTED_CACHE={}}
 function persistPhotoSource(id,src,credit=""){
  if(!src||typeof src!=="string"||src.startsWith("data:"))return;
  PHOTO_PERSISTED_CACHE[id]={src,credit,at:Date.now()};
@@ -6375,29 +6393,8 @@ async function resolveExternalPhotoSrc(p){
   const src=json.thumbnail?.source||json.originalimage?.source||null;
   if(src)return remember(src,`Wikipédia (${lang})`);
  }catch(e){}
-
- // Règle universelle : tout nouveau lieu tente automatiquement une recherche
- // d'image Wikipédia avant d'utiliser l'illustration de remplacement.
- const searchAddress=String(p.address||"").trim();
- const sameAsName=searchAddress.toLocaleLowerCase()===String(p.name||"").trim().toLocaleLowerCase();
- const ambiguousPersonalPlace=p.custom&&sameAsName&&/restaurant|café|cafe|bar/i.test(`${p.type||""} ${p.customNature||""}`);
- if(ambiguousPersonalPlace)return remember(null);
- try{
-  const address=searchAddress;
-  const city=/malm[oö]|sweden|suède/i.test(`${p.name} ${address}`)
-   ? "Malmö"
-   : /københavn|copenhague|copenhagen|frederiksberg/i.test(`${p.name} ${address}`)
-    ? "Copenhagen"
-    : address.split(",").slice(-2).join(" ");
-  const query=`${p.name||""} ${city}`.trim();
-  const api=`https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query)}&gsrlimit=3&prop=pageimages&piprop=thumbnail&pithumbsize=1400&format=json&origin=*`;
-  const res=await fetch(api);
-  if(!res.ok)throw new Error("HTTP "+res.status);
-  const json=await res.json();
-  const pages=Object.values(json.query?.pages||{});
-  const found=pages.find(item=>item.thumbnail?.source);
-  if(found?.thumbnail?.source)return remember(found.thumbnail.source,"Wikipédia / Wikimedia Commons");
- }catch(e){}
+ const fallback=PHOTO_FALLBACKS_BY_ID[p.id];
+ if(fallback)return remember(fallback,"Illustration IA dédiée au lieu");
  return remember(null);
 }
 
@@ -6678,6 +6675,7 @@ function knownPhotoSource(p){
  const special=specialLargePhotoData(p);
  if(special)return special;
  if(PHOTO_DIRECT[p.name])return PHOTO_DIRECT[p.name];
+ if(PHOTO_FALLBACKS_BY_ID[p.id])return PHOTO_FALLBACKS_BY_ID[p.id];
  const persisted=PHOTO_PERSISTED_CACHE[p.id];
  if(persisted?.src&&Date.now()-Number(persisted.at||0)<PHOTO_CACHE_MAX_AGE)return persisted.src;
  return null;

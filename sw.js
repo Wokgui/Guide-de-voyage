@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v358-static-v66";
-const RUNTIME_CACHE="copenhague-v358-runtime-v66";
+const STATIC_CACHE="copenhague-v358-static-v67";
+const RUNTIME_CACHE="copenhague-v358-runtime-v67";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -8,10 +8,7 @@ const STATIC_FILES=[
   "/header-prestige.js?v=357",
   "/visit-polish-v366.js?v=366",
   "/visit-section-scroll-v370.js?v=374",
-  "/visit-photo-fallback-v2.js?v=4",
-  "/visit-photo-collapsed-v3.js?v=5",
   "/visit-refinement-v369.css?v=373",
-  "/visit-photo-fallback-v2.css?v=2",
   "/ux-stability-v1.css?v=1",
   "/first-paint-v355.css?v=355",
   "/visual-stability-v357.css?v=357",
@@ -25,6 +22,12 @@ const STATIC_FILES=[
   "/icons/app-icon.svg",
   "/icons/app-icon-192.png?v=2",
   "/icons/app-icon-512.png?v=2",
+  "/assets/place-fallbacks/dop.webp",
+  "/assets/place-fallbacks/restaurant-palaegade.webp",
+  "/assets/place-fallbacks/restaurant-kronborg.webp",
+  "/assets/place-fallbacks/hallernes-smorrebrod.webp",
+  "/assets/place-fallbacks/safari.webp",
+  "/assets/place-fallbacks/the-pescatarian.webp",
   "/vendor/leaflet/leaflet.css",
   "/vendor/leaflet/leaflet.js",
   "/vendor/supabase/supabase.js",
@@ -69,36 +72,22 @@ async function cacheFirst(request){
   catch(_){return Response.error();}
 }
 
-function sanitizeHeaderPhotoFallback(source){
-  return source
-    .replace(/ensureMissingPlacePhotos\(\);\s*/g,"")
-    .replace(/img\.addEventListener\("error",fallback,\{once:true\}\);\s*if\(img\.complete&&img\.naturalWidth===0\)fallback\(\);/g,"");
-}
-
 async function enhancedHeader(request){
   try{
     const polishRequest=new Request(new URL("/visit-polish-v366.js?v=366",self.location.origin),{method:"GET"});
     const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=374",self.location.origin),{method:"GET"});
-    const photoFallbackRequest=new Request(new URL("/visit-photo-fallback-v2.js?v=4",self.location.origin),{method:"GET"});
-    const collapsedPhotoRequest=new Request(new URL("/visit-photo-collapsed-v3.js?v=5",self.location.origin),{method:"GET"});
-    let [headerResponse,polishResponse,sectionScrollResponse,photoFallbackResponse,collapsedPhotoResponse]=await Promise.all([
+    let [headerResponse,polishResponse,sectionScrollResponse]=await Promise.all([
       fetch(request,{cache:"no-store"}),
       fetch(polishRequest,{cache:"no-store"}),
-      fetch(sectionScrollRequest,{cache:"no-store"}),
-      fetch(photoFallbackRequest,{cache:"no-store"}),
-      fetch(collapsedPhotoRequest,{cache:"no-store"})
+      fetch(sectionScrollRequest,{cache:"no-store"})
     ]);
     if(!headerResponse.ok)throw new Error("header fetch failed");
     if(!polishResponse.ok)polishResponse=await caches.match(polishRequest);
     if(!sectionScrollResponse.ok)sectionScrollResponse=await caches.match(sectionScrollRequest);
-    if(!photoFallbackResponse.ok)photoFallbackResponse=await caches.match(photoFallbackRequest);
-    if(!collapsedPhotoResponse.ok)collapsedPhotoResponse=await caches.match(collapsedPhotoRequest);
-    const source=sanitizeHeaderPhotoFallback(await headerResponse.text());
+    const source=await headerResponse.text();
     const polish=polishResponse?await polishResponse.text():"";
     const sectionScroll=sectionScrollResponse?await sectionScrollResponse.text():"";
-    const photoFallback=photoFallbackResponse?await photoFallbackResponse.text():"";
-    const collapsedPhoto=collapsedPhotoResponse?await collapsedPhotoResponse.text():"";
-    const response=new Response(`${source}\n${polish}\n${sectionScroll}\n${photoFallback}\n${collapsedPhoto}`,{
+    const response=new Response(`${source}\n${polish}\n${sectionScroll}`,{
       status:200,
       statusText:"OK",
       headers:{
@@ -113,41 +102,31 @@ async function enhancedHeader(request){
     const headerRequest=new Request(new URL("/header-prestige.js?v=357",self.location.origin));
     const polishRequest=new Request(new URL("/visit-polish-v366.js?v=366",self.location.origin));
     const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=374",self.location.origin));
-    const photoFallbackRequest=new Request(new URL("/visit-photo-fallback-v2.js?v=4",self.location.origin));
-    const collapsedPhotoRequest=new Request(new URL("/visit-photo-collapsed-v3.js?v=5",self.location.origin));
-    const [headerResponse,polishResponse,sectionScrollResponse,photoFallbackResponse,collapsedPhotoResponse]=await Promise.all([
+    const [headerResponse,polishResponse,sectionScrollResponse]=await Promise.all([
       caches.match(headerRequest),
       caches.match(polishRequest),
-      caches.match(sectionScrollRequest),
-      caches.match(photoFallbackRequest),
-      caches.match(collapsedPhotoRequest)
+      caches.match(sectionScrollRequest)
     ]);
     if(!headerResponse)return Response.error();
-    const source=sanitizeHeaderPhotoFallback(await headerResponse.text());
+    const source=await headerResponse.text();
     const polish=polishResponse?await polishResponse.text():"";
     const sectionScroll=sectionScrollResponse?await sectionScrollResponse.text():"";
-    const photoFallback=photoFallbackResponse?await photoFallbackResponse.text():"";
-    const collapsedPhoto=collapsedPhotoResponse?await collapsedPhotoResponse.text():"";
-    return new Response(`${source}\n${polish}\n${sectionScroll}\n${photoFallback}\n${collapsedPhoto}`,{headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"no-store"}});
+    return new Response(`${source}\n${polish}\n${sectionScroll}`,{headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"no-store"}});
   }
 }
 
 async function enhancedInteractionStyle(request){
   try{
     const refinementRequest=new Request(new URL("/visit-refinement-v369.css?v=373",self.location.origin),{method:"GET"});
-    const photoFallbackStyleRequest=new Request(new URL("/visit-photo-fallback-v2.css?v=2",self.location.origin),{method:"GET"});
-    let [baseResponse,refinementResponse,photoFallbackStyleResponse]=await Promise.all([
+    let [baseResponse,refinementResponse]=await Promise.all([
       fetch(request,{cache:"no-store"}),
-      fetch(refinementRequest,{cache:"no-store"}),
-      fetch(photoFallbackStyleRequest,{cache:"no-store"})
+      fetch(refinementRequest,{cache:"no-store"})
     ]);
     if(!baseResponse.ok)throw new Error("interaction style fetch failed");
     if(!refinementResponse.ok)refinementResponse=await caches.match(refinementRequest);
-    if(!photoFallbackStyleResponse.ok)photoFallbackStyleResponse=await caches.match(photoFallbackStyleRequest);
     const base=await baseResponse.text();
     const refinement=refinementResponse?await refinementResponse.text():"";
-    const photoFallbackStyle=photoFallbackStyleResponse?await photoFallbackStyleResponse.text():"";
-    const response=new Response(`${base}\n${refinement}\n${photoFallbackStyle}`,{
+    const response=new Response(`${base}\n${refinement}`,{
       status:200,
       statusText:"OK",
       headers:{
@@ -161,17 +140,14 @@ async function enhancedInteractionStyle(request){
     if(runtime)return runtime;
     const baseRequest=new Request(new URL("/interaction-layout-v358.css?v=358",self.location.origin));
     const refinementRequest=new Request(new URL("/visit-refinement-v369.css?v=373",self.location.origin));
-    const photoFallbackStyleRequest=new Request(new URL("/visit-photo-fallback-v2.css?v=2",self.location.origin));
-    const [baseResponse,refinementResponse,photoFallbackStyleResponse]=await Promise.all([
+    const [baseResponse,refinementResponse]=await Promise.all([
       caches.match(baseRequest),
-      caches.match(refinementRequest),
-      caches.match(photoFallbackStyleRequest)
+      caches.match(refinementRequest)
     ]);
     if(!baseResponse)return Response.error();
     const base=await baseResponse.text();
     const refinement=refinementResponse?await refinementResponse.text():"";
-    const photoFallbackStyle=photoFallbackStyleResponse?await photoFallbackStyleResponse.text():"";
-    return new Response(`${base}\n${refinement}\n${photoFallbackStyle}`,{headers:{"Content-Type":"text/css; charset=utf-8","Cache-Control":"no-store"}});
+    return new Response(`${base}\n${refinement}`,{headers:{"Content-Type":"text/css; charset=utf-8","Cache-Control":"no-store"}});
   }
 }
 

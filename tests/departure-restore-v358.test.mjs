@@ -53,13 +53,10 @@ assert.match(sectionScroll,/desiredTargetTop\(\)[\s\S]*?stickyHeaderOffset\(\)\+
 assert.match(sectionScroll,/button\.addEventListener\("click",\(\)=>\{[\s\S]*?scrollTargetBelowHeader\(banner,banner\)/,'chaque ouverture ou fermeture de journée doit recaler son bandeau');
 assert.doesNotMatch(sectionScroll,/genericHeroDataUrl|ensureVisitHeroImages/,'le script de scroll ne doit plus produire un ancien placeholder photo');
 
-assert.match(header,/function ensureMissingPlacePhotos\(\)[\s\S]*?#programme \.visit-summary[\s\S]*?visit-summary-thumb cph-place-photo-fallback cph-generated-place-photo/,'le moteur historique peut toujours réserver une miniature de remplacement');
-assert.match(photoFallback,/function ensureSummaryPhoto\(summary\)[\s\S]*?visit-summary-thumb/,'le nouveau moteur doit remplacer toute miniature absente ou générée par une photo de catégorie');
-assert.match(photoFallback,/function ensureHeroPhoto\(details\)[\s\S]*?insertAdjacentElement\("afterend",hero\)/,'une visite dépliée sans photo doit recevoir un seul grand visuel');
-assert.match(photoFallback,/croisi\|canal\|bateau\|boat/,'Croisière doit sélectionner la photo de catégorie correspondante');
-assert.match(photoFallback,/safari\|zoo\|animal\|faune\|wildlife/,'Safari et les lieux animaliers doivent sélectionner leur photo dédiée');
-assert.match(photoFallback,/Photo momentanément indisponible[\s\S]*?Réessayer/,'le bloc erreur photo doit être reconnu et supprimé');
-assert.match(photoFallbackCss,/\.cph-generated-place-hero:not\(\.cph-category-fallback-hero\)[\s\S]*?display:none!important/,'les anciens emplacements générés ne doivent pas créer un second espace');
+assert.doesNotMatch(header,/normalizeStatusButtons\(\);\s*installPlaceImageFallbacks\(\)/,'le rendu principal ne doit plus injecter un remplacement photo après coup');
+assert.doesNotMatch(photoFallback,/images\.unsplash\.com|setTimeout|\.src\s*=/,'le module de transition ne doit plus remplacer les photos');
+assert.doesNotMatch(photoFallbackCss,/\.cph-category-photo-fallback|display:none!important/,'le style de transition ne doit plus masquer ou reformater les photos');
+assert.match(html,/const PHOTO_FALLBACKS_BY_ID=\{[\s\S]*?custom-1785177723866-xtyhp[\s\S]*?safari\.webp/,'Safari doit utiliser son illustration locale dédiée');
 
 const cascadeStart=header.indexOf('function cascadeFromClickedPoint');
 const cascadeEnd=header.indexOf('function currentMinute',cascadeStart);
@@ -69,11 +66,10 @@ assert.match(cascade,/const ordered=dayItems\(day\)\.slice\(\)/,'l’ordre affic
 assert.match(cascade,/state\.timeOverrides\[id\]=minToHm\(target\)/,'le premier événement doit recevoir directement la nouvelle heure');
 assert.doesNotMatch(cascade,/reorderDayChronologically/,'aucun réordonnancement ne doit changer la cible avant la propagation');
 
-assert.match(sw,/copenhague-v358-static-v63/,'le cache statique doit être renouvelé pour les nouvelles photos de secours');
+assert.match(sw,/copenhague-v358-static-v67/,'le cache statique doit être renouvelé pour les nouvelles photos de secours');
 assert.match(sw,/visit-refinement-v369\.css\?v=373/,'la feuille de raffinement centrée doit être précachée');
 assert.match(sw,/visit-section-scroll-v370\.js\?v=374/,'le script de recalage sans ancien placeholder doit être précaché');
-assert.match(sw,/visit-photo-fallback-v2\.js\?v=2/,'le moteur de photos de catégorie doit être précaché');
-assert.match(sw,/visit-photo-fallback-v2\.css\?v=2/,'le style des photos de catégorie doit être précaché');
+assert.doesNotMatch(sw,/visit-photo-fallback-v2\.js|visit-photo-collapsed-v3\.js|visit-photo-fallback-v2\.css/,'les injecteurs de photos génériques ne doivent plus être chargés');
 assert.match(sw,/enhancedInteractionStyle\(request\)/,'la feuille de raffinement doit être servie avec interaction-layout dès le head');
 
-console.log(JSON.stringify({ok:true,departure:'never-painted',actions:'iconless',time:'symmetrical-padding-centered',sections:'classic-icons-equal-8px',sectionScroll:'all-details-and-days-title-visible',images:'single-category-photo-fallback',cache:'v63'},null,2));
+console.log(JSON.stringify({ok:true,departure:'never-painted',actions:'iconless',time:'symmetrical-padding-centered',sections:'classic-icons-equal-8px',sectionScroll:'all-details-and-days-title-visible',images:'exact-or-place-specific',cache:'v67'},null,2));
