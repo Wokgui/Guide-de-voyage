@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v358-static-v57";
-const RUNTIME_CACHE="copenhague-v358-runtime-v57";
+const STATIC_CACHE="copenhague-v358-static-v58";
+const RUNTIME_CACHE="copenhague-v358-runtime-v58";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -7,6 +7,7 @@ const STATIC_FILES=[
   "/cloud-backup.js?v=3",
   "/header-prestige.js?v=357",
   "/visit-polish-v366.js?v=366",
+  "/visit-section-scroll-v370.js?v=370",
   "/visit-refinement-v369.css?v=369",
   "/ux-stability-v1.css?v=1",
   "/first-paint-v355.css?v=355",
@@ -68,15 +69,19 @@ async function cacheFirst(request){
 async function enhancedHeader(request){
   try{
     const polishRequest=new Request(new URL("/visit-polish-v366.js?v=366",self.location.origin),{method:"GET"});
-    let [headerResponse,polishResponse]=await Promise.all([
+    const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=370",self.location.origin),{method:"GET"});
+    let [headerResponse,polishResponse,sectionScrollResponse]=await Promise.all([
       fetch(request,{cache:"no-store"}),
-      fetch(polishRequest,{cache:"no-store"})
+      fetch(polishRequest,{cache:"no-store"}),
+      fetch(sectionScrollRequest,{cache:"no-store"})
     ]);
     if(!headerResponse.ok)throw new Error("header fetch failed");
     if(!polishResponse.ok)polishResponse=await caches.match(polishRequest);
+    if(!sectionScrollResponse.ok)sectionScrollResponse=await caches.match(sectionScrollRequest);
     const source=await headerResponse.text();
     const polish=polishResponse?await polishResponse.text():"";
-    const response=new Response(`${source}\n${polish}`,{
+    const sectionScroll=sectionScrollResponse?await sectionScrollResponse.text():"";
+    const response=new Response(`${source}\n${polish}\n${sectionScroll}`,{
       status:200,
       statusText:"OK",
       headers:{
@@ -90,11 +95,17 @@ async function enhancedHeader(request){
     if(runtime)return runtime;
     const headerRequest=new Request(new URL("/header-prestige.js?v=357",self.location.origin));
     const polishRequest=new Request(new URL("/visit-polish-v366.js?v=366",self.location.origin));
-    const [headerResponse,polishResponse]=await Promise.all([caches.match(headerRequest),caches.match(polishRequest)]);
+    const sectionScrollRequest=new Request(new URL("/visit-section-scroll-v370.js?v=370",self.location.origin));
+    const [headerResponse,polishResponse,sectionScrollResponse]=await Promise.all([
+      caches.match(headerRequest),
+      caches.match(polishRequest),
+      caches.match(sectionScrollRequest)
+    ]);
     if(!headerResponse)return Response.error();
     const source=await headerResponse.text();
     const polish=polishResponse?await polishResponse.text():"";
-    return new Response(`${source}\n${polish}`,{headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"no-store"}});
+    const sectionScroll=sectionScrollResponse?await sectionScrollResponse.text():"";
+    return new Response(`${source}\n${polish}\n${sectionScroll}`,{headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"no-store"}});
   }
 }
 
