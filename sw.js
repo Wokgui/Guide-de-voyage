@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v358-static-v58";
-const RUNTIME_CACHE="copenhague-v358-runtime-v58";
+const STATIC_CACHE="copenhague-v358-static-v59";
+const RUNTIME_CACHE="copenhague-v358-runtime-v59";
 const STATIC_FILES=[
   "/",
   "/index.html",
