@@ -1,11 +1,12 @@
 /* v358 — départ effectif et actions d'horaire stables dès le premier rendu. */
 
-/* Le départ effectif n'est jamais peint : seul un départ prévu validé par le JS est affiché. */
-#programme .day-banner .day-departure{
+/* Aucun bandeau Départ prévu/réel ne doit pouvoir être peint, même avant le JS. */
+html body #programme .day-departure,
+html body #programme .day-departure.cph-departure-visible{
   display:none!important;
-}
-#programme .day-banner .day-departure.cph-departure-visible{
-  display:flex!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
 }
 
 #programme .time-editor>.time-editor-actions{
