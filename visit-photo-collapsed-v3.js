@@ -13,7 +13,7 @@ const FALLBACKS={
   park:"https://images.unsplash.com/photo-1770823185021-76dfed76e35b?auto=format&fit=crop&w=900&q=82",
   dining:"https://images.unsplash.com/photo-1758426637742-80bd0f983611?auto=format&fit=crop&w=900&q=82",
   square:"https://images.unsplash.com/photo-1777295955917-222080a21b70?auto=format&fit=crop&w=900&q=82",
-  generic:"https://images.unsplash.com/photo-1777295955917-222080a21b70?auto=format&fit=crop&w=900&q=82"
+  generic:"https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?auto=format&fit=crop&w=900&q=82"
 };
 
 function text(scope){return (scope?.textContent||"").replace(/\s+/g," ").trim().toLowerCase();}
@@ -23,7 +23,7 @@ function category(scope){
  if(/hôtel|hotel|hébergement|hebergement|auberge/.test(value))return "hotel";
  if(/gare|station|train|rail|métro|metro/.test(value))return "station";
  if(/château|chateau|castle|palais|palace|forteresse/.test(value))return "castle";
- if(/musée|musee|museum|galerie|gallery|exposition/.test(value))return "museum";
+ if(/musée|musee|museum|galerie|gallery|exposition|biblioth|library/.test(value))return "museum";
  if(/safari|zoo|animal|faune|wildlife/.test(value))return "safari";
  if(/parc|park|jardin|garden|botanique|nature/.test(value))return "park";
  if(/restaurant|café|cafe|bar|bistro|pâtisserie|patisserie|boulangerie|food/.test(value))return "dining";
@@ -35,18 +35,26 @@ function lastResort(){
  const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#155f57"/><stop offset=".5" stop-color="#79b8aa"/><stop offset="1" stop-color="#ead2a0"/></linearGradient></defs><rect width="900" height="700" fill="url(#g)"/><circle cx="690" cy="170" r="85" fill="#fff1bd" opacity=".85"/><path d="M0 540c180-75 310-50 450 20 150 75 280 55 450-35v175H0z" fill="#1f4f48" opacity=".42"/></svg>';
  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
-function forceVisible(img){
- img.classList.add("visit-summary-thumb","cph-category-photo-fallback","cph-category-fallback-thumb","cph-collapsed-photo-v3");
+function hasRealBackground(node){
+ if(!node||node.tagName==="IMG")return false;
+ let value=String(node.style?.backgroundImage||"");
+ try{
+  if((!value||value==="none")&&window.getComputedStyle)value=String(getComputedStyle(node).backgroundImage||"");
+ }catch(_){ }
+ return value!=="none"&&/url\(/i.test(value)&&!/data:image\/svg\+xml/i.test(value);
+}
+function stabilizeImage(img){
+ img.classList.add("visit-summary-thumb","cph-collapsed-photo-v3");
  img.style.setProperty("display","block","important");
  img.style.setProperty("visibility","visible","important");
  img.style.setProperty("opacity","1","important");
  img.style.setProperty("object-fit","cover","important");
  img.style.setProperty("object-position","center","important");
- img.style.setProperty("background","none","important");
 }
 function applyFallback(img,scope){
  if(!img)return;
- forceVisible(img);
+ stabilizeImage(img);
+ img.classList.add("cph-category-photo-fallback","cph-category-fallback-thumb");
  img.removeAttribute("srcset");
  img.removeAttribute("sizes");
  img.dataset.cphCollapsedFallback="1";
@@ -60,17 +68,22 @@ function applyFallback(img,scope){
 }
 function makeImage(scope,oldNode){
  const img=document.createElement("img");
- if(oldNode?.classList)oldNode.classList.forEach(name=>img.classList.add(name));
+ if(oldNode?.classList)oldNode.classList.forEach(name=>{
+  if(name!=="cph-category-photo-fallback"&&name!=="cph-category-fallback-thumb")img.classList.add(name);
+ });
  img.alt="Photo d’illustration";
- forceVisible(img);
+ stabilizeImage(img);
  if(oldNode)oldNode.replaceWith(img);
  applyFallback(img,scope);
  return img;
 }
 function fixSummary(summary){
- const scope=summary.closest(".visit-details")||summary;
+ const scope=summary;
  let thumb=summary.querySelector(":scope > .visit-summary-thumb")||summary.querySelector(".visit-summary-thumb");
  if(thumb&&thumb.tagName!=="IMG"){
+  const isFallbackNode=thumb.classList.contains("cph-category-photo-fallback")||thumb.dataset.cphFallbackCategory;
+  // Une vraie miniature déjà fournie par l'application doit rester intacte.
+  if(hasRealBackground(thumb)&&!isFallbackNode)return;
   makeImage(scope,thumb);
   return;
  }
@@ -81,7 +94,7 @@ function fixSummary(summary){
   summary.insertBefore(img,main||summary.firstChild);
   return;
  }
- forceVisible(thumb);
+ stabilizeImage(thumb);
  const src=String(thumb.getAttribute("src")||"").trim();
  const obsolete=thumb.classList.contains("cph-generated-place-photo")||/^data:image\/svg\+xml/i.test(src);
  if(!src||obsolete||(thumb.complete&&thumb.naturalWidth===0))applyFallback(thumb,scope);
