@@ -1,5 +1,5 @@
-const STATIC_CACHE="copenhague-v358-static-v56";
-const RUNTIME_CACHE="copenhague-v358-runtime-v56";
+const STATIC_CACHE="copenhague-v358-static-v57";
+const RUNTIME_CACHE="copenhague-v358-runtime-v57";
 const STATIC_FILES=[
   "/",
   "/index.html",
@@ -7,6 +7,7 @@ const STATIC_FILES=[
   "/cloud-backup.js?v=3",
   "/header-prestige.js?v=357",
   "/visit-polish-v366.js?v=366",
+  "/visit-refinement-v369.css?v=369",
   "/ux-stability-v1.css?v=1",
   "/first-paint-v355.css?v=355",
   "/visual-stability-v357.css?v=357",
@@ -97,6 +98,39 @@ async function enhancedHeader(request){
   }
 }
 
+async function enhancedInteractionStyle(request){
+  try{
+    const refinementRequest=new Request(new URL("/visit-refinement-v369.css?v=369",self.location.origin),{method:"GET"});
+    let [baseResponse,refinementResponse]=await Promise.all([
+      fetch(request,{cache:"no-store"}),
+      fetch(refinementRequest,{cache:"no-store"})
+    ]);
+    if(!baseResponse.ok)throw new Error("interaction style fetch failed");
+    if(!refinementResponse.ok)refinementResponse=await caches.match(refinementRequest);
+    const base=await baseResponse.text();
+    const refinement=refinementResponse?await refinementResponse.text():"";
+    const response=new Response(`${base}\n${refinement}`,{
+      status:200,
+      statusText:"OK",
+      headers:{
+        "Content-Type":"text/css; charset=utf-8",
+        "Cache-Control":"no-store, no-cache, must-revalidate"
+      }
+    });
+    return await remember(request,response);
+  }catch(_){
+    const runtime=await caches.match(request);
+    if(runtime)return runtime;
+    const baseRequest=new Request(new URL("/interaction-layout-v358.css?v=358",self.location.origin));
+    const refinementRequest=new Request(new URL("/visit-refinement-v369.css?v=369",self.location.origin));
+    const [baseResponse,refinementResponse]=await Promise.all([caches.match(baseRequest),caches.match(refinementRequest)]);
+    if(!baseResponse)return Response.error();
+    const base=await baseResponse.text();
+    const refinement=refinementResponse?await refinementResponse.text():"";
+    return new Response(`${base}\n${refinement}`,{headers:{"Content-Type":"text/css; charset=utf-8","Cache-Control":"no-store"}});
+  }
+}
+
 self.addEventListener("fetch",event=>{
   const request=event.request;
   if(request.method!=="GET")return;
@@ -115,6 +149,11 @@ self.addEventListener("fetch",event=>{
 
   if(url.origin===self.location.origin&&url.pathname==="/header-prestige.js"){
     event.respondWith(enhancedHeader(request));
+    return;
+  }
+
+  if(url.origin===self.location.origin&&url.pathname==="/interaction-layout-v358.css"){
+    event.respondWith(enhancedInteractionStyle(request));
     return;
   }
 
