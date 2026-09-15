@@ -13,7 +13,7 @@ const FALLBACKS={
   park:"https://images.unsplash.com/photo-1770823185021-76dfed76e35b?auto=format&fit=crop&w=1200&q=82",
   dining:"https://images.unsplash.com/photo-1758426637742-80bd0f983611?auto=format&fit=crop&w=1200&q=82",
   square:"https://images.unsplash.com/photo-1777295955917-222080a21b70?auto=format&fit=crop&w=1200&q=82",
-  generic:"https://images.unsplash.com/photo-1777295955917-222080a21b70?auto=format&fit=crop&w=1200&q=82"
+  generic:"https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?auto=format&fit=crop&w=1200&q=82"
 };
 
 function cleanText(node){
@@ -26,7 +26,7 @@ function categoryFor(scope){
   if(/hôtel|hotel|hébergement|hebergement|auberge/.test(text))return "hotel";
   if(/gare|station|train|rail|métro|metro/.test(text))return "station";
   if(/château|chateau|castle|palais|palace|forteresse/.test(text))return "castle";
-  if(/musée|musee|museum|galerie|gallery|exposition/.test(text))return "museum";
+  if(/musée|musee|museum|galerie|gallery|exposition|biblioth|library/.test(text))return "museum";
   if(/safari|zoo|animal|faune|wildlife/.test(text))return "safari";
   if(/parc|park|jardin|garden|botanique|nature/.test(text))return "park";
   if(/restaurant|café|cafe|bar|bistro|pâtisserie|patisserie|boulangerie|food/.test(text))return "dining";
@@ -50,6 +50,15 @@ function isOldGenerated(img){
     /^data:image\/svg\+xml/i.test(src);
 }
 
+function hasRealBackground(node){
+  if(!node||node.tagName==="IMG")return false;
+  let value=String(node.style?.backgroundImage||"");
+  try{
+    if((!value||value==="none")&&window.getComputedStyle)value=String(getComputedStyle(node).backgroundImage||"");
+  }catch(_){ }
+  return value!=="none"&&/url\(/i.test(value)&&!/data:image\/svg\+xml/i.test(value);
+}
+
 function installFallbackOnImage(img,scope,kind){
   if(!img)return;
   const useFallback=()=>{
@@ -69,7 +78,10 @@ function installFallbackOnImage(img,scope,kind){
 
   const raw=String(img.getAttribute("src")||"").trim();
   if(!raw||isOldGenerated(img)||(img.complete&&img.naturalWidth===0))useFallback();
-  else img.addEventListener("error",useFallback,{once:true});
+  else if(img.dataset.cphCategoryFallbackErrorBound!=="1"){
+    img.dataset.cphCategoryFallbackErrorBound="1";
+    img.addEventListener("error",useFallback,{once:true});
+  }
 }
 
 function removeUnavailablePhotoBlocks(scope){
@@ -99,11 +111,13 @@ function removeUnavailablePhotoBlocks(scope){
 
 function ensureSummaryPhoto(summary){
   if(!summary)return;
-  const scope=summary.closest(".visit-details")||summary;
+  const scope=summary;
   let thumb=summary.querySelector(".visit-summary-thumb");
   if(!thumb)thumb=summary.querySelector("img");
 
   if(thumb&&thumb.tagName!=="IMG"){
+    // Une miniature existante avec une vraie image de fond appartient au rendu d'origine : ne jamais l'écraser.
+    if(hasRealBackground(thumb)&&!thumb.classList.contains("cph-category-photo-fallback"))return;
     thumb.classList.add("cph-category-fallback-thumb","cph-category-photo-fallback");
     thumb.dataset.cphFallbackCategory=categoryFor(scope);
     thumb.style.backgroundImage=`url("${fallbackFor(scope)}")`;
@@ -139,14 +153,14 @@ function ensureHeroPhoto(details){
   let hero=outsideImages.find(img=>img.classList.contains("cph-category-fallback-hero")||img.classList.contains("cph-generated-place-hero"))||outsideImages[0]||null;
 
   if(hero){
-    installFallbackOnImage(hero,details,"hero");
+    installFallbackOnImage(hero,summary,"hero");
   }else{
     hero=document.createElement("img");
     hero.className="cph-category-photo-fallback cph-category-fallback-hero";
     hero.alt="Photo d’illustration";
     hero.dataset.cphCategoryFallbackApplied="1";
-    hero.dataset.cphFallbackCategory=categoryFor(details);
-    hero.src=fallbackFor(details);
+    hero.dataset.cphFallbackCategory=categoryFor(summary);
+    hero.src=fallbackFor(summary);
     summary.insertAdjacentElement("afterend",hero);
     hero.addEventListener("error",()=>{hero.src=lastResortDataUrl();},{once:true});
   }
