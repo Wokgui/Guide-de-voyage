@@ -1,7 +1,8 @@
-/* v371 — icônes classiques équilibrées et stabilité du premier affichage. */
+/* v372 — icônes classiques équilibrées et stabilité du premier affichage. */
 
-/* Horaire et Notes : anciennes icônes emoji conservées, avec exactement le même
-   écart visuel de 5 px avant le titre. Le texte reste centré indépendamment de l'icône. */
+/* Horaire et Notes : anciennes icônes emoji conservées. Le titre Horaire est
+   explicitement découpé sur deux lignes afin que la roue soit réellement accolée
+   au texte visible. Les deux icônes utilisent exactement le même écart de 8 px. */
 html body #programme .cph-section-title{
   display:block!important;
   width:max-content!important;
@@ -12,7 +13,7 @@ html body #programme .cph-section-title{
 html body #programme .cph-section-title>span:first-child{
   position:absolute!important;
   left:auto!important;
-  right:calc(100% + 5px)!important;
+  right:calc(100% + 8px)!important;
   top:50%!important;
   display:flex!important;
   align-items:center!important;
@@ -37,10 +38,13 @@ html body #programme .cph-section-title>span:first-child svg{
 }
 html body #programme .cph-section-title>span:last-child{
   display:block!important;
+  width:max-content!important;
+  max-width:100%!important;
   margin:0!important;
   padding:0!important;
   text-align:center!important;
   line-height:1.15!important;
+  white-space:nowrap!important;
 }
 
 /* Carte dépliée : le centre du NOM, et non du groupe nom+étoiles, suit exactement
