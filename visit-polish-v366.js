@@ -32,7 +32,7 @@ style.textContent=`
  display:inline-flex!important;
  align-items:center!important;
  justify-content:center!important;
- gap:7px!important;
+ gap:4px!important;
  width:max-content!important;
  max-width:calc(100% - 108px)!important;
  margin:0!important;
@@ -42,8 +42,21 @@ style.textContent=`
  display:inline-flex!important;
  align-items:center!important;
  justify-content:center!important;
- flex:0 0 auto!important;
+ flex:0 0 20px!important;
+ width:20px!important;
+ height:20px!important;
+ margin:0!important;
  line-height:1!important;
+}
+#programme .cph-section-title>span:first-child svg{
+ display:block!important;
+ width:18px!important;
+ height:18px!important;
+ fill:none!important;
+ stroke:currentColor!important;
+ stroke-width:1.8!important;
+ stroke-linecap:round!important;
+ stroke-linejoin:round!important;
 }
 #programme .cph-section-title>span:last-child{
  display:block!important;
@@ -145,10 +158,15 @@ document.head.appendChild(style);
 
 const norm=element=>(element?.textContent||"").replace(/\s+/g," ").trim();
 
+const SECTION_ICONS={
+ schedule:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.1"/><path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5 7 7M17 17l1.5 1.5M18.5 5.5 17 7M7 17l-1.5 1.5"/><circle cx="12" cy="12" r="7.1"/></svg>',
+ notes:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h9.5L19 7v13.5H6z"/><path d="M15.5 3.5V7H19M9 11h7M9 14.5h7M9 18h5"/></svg>'
+};
+
 function sectionSpec(summary){
  const text=norm(summary);
- if(/Horaire, durée et organisation/i.test(text))return {key:"schedule",icon:"⚙️",label:"Horaire, durée et organisation"};
- if(/(^|\s)Notes?(\s|$)/i.test(text))return {key:"notes",icon:"📝",label:"Notes"};
+ if(/Horaire, durée et organisation/i.test(text))return {key:"schedule",icon:SECTION_ICONS.schedule,label:"Horaire, durée et organisation"};
+ if(/(^|\s)Notes?(\s|$)/i.test(text))return {key:"notes",icon:SECTION_ICONS.notes,label:"Notes"};
  return null;
 }
 
@@ -161,7 +179,7 @@ function polishSectionSummaries(){
    summary.classList.add("cph-section-summary");
    summary.replaceChildren();
    const title=document.createElement("span");
-   title.className="cph-section-title";
+   title.className=`cph-section-title cph-section-title-${spec.key}`;
    title.innerHTML=`<span aria-hidden="true">${spec.icon}</span><span>${spec.label}</span>`;
    const arrow=document.createElement("span");
    arrow.className="cph-section-arrow";
