@@ -28,7 +28,9 @@ assert.match(css,/\.cph-now-label\{[\s\S]*?font-size:10\.5px!important/,'la tail
 assert.match(css,/@media\(max-width:380px\)[\s\S]*?\.cph-now-label\{[\s\S]*?font-size:9\.6px!important/,'la police doit encore s’adapter aux petits écrans');
 assert.match(css,/\.visit-now-actions>\.restore-original-time\{[\s\S]*?row-gap:6px!important/,'Rétablir doit conserver un espace suffisant sous son icône');
 
-assert.match(header,/function removeActualDepartureTile\(\)[\s\S]*?===\"Départ réel\"\)tile\.remove\(\)/,'la tuile Départ réel doit être réellement supprimée du DOM');
+assert.match(css,/#programme \.day-banner \.day-departure\{[\s\S]*?display:none!important/,'les départs doivent être invisibles dès le premier paint');
+assert.match(css,/\.day-departure\.cph-departure-visible\{[\s\S]*?display:flex!important/,'seul un départ validé doit être réaffiché');
+assert.match(header,/function removeActualDepartureTile\(\)[\s\S]*?Départ réel[\s\S]*?tile\.remove\(\)[\s\S]*?cph-departure-visible/,'Départ réel doit être supprimé avant de révéler les départs prévus');
 assert.match(header,/function normalizeNowActionButtons\(\)[\s\S]*?\.here-now[\s\S]*?\.restore-original-time[\s\S]*?\.go-now/,'les trois boutons temporels doivent être normalisés ensemble');
 assert.match(header,/cph-now-icon/,'les actions temporelles doivent utiliser une icône structurée');
 assert.match(header,/cph-now-label/,'les actions temporelles doivent utiliser un libellé structuré');
@@ -37,13 +39,17 @@ assert.match(header,/const VISIT_HELPER_PREFIXES=\[[\s\S]*?Le point est inséré
 assert.match(header,/function removeVisitHelperTexts\(\)[\s\S]*?isVisitHelperText\(text\)\)element\.remove\(\)/,'les sous-textes doivent être retirés de toutes les visites rendues');
 assert.match(header,/function refresh\(\)[\s\S]*?removeVisitHelperTexts\(\)/,'le nettoyage des sous-textes doit être rejoué après chaque rendu');
 
-assert.match(header,/function centerScheduleEditorFields\(\)[\s\S]*?\["Heure souhaitée","Durée prévue","Jour de visite"\][\s\S]*?exactTextElements\(root,text\)\.forEach/,'les trois titres de toutes les visites doivent être traités');
+assert.match(header,/function scheduleFieldElements\(root,text\)[\s\S]*?root\.querySelectorAll\("label"\)[\s\S]*?startsWith\(`\$\{text\} `\)/,'les labels contenant leur contrôle doivent être reconnus, y compris sur les nouveaux événements');
+assert.match(header,/function centerScheduleEditorFields\(\)[\s\S]*?\["Heure souhaitée","Durée prévue","Jour de visite"\][\s\S]*?scheduleFieldElements\(root,text\)\.forEach/,'les trois titres de toutes les visites doivent être traités');
 assert.match(css,/\.cph-editor-title-centered\{[\s\S]*?text-align:center!important/,'les titres de l’éditeur doivent être centrés');
+assert.match(css,/\.visit-details label:has\(select\)\{[\s\S]*?text-align:center!important/,'Jour de visite doit être centré même avant le passage du JavaScript');
+assert.match(css,/\.visit-details label:has\(select\) select\{[\s\S]*?width:min\(150px,100%\)!important;[\s\S]*?margin-left:auto!important/,'le sélecteur de jour doit être compact et centré dès le premier rendu');
+assert.match(css,/\.duration-editor label:has\(input\[type="number"\]\)[\s\S]*?text-align:center!important/,'Durée prévue doit être centrée dès le premier rendu');
 assert.match(css,/\.time-editor \.cph-time-control-centered\{[\s\S]*?width:min\(180px,100%\)!important;[\s\S]*?margin-left:auto!important;[\s\S]*?text-align:center!important/,'le contrôle Heure souhaitée doit être réellement centré horizontalement');
 assert.match(header,/text==="Jour de visite"[\s\S]*?cph-day-control-centered/,'le sélecteur Jour de visite doit être marqué sur toutes les visites');
-assert.match(css,/\.cph-day-control-centered\{[\s\S]*?width:min\(150px,100%\)!important;[\s\S]*?margin-left:auto!important;[\s\S]*?text-align:center!important/,'le sélecteur Jour de visite doit être compact et centré');
+assert.match(css,/\.cph-day-control-centered\{[\s\S]*?width:min\(150px,100%\)!important;[\s\S]*?margin-left:auto!important;[\s\S]*?text-align:center!important/,'le sélecteur Jour de visite doit rester compact et centré après normalisation');
 
-assert.match(header,/function normalizeDurationEditors\(\)[\s\S]*?exactTextElements\(root,"Durée prévue"\)\.forEach/,'tous les éditeurs de durée doivent être normalisés');
+assert.match(header,/function normalizeDurationEditors\(\)[\s\S]*?scheduleFieldElements\(root,"Durée prévue"\)\.forEach/,'tous les éditeurs de durée doivent être normalisés');
 assert.match(header,/title\.classList\.add\("cph-duration-title"\)/,'le titre Durée prévue doit avoir un ciblage dédié');
 assert.match(header,/unit\.textContent="minutes"/,'le mot minutes doit être ajouté à droite du champ numérique');
 assert.match(header,/editor\.insertBefore\(unit,apply\)/,'minutes doit précéder directement Appliquer dans la rangée de durée');
@@ -60,11 +66,12 @@ assert.match(header,/function normalizeStatusButtons\(\)[\s\S]*?Mettre de côté
 assert.match(css,/\.cph-status-icon,[\s\S]*?\.cph-aside-icon\{[\s\S]*?align-items:center!important;[\s\S]*?justify-content:center!important/,'les icônes de statut doivent rester centrées verticalement');
 assert.match(css,/\.cph-status-label,[\s\S]*?\.cph-aside-label\{[\s\S]*?justify-items:center!important/,'les libellés de statut doivent rester centrés');
 
-assert.match(header,/function installPlaceImageFallbacks\(\)[\s\S]*?addEventListener\("error",fallback,\{once:true\}\)/,'chaque photo de lieu doit disposer d’un repli sur erreur');
-assert.match(header,/function placeFallbackDataUrl\(name\)[\s\S]*?data:image\/svg\+xml/,'le repli doit être une image locale autonome et non une nouvelle dépendance réseau');
+assert.match(header,/function ensureMissingPlacePhotos\(\)[\s\S]*?#programme \.visit-summary[\s\S]*?visit-summary-thumb cph-place-photo-fallback cph-generated-place-photo/,'une visite sans aucune photo doit recevoir une miniature de remplacement');
+assert.match(header,/function installPlaceImageFallbacks\(\)[\s\S]*?ensureMissingPlacePhotos\(\)[\s\S]*?addEventListener\("error",fallback,\{once:true\}\)/,'les photos absentes et cassées doivent être traitées ensemble');
+assert.match(header,/function placeFallbackDataUrl\(name\)[\s\S]*?croisi\|canal\|bateau[\s\S]*?data:image\/svg\+xml/,'le repli doit être local et représenter notamment les visites de canal');
 assert.match(header,/placeFallbackDataUrl\(placeNameForImage\(img\)\)/,'le visuel de repli doit reprendre le nom du lieu');
 assert.match(header,/function refresh\(\)[\s\S]*?installPlaceImageFallbacks\(\)/,'les replis photo doivent être installés sur chaque nouveau rendu');
-assert.match(css,/img\.cph-place-photo-fallback[\s\S]*?object-fit:cover!important/,'l’image de repli doit conserver un cadrage propre');
+assert.match(css,/\.visit-summary-thumb\.cph-generated-place-photo\{[\s\S]*?object-fit:cover!important/,'la miniature générée doit conserver le cadrage des vraies photos');
 
 const cascadeStart=header.indexOf('function cascadeFromClickedPoint');
 const cascadeEnd=header.indexOf('function currentMinute',cascadeStart);
@@ -80,4 +87,4 @@ assert.match(header,/window\.restorePointOriginalTime=function\(id\)[\s\S]*?casc
 assert.match(sw,/copenhague-v358-static-v51/,'le cache statique doit rester cohérent');
 assert.match(sw,/\/interaction-layout-v358\.css\?v=358/,'la feuille v358 doit être précachée');
 
-console.log(JSON.stringify({ok:true,departure:'actual-removed',actions:'uniform-66px-compact-v361',editor:'centered-compact-v364',photos:'named-svg-fallback',cascade:'clicked-point-first'},null,2));
+console.log(JSON.stringify({ok:true,departure:'no-first-paint-actual',actions:'uniform-66px-compact-v361',editor:'first-paint-centered-v365',photos:'missing-and-broken-local-fallback',cascade:'clicked-point-first'},null,2));
