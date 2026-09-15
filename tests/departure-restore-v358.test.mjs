@@ -31,8 +31,9 @@ assert.match(header,/function removeActualDepartureTile\(\)[\s\S]*?Départ réel
 assert.match(css,/html body #programme \.time-editor input\.point-time,[\s\S]*?-webkit-appearance:none!important;[\s\S]*?appearance:none!important/,'Heure souhaitée doit neutraliser la seconde flèche native');
 assert.match(css,/\.day-editor>\.apply-day\{[\s\S]*?width:min\(210px,68%\)!important/,'Changer de jour doit rester plus étroit et centré');
 
-assert.match(refinement,/grid-template-columns:20px auto!important/,'Horaire et Notes doivent partager la même géométrie icône/texte');
-assert.match(refinement,/column-gap:4px!important/,'la distance icône-texte doit être identique');
+assert.match(refinement,/\.cph-section-title>span:first-child\{[\s\S]*?right:calc\(100% \+ 1px\)!important/,'les anciennes icônes doivent rester proches du titre');
+assert.match(refinement,/font-family:"Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif!important/,'Horaire et Notes doivent reprendre les icônes emoji classiques');
+assert.match(refinement,/\.cph-section-title>span:first-child svg\{[\s\S]*?display:none!important/,'les icônes vectorielles intermédiaires doivent rester invisibles');
 assert.match(refinement,/\.visit-details\[open\] \.visit-summary \.summary-title\{[\s\S]*?grid-column:2!important/,'le nom doit être sur l’axe de la durée de visite');
 assert.match(refinement,/\.title-stars\{[\s\S]*?position:absolute!important/,'les étoiles ne doivent pas modifier cet axe');
 assert.match(refinement,/\.day-banner::after\{[\s\S]*?content:"⌄"!important/,'la flèche de journée doit être visible dès le rendu du bandeau');
@@ -49,8 +50,9 @@ assert.match(cascade,/const ordered=dayItems\(day\)\.slice\(\)/,'l’ordre affic
 assert.match(cascade,/state\.timeOverrides\[id\]=minToHm\(target\)/,'le premier événement doit recevoir directement la nouvelle heure');
 assert.doesNotMatch(cascade,/reorderDayChronologically/,'aucun réordonnancement ne doit changer la cible avant la propagation');
 
-assert.match(sw,/copenhague-v358-static-v57/,'le cache statique doit être renouvelé pour v369');
-assert.match(sw,/visit-refinement-v369\.css\?v=369/,'la feuille v369 doit être précachée');
-assert.match(sw,/enhancedInteractionStyle\(request\)/,'la feuille v369 doit être servie avec interaction-layout dès le head');
+assert.match(sw,/copenhague-v358-static-v58/,'le cache statique doit être renouvelé pour v370');
+assert.match(sw,/visit-refinement-v369\.css\?v=369/,'la feuille de raffinement doit être précachée');
+assert.match(sw,/visit-section-scroll-v370\.js\?v=370/,'le script de restauration des icônes et de recalage doit être précaché');
+assert.match(sw,/enhancedInteractionStyle\(request\)/,'la feuille de raffinement doit être servie avec interaction-layout dès le head');
 
-console.log(JSON.stringify({ok:true,departure:'never-painted',actions:'iconless',sections:'equal-gap-svg',openTitle:'duration-axis',dayBanner:'first-paint-arrow',cache:'v57'},null,2));
+console.log(JSON.stringify({ok:true,departure:'never-painted',actions:'iconless',sections:'classic-icons-tight',openTitle:'duration-axis',dayBanner:'first-paint-arrow',cache:'v58'},null,2));
