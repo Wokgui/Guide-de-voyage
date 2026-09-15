@@ -669,3 +669,96 @@ html body #programme .visit-details[open] .visit-summary .summary-title-name{
     font-size:9.6px!important;
   }
 }
+
+/* v368 — suppression des derniers écarts de premier affichage. */
+
+/* Heure souhaitée : neutralise le décor natif Android/WebKit et conserve
+   uniquement la flèche personnalisée dessinée à droite. */
+html body #programme .time-editor input.point-time,
+html body #programme .time-editor input[type="time"].cph-time-control-centered{
+  -webkit-appearance:none!important;
+  appearance:none!important;
+}
+html body #programme .time-editor input[type="time"]::-webkit-inner-spin-button,
+html body #programme .time-editor input[type="time"]::-webkit-clear-button{
+  display:none!important;
+  -webkit-appearance:none!important;
+}
+
+/* Changer de jour : bouton plus court, centré, sans occuper toute la carte. */
+html body #programme .day-editor>.apply-day{
+  box-sizing:border-box!important;
+  flex:0 1 210px!important;
+  width:min(210px,68%)!important;
+  min-width:150px!important;
+  max-width:210px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  justify-self:center!important;
+}
+
+/* La roue reste immédiatement accolée au titre sans déplacer son centre. */
+html body #programme .cph-section-title>span:first-child{
+  right:calc(100% + 2px)!important;
+}
+
+/* Priorité maximale aux actions sans icône : les anciennes règles !important
+   ne peuvent plus réafficher les SVG/emoji injectés par le polish historique. */
+html body #programme#programme .visit-now-actions>.button .cph-now-icon,
+html body #programme#programme .action-grid.status.actions>button .cph-status-icon,
+html body #programme#programme .action-grid.status.actions>button .cph-aside-icon{
+  display:none!important;
+  width:0!important;
+  min-width:0!important;
+  max-width:0!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+html body #programme#programme .visit-now-actions>.button .cph-now-label,
+html body #programme#programme .action-grid.status.actions>button .cph-status-label,
+html body #programme#programme .action-grid.status.actions>button .cph-aside-label{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  margin:-1px!important;
+  padding:0!important;
+  overflow:hidden!important;
+  clip:rect(0 0 0 0)!important;
+  clip-path:inset(50%)!important;
+  white-space:nowrap!important;
+}
+
+/* Bandeau de journée : la place de la flèche existe dès le premier paint,
+   et la flèche ajoutée ensuite est absolument positionnée. Son insertion ne
+   peut donc plus redimensionner « Mardi 28 juillet » ou les autres journées. */
+html body #programme#programme .day-banner{
+  position:relative!important;
+  box-sizing:border-box!important;
+  padding-right:58px!important;
+}
+html body #programme#programme .day-banner>.cph-day-toggle{
+  position:absolute!important;
+  right:12px!important;
+  top:50%!important;
+  width:34px!important;
+  min-width:34px!important;
+  max-width:34px!important;
+  height:34px!important;
+  min-height:34px!important;
+  max-height:34px!important;
+  margin:0!important;
+  transform:translateY(-50%)!important;
+  z-index:2!important;
+}
+
+@media(max-width:420px){
+  html body #programme .day-editor>.apply-day{
+    flex-basis:190px!important;
+    width:min(190px,64%)!important;
+    max-width:190px!important;
+  }
+}
