@@ -72,7 +72,11 @@ function keepTrackingClosedOnEntry(){
 function removeActualDepartureTile(){
  document.querySelectorAll("#programme .day-departure").forEach(tile=>{
   const label=tile.querySelector(".day-departure-label");
-  if((label?.textContent||"").trim()==="Départ réel")tile.remove();
+  if((label?.textContent||"").trim()==="Départ réel"){
+   tile.remove();
+   return;
+  }
+  tile.classList.add("cph-departure-visible");
  });
 }
 
@@ -103,6 +107,17 @@ function exactTextElements(root,text){
  return matches.filter(element=>!Array.from(element.children).some(child=>normalizedText(child)===text));
 }
 
+function scheduleFieldElements(root,text){
+ const exact=exactTextElements(root,text);
+ const coveredLabels=new Set(exact.map(element=>element.matches("label")?element:element.closest("label")).filter(Boolean));
+ const prefixedLabels=Array.from(root.querySelectorAll("label")).filter(label=>{
+  if(coveredLabels.has(label))return false;
+  const value=normalizedText(label);
+  return value===text||value.startsWith(`${text} `);
+ });
+ return [...exact,...prefixedLabels];
+}
+
 const VISIT_HELPER_PREFIXES=[
  "Le point est inséré chronologiquement",
  "Le reste de la journée est recalculé",
@@ -131,9 +146,9 @@ function centerScheduleEditorFields(){
  const root=document.querySelector("#programme");
  if(!root)return;
  ["Heure souhaitée","Durée prévue","Jour de visite"].forEach(text=>{
-  exactTextElements(root,text).forEach(title=>{
+  scheduleFieldElements(root,text).forEach(title=>{
    title.classList.add("cph-editor-title-centered");
-   const label=title.closest("label")||(title.matches("label")?title:null);
+   const label=title.matches("label")?title:title.closest("label");
    if(label)label.classList.add("cph-editor-field-centered");
    const scope=label||title.parentElement;
    if(text==="Heure souhaitée"){
@@ -151,7 +166,7 @@ function centerScheduleEditorFields(){
 function durationEditorForTitle(title,root){
  const direct=title.closest(".duration-editor");
  if(direct)return direct;
- let scope=title.closest("label")?.parentElement||title.parentElement;
+ let scope=(title.matches("label")?title:title.closest("label"))?.parentElement||title.parentElement;
  for(let depth=0;scope&&scope!==root&&depth<6;depth++,scope=scope.parentElement){
   const apply=Array.from(scope.querySelectorAll("button,.button")).find(button=>normalizedText(button)==="Appliquer");
   const control=scope.querySelector('input[type="number"],input');
@@ -163,10 +178,10 @@ function durationEditorForTitle(title,root){
 function normalizeDurationEditors(){
  const root=document.querySelector("#programme");
  if(!root)return;
- exactTextElements(root,"Durée prévue").forEach(title=>{
+ scheduleFieldElements(root,"Durée prévue").forEach(title=>{
   const editor=durationEditorForTitle(title,root);
   if(!editor)return;
-  const label=title.closest("label")||(title.matches("label")?title:null);
+  const label=title.matches("label")?title:title.closest("label");
   const control=(label&&label.querySelector('input[type="number"],input'))||editor.querySelector('input[type="number"],input');
   const apply=Array.from(editor.querySelectorAll("button,.button")).find(button=>normalizedText(button)==="Appliquer")||null;
   if(!control||!apply)return;
@@ -219,23 +234,49 @@ function escapeXml(value){
  return String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&apos;"}[char]));
 }
 
+function placeNameFromSummary(summary){
+ const title=summary?.querySelector(".summary-title-name,.visit-title,.place-title,h2,h3,h4,strong");
+ return (normalizedText(title)||"Lieu à visiter").slice(0,52);
+}
+
 function placeNameForImage(img){
- const rawAlt=normalizedText(img).trim()||String(img.getAttribute("alt")||"").trim();
- const alt=rawAlt.replace(/^(photo|image)(\s+de|\s+du|\s+des|\s+d’|\s+d')?\s*/i,"").trim();
+ const rawAlt=String(img.getAttribute("alt")||"").trim();
+ const alt=rawAlt.replace(/^(photo|image|illustration)(\s+de|\s+du|\s+des|\s+d’|\s+d')?\s*/i,"").trim();
  if(alt&&!/^(photo|image|illustration|lieu)$/i.test(alt))return alt.slice(0,52);
+ const summary=img.closest(".visit-summary");
+ if(summary)return placeNameFromSummary(summary);
  const card=img.closest("article,.place-card,.poi-card,.visit-card,.program-item,.card,[data-place-id]");
- const title=card?.querySelector("h2,h3,h4,.title,.place-title,.poi-title,.visit-title,strong");
+ const title=card?.querySelector(".summary-title-name,h2,h3,h4,.title,.place-title,.poi-title,.visit-title,strong");
  const name=normalizedText(title);
  return (name||"Lieu à visiter").slice(0,52);
 }
 
 function placeFallbackDataUrl(name){
  const safe=escapeXml(name);
- const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-label="${safe}"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9ddf2"/><stop offset="1" stop-color="#f5dfc0"/></linearGradient><linearGradient id="water" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7eb7c9"/><stop offset="1" stop-color="#5f94a9"/></linearGradient></defs><rect width="1200" height="675" fill="url(#sky)"/><circle cx="965" cy="135" r="68" fill="#fff4c7" opacity=".9"/><path d="M0 430 130 350l88 54 150-118 122 106 133-178 137 151 112-90 148 112 110-73 90 85v276H0Z" fill="#708b88" opacity=".28"/><path d="M0 470h1200v205H0Z" fill="url(#water)"/><path d="M0 492c160-34 256 30 393 4s240-15 344 7 270 18 463-8" fill="none" stroke="#d9f1f2" stroke-width="8" opacity=".65"/><g fill="#405f67"><rect x="124" y="344" width="90" height="132" rx="3"/><rect x="230" y="316" width="108" height="160" rx="3"/><rect x="354" y="356" width="96" height="120" rx="3"/><path d="M278 316v-74l16-38 16 38v74Z"/><path d="M169 344v-48l12-31 12 31v48Z"/></g><g fill="#f5ead9" opacity=".9"><rect x="145" y="374" width="16" height="26"/><rect x="177" y="374" width="16" height="26"/><rect x="253" y="349" width="18" height="29"/><rect x="294" y="349" width="18" height="29"/><rect x="379" y="383" width="16" height="26"/><rect x="412" y="383" width="16" height="26"/></g><rect x="72" y="70" width="1056" height="96" rx="26" fill="#173846" opacity=".78"/><text x="600" y="130" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="42" font-weight="700" fill="white">${safe}</text><g transform="translate(1000 530)" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9"><circle cx="0" cy="0" r="40"/><circle cx="105" cy="0" r="40"/><path d="M0 0h45l30-52h-48l25 52h53M75-52l19-32"/></g></svg>`;
+ const lower=String(name).toLowerCase();
+ const cruise=/croisi|canal|bateau|boat|harbour|havn|port/.test(lower);
+ const motif=cruise
+  ? '<g transform="translate(535 392)"><path d="M-190 34h380l-48 82h-284Z" fill="#f7f1df" stroke="#274f59" stroke-width="9"/><rect x="-75" y="-52" width="150" height="88" rx="8" fill="#e9c46a" stroke="#274f59" stroke-width="8"/><path d="M0-52v-72" stroke="#274f59" stroke-width="9"/><path d="M0-120l95 42H0Z" fill="#fff" stroke="#274f59" stroke-width="7"/></g>'
+  : '<g fill="#405f67"><rect x="124" y="344" width="90" height="132" rx="3"/><rect x="230" y="316" width="108" height="160" rx="3"/><rect x="354" y="356" width="96" height="120" rx="3"/><path d="M278 316v-74l16-38 16 38v74Z"/><path d="M169 344v-48l12-31 12 31v48Z"/></g>';
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-label="${safe}"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9ddf2"/><stop offset="1" stop-color="#f5dfc0"/></linearGradient><linearGradient id="water" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7eb7c9"/><stop offset="1" stop-color="#5f94a9"/></linearGradient></defs><rect width="1200" height="675" fill="url(#sky)"/><circle cx="965" cy="135" r="68" fill="#fff4c7" opacity=".9"/><path d="M0 430 130 350l88 54 150-118 122 106 133-178 137 151 112-90 148 112 110-73 90 85v276H0Z" fill="#708b88" opacity=".22"/><path d="M0 470h1200v205H0Z" fill="url(#water)"/><path d="M0 492c160-34 256 30 393 4s240-15 344 7 270 18 463-8" fill="none" stroke="#d9f1f2" stroke-width="8" opacity=".65"/>${motif}<rect x="72" y="70" width="1056" height="96" rx="26" fill="#173846" opacity=".78"/><text x="600" y="130" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="42" font-weight="700" fill="white">${safe}</text></svg>`;
  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
+function ensureMissingPlacePhotos(){
+ document.querySelectorAll("#programme .visit-summary").forEach(summary=>{
+  if(summary.querySelector(".visit-summary-thumb,img"))return;
+  const name=placeNameFromSummary(summary);
+  const img=document.createElement("img");
+  img.className="visit-summary-thumb cph-place-photo-fallback cph-generated-place-photo";
+  img.alt=`Illustration de ${name}`;
+  img.src=placeFallbackDataUrl(name);
+  const main=summary.querySelector(".summary-main");
+  summary.insertBefore(img,main||summary.firstChild);
+ });
+}
+
 function installPlaceImageFallbacks(){
+ ensureMissingPlacePhotos();
  const images=new Set([
   ...document.querySelectorAll("#programme img"),
   ...document.querySelectorAll(".place-card img,.poi-card img,.visit-card img,[data-place-id] img")
@@ -312,7 +353,6 @@ function cascadeFromClickedPoint(id,startMins){
  if(startIndex<0)return false;
 
  state.timeOverrides=state.timeOverrides||{};
- // Une action directe modifie toujours l'événement pressé, même s'il est réservé.
  state.timeOverrides[id]=minToHm(target);
 
  let previous=point;
@@ -327,7 +367,6 @@ function cascadeFromClickedPoint(id,startMins){
   const proposed=cursor+travel;
   const protectedTime=typeof protectedReservationTime==="function"?protectedReservationTime(next):null;
 
-  // Les réservations suivantes restent des ancres fixes, puis le recalcul continue après elles.
   if(protectedTime&&typeof hmToMin==="function"){
    const fixed=hmToMin(protectedTime);
    if(Number.isFinite(fixed)){
