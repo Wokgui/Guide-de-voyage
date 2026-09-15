@@ -1,7 +1,7 @@
 (function(){
 "use strict";
-if(window.__cphVisitSectionScrollV370)return;
-window.__cphVisitSectionScrollV370=true;
+if(window.__cphVisitSectionScrollV371)return;
+window.__cphVisitSectionScrollV371=true;
 
 const LEGACY_ICONS={
  schedule:"⚙️",
@@ -10,10 +10,16 @@ const LEGACY_ICONS={
 
 function restoreLegacySectionIcons(){
  Object.entries(LEGACY_ICONS).forEach(([key,icon])=>{
-  document.querySelectorAll(`#programme .cph-section-title-${key}>span:first-child`).forEach(slot=>{
-   if(slot.textContent===icon&&slot.dataset.cphLegacyIcon==="1")return;
-   slot.dataset.cphLegacyIcon="1";
-   slot.textContent=icon;
+  document.querySelectorAll(`#programme .cph-section-title-${key}`).forEach(title=>{
+   const iconSlot=title.querySelector(":scope > span:first-child");
+   const labelSlot=title.querySelector(":scope > span:last-child");
+   if(iconSlot){
+    iconSlot.dataset.cphLegacyIcon="1";
+    iconSlot.textContent=icon;
+   }
+   if(key==="schedule"&&labelSlot){
+    labelSlot.innerHTML="Horaire, durée et<br>organisation";
+   }
   });
  });
 }
@@ -32,26 +38,25 @@ function stickyHeaderOffset(){
  return Math.max(0,Math.round(rect.bottom));
 }
 
-function desiredSummaryTop(){
+function desiredTargetTop(){
  return stickyHeaderOffset()+12;
 }
 
-function settleSummary(summary,details,token){
- if(details.dataset.cphSectionScrollToken!==token||!summary.isConnected)return;
- const delta=Math.round(summary.getBoundingClientRect().top-desiredSummaryTop());
+function settleTarget(target,owner,token){
+ if(owner.dataset.cphScrollToken!==token||!target.isConnected)return;
+ const delta=Math.round(target.getBoundingClientRect().top-desiredTargetTop());
  if(Math.abs(delta)>2)window.scrollBy({top:delta,behavior:"auto"});
 }
 
-function scrollSectionHeader(details){
- const summary=directSummary(details);
- if(!summary)return;
- const token=String((Number(details.dataset.cphSectionScrollToken)||0)+1);
- details.dataset.cphSectionScrollToken=token;
+function scrollTargetBelowHeader(target,owner){
+ if(!target||!owner)return;
+ const token=String((Number(owner.dataset.cphScrollToken)||0)+1);
+ owner.dataset.cphScrollToken=token;
  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-  if(details.dataset.cphSectionScrollToken!==token||!summary.isConnected)return;
-  const top=Math.max(0,window.scrollY+summary.getBoundingClientRect().top-desiredSummaryTop());
+  if(owner.dataset.cphScrollToken!==token||!target.isConnected)return;
+  const top=Math.max(0,window.scrollY+target.getBoundingClientRect().top-desiredTargetTop());
   window.scrollTo({top,behavior:"smooth"});
-  window.setTimeout(()=>settleSummary(summary,details,token),420);
+  window.setTimeout(()=>settleTarget(target,owner,token),420);
  }));
 }
 
@@ -60,13 +65,25 @@ function bindSectionAutoScroll(){
   const summary=directSummary(details);
   if(!summary||details.dataset.cphSectionScrollBound==="1")return;
   details.dataset.cphSectionScrollBound="1";
-  details.addEventListener("toggle",()=>scrollSectionHeader(details));
+  details.addEventListener("toggle",()=>scrollTargetBelowHeader(summary,details));
+ });
+}
+
+function bindDayAutoScroll(){
+ document.querySelectorAll("#programme .day-banner").forEach(banner=>{
+  const button=banner.querySelector(":scope > .cph-day-toggle");
+  if(!button||button.dataset.cphDayScrollBound==="1")return;
+  button.dataset.cphDayScrollBound="1";
+  button.addEventListener("click",()=>{
+   window.setTimeout(()=>scrollTargetBelowHeader(banner,banner),0);
+  });
  });
 }
 
 function refresh(){
  restoreLegacySectionIcons();
  bindSectionAutoScroll();
+ bindDayAutoScroll();
 }
 
 document.addEventListener("guide:rendered",refresh);
